@@ -2,6 +2,38 @@
 @section('title', 'Input Penilaian')
 @section('breadcrumb')<span style="color:var(--text-muted);">Penilaian</span> / <strong>Input Penilaian</strong>@endsection
 
+@push('styles')
+<style>
+.skor-col-4 { color: #059669; }
+.skor-col-3 { color: #2563eb; }
+.skor-col-2 { color: #d97706; }
+.skor-col-1 { color: #dc2626; }
+.param-row {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+}
+.param-row:last-child {
+    border-bottom: none;
+}
+.param-header-grid {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+}
+.skor-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 60px);
+    text-align: center;
+    border-left: 1px solid var(--border);
+    align-items: center;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="page-header">
     <div class="page-title">
@@ -72,24 +104,25 @@
     </div>
 
     {{-- Header kolom --}}
-    <div style="display:grid;grid-template-columns:1fr 240px;gap:0;border-bottom:1px solid var(--border);background:#f8fafc;">
+    <div class="param-header-grid">
         <div style="padding:8px 16px;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Indikator Penilaian</div>
-        <div style="display:grid;grid-template-columns:repeat(4,60px);text-align:center;border-left:1px solid var(--border);">
-            @foreach([4,3,2,1] as $s)
-            <div style="padding:8px 0;font-size:0.78rem;font-weight:700;color:{{ $s==4?'#059669':($s==3?'#2563eb':($s==2?'#d97706':'#dc2626')) }};">{{ $s }}</div>
-            @endforeach
+        <div class="skor-grid">
+            <div class="skor-col-4" style="padding:8px 0;font-size:0.78rem;font-weight:700;">4</div>
+            <div class="skor-col-3" style="padding:8px 0;font-size:0.78rem;font-weight:700;">3</div>
+            <div class="skor-col-2" style="padding:8px 0;font-size:0.78rem;font-weight:700;">2</div>
+            <div class="skor-col-1" style="padding:8px 0;font-size:0.78rem;font-weight:700;">1</div>
         </div>
     </div>
 
     @foreach($params as $param)
-    <div style="display:grid;grid-template-columns:1fr 240px;gap:0;border-bottom:1px solid var(--border);{{ $loop->last?'border-bottom:none;':'' }}">
+    <div class="param-row">
         <div style="padding:12px 16px;">
             <div style="font-size:0.875rem;font-weight:500;color:var(--text);">{{ $param->nama }}</div>
             @if($param->deskripsi)
             <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">{{ $param->deskripsi }}</div>
             @endif
         </div>
-        <div style="display:grid;grid-template-columns:repeat(4,60px);border-left:1px solid var(--border);align-items:center;">
+        <div class="skor-grid">
             @foreach([4,3,2,1] as $skor)
             <label style="display:flex;justify-content:center;align-items:center;height:100%;cursor:pointer;padding:8px 0;"
                    title="{{ $skor==4?'Sangat Baik':($skor==3?'Baik':($skor==2?'Cukup':'Kurang Baik')) }}">
@@ -98,7 +131,7 @@
                     value="{{ $skor }}"
                     {{ old('nilai_' . $param->id) == $skor || (!old('nilai_' . $param->id) && $skor == 3) ? 'checked' : '' }}
                     onchange="recalculate()"
-                    style="width:18px;height:18px;accent-color:{{ $skor==4?'#059669':($skor==3?'#2563eb':($skor==2?'#d97706':'#dc2626')) }};cursor:pointer;">
+                    style="width:18px;height:18px;cursor:pointer;">
             </label>
             @endforeach
         </div>
@@ -131,16 +164,21 @@
 </div>
 
 </form>
+
+{{-- Data JSON terisolasi untuk frontend script --}}
+<script id="paramDataJson" type="application/json">
+{!! json_encode($parameters->flatten()->map(fn($p) => ['id' => $p->id, 'bobot' => $p->bobot])) !!}
+</script>
 @endsection
 
 @push('scripts')
 <script>
-const allParams = @json($parameters->flatten()->map(fn($p) => ['id' => $p->id, 'bobot' => $p->bobot]));
+const allParams = JSON.parse(document.getElementById('paramDataJson').textContent || '[]');
 
 function recalculate() {
     let totalBobotMax = 0, totalWeighted = 0;
     allParams.forEach(p => {
-        const radio = document.querySelector(`input[name="nilai_${p.id}"]:checked`);
+        const radio = document.querySelector('input[name="nilai_' + p.id + '"]:checked');
         const skor = radio ? parseInt(radio.value) : 3;
         totalBobotMax += 4 * p.bobot;
         totalWeighted += skor * p.bobot;

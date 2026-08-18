@@ -22,7 +22,8 @@
         </div>
         <div style="text-align:right;">
             <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:2px;">Rata-rata Semua Periode</div>
-            <div style="font-size:2rem;font-weight:800;color:{{ $rataRata>=90?'#059669':($rataRata>=75?'#2563eb':($rataRata>=60?'#d97706':'#dc2626')) }};">
+            @php $avgClass = $rataRata>=88 ? 'text-score-success' : ($rataRata>=63 ? 'text-score-primary' : ($rataRata>=38 ? 'text-score-warning' : 'text-score-danger')); @endphp
+            <div class="{{ $avgClass }}" style="font-size:2rem;font-weight:800;">
                 {{ $rataRata ? number_format($rataRata, 2) : '—' }}
             </div>
         </div>
@@ -55,7 +56,7 @@
             @endif
         </div>
         <div class="card-body" style="text-align:center;padding:20px;">
-            <div style="font-size:3rem;font-weight:800;color:{{ $kat?->warna=='success'?'#059669':($kat?->warna=='primary'?'#2563eb':($kat?->warna=='warning'?'#d97706':'#dc2626')) }};">
+            <div class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:3rem;font-weight:800;">
                 {{ number_format($p->nilai_akhir ?? 0, 1) }}
             </div>
             <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">Nilai Akhir</div>

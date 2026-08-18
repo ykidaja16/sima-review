@@ -27,9 +27,12 @@
         .nilai { font-weight: 700; font-size: 13px; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
         .badge-success { background: #dcfce7; color: #166534; }
-        .badge-primary { background: #dbeafe; color: #1e40af; }
-        .badge-warning { background: #fef9c3; color: #854d0e; }
         .badge-danger  { background: #fee2e2; color: #991b1b; }
+        .text-success { color: #059669; }
+        .text-primary { color: #1e40af; }
+        .text-warning { color: #854d0e; }
+        .text-danger  { color: #991b1b; }
+        .text-secondary { color: #64748b; }
         .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 10px; color: #6b7280; }
         @media print {
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -110,7 +113,7 @@
                     <td>{{ $p->karyawan->jabatan->nama ?? '-' }}</td>
                     <td>{{ $p->karyawan->divisi->nama ?? '-' }}</td>
                     <td>
-                        <span class="nilai" style="color:{{ $kat?->warna=='success'?'#059669':($kat?->warna=='primary'?'#1e40af':($kat?->warna=='warning'?'#854d0e':'#991b1b')) }}">
+                        <span class="nilai text-{{ $kat?->warna ?? 'secondary' }}">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}
                         </span>
                     </td>

@@ -78,7 +78,7 @@
                     <span class="form-label" style="margin:0;font-size:0.9rem;">Buat akun login untuk karyawan ini</span>
                 </label>
             </div>
-            <div id="akunFields" style="{{ old('buat_akun') ? '' : 'display:none;' }}">
+            <div id="akunFields" class="{{ old('buat_akun') ? '' : 'd-none' }}">
                 <div class="form-group">
                     <label class="form-label">Username Login *</label>
                     <input type="text" name="username" class="form-control @error('username') is-invalid @enderror"

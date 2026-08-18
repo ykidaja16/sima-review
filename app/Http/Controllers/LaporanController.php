@@ -30,16 +30,12 @@ class LaporanController extends Controller
 
     public function index(Request $request): View
     {
-        $periodes  = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
-        $divisis   = Divisi::active()->orderBy('nama')->get();
-        $kategoris = KategoriNilai::orderBy('urutan')->get();
+        $periodes   = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
+        $divisis    = Divisi::active()->orderBy('nama')->get();
+        $kategoris  = KategoriNilai::orderBy('urutan')->get();
+        $penilaians = $this->buildQuery($request)->get();
 
-        $data = [];
-        if ($request->filled('periode_id') || $request->filled('divisi_id')) {
-            $data['penilaians'] = $this->buildQuery($request)->get();
-        }
-
-        return view('laporan.index', array_merge(compact('periodes', 'divisis', 'kategoris'), $data));
+        return view('laporan.index', compact('periodes', 'divisis', 'kategoris', 'penilaians'));
     }
 
     public function exportExcel(Request $request)

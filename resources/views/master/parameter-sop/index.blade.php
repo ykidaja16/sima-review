@@ -23,12 +23,7 @@
                     <td style="font-weight:600;">{{ $p->nama }}</td>
                     <td><span class="badge badge-info">{{ $p->kategori }}</span></td>
                     <td>
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <div style="height:6px;background:var(--border);border-radius:3px;width:50px;overflow:hidden;">
-                                <div style="height:100%;background:#3b82f6;border-radius:3px;width:{{ min($p->bobot * 10, 100) }}%"></div>
-                            </div>
-                            <span style="font-weight:700;">{{ $p->bobot }}</span>
-                        </div>
+                        <span class="badge badge-info" style="font-size:0.8rem;font-weight:700;">Bobot {{ $p->bobot }}</span>
                     </td>
                     <td style="font-size:0.8rem;color:var(--text-muted);">{{ Str::limit($p->deskripsi, 50) ?? '—' }}</td>
                     <td>{{ $p->urutan }}</td>

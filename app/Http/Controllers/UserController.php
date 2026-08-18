@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -43,11 +44,13 @@ class UserController extends Controller
             'name'        => ['required', 'string', 'max:150'],
             'email'       => ['nullable', 'email', 'unique:users,email'],
             'role_id'     => ['required', 'exists:roles,id'],
-            'is_active'   => ['boolean'],
+            'is_active'   => ['nullable'],
             'karyawan_id' => ['nullable', 'exists:karyawans,id'],
-            'password'    => ['required', Password::min(8)->letters()->numbers(), 'confirmed'],
+            'password'    => ['required', 'string', 'min:6', 'confirmed'],
         ], [
             'username.alpha_dash' => 'Username hanya boleh huruf, angka, dash dan underscore.',
+            'password.min'        => 'Password minimal 6 karakter.',
+            'password.confirmed'  => 'Konfirmasi password tidak cocok.',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -99,9 +102,13 @@ class UserController extends Controller
             'name'        => ['required', 'string', 'max:150'],
             'email'       => ['nullable', 'email', 'unique:users,email,' . $user->id],
             'role_id'     => ['required', 'exists:roles,id'],
-            'is_active'   => ['boolean'],
+            'is_active'   => ['nullable'],
             'karyawan_id' => ['nullable', 'exists:karyawans,id'],
-            'password'    => ['nullable', Password::min(8)->letters()->numbers(), 'confirmed'],
+            'password'    => ['nullable', 'string', 'min:6', 'confirmed'],
+        ], [
+            'username.alpha_dash' => 'Username hanya boleh huruf, angka, dash dan underscore.',
+            'password.min'        => 'Password minimal 6 karakter.',
+            'password.confirmed'  => 'Konfirmasi password tidak cocok.',
         ]);
 
         $dataLama = ['username' => $user->username, 'name' => $user->name, 'role' => $user->role?->slug];
@@ -140,7 +147,7 @@ class UserController extends Controller
 
     public function destroy(User $user): RedirectResponse
     {
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::id()) {
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 

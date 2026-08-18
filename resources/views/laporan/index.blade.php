@@ -1,24 +1,36 @@
 @extends('layouts.app')
 @section('title', 'Laporan & Export')
+@section('breadcrumb')<span style="color:var(--text-muted);">Laporan</span> / <strong>Export & Rekap</strong>@endsection
 
 @section('content')
 <div class="page-header">
     <div class="page-title">
         <h2>Laporan & Export</h2>
-        <p>Generate laporan penilaian dalam berbagai format</p>
+        <p>Rekapitulasi dan generate laporan penilaian dalam berbagai format</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a href="{{ route('laporan.export-excel', request()->query()) }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel-fill"></i> Export Excel
+        </a>
+        <a href="{{ route('laporan.export-pdf', request()->query()) }}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
+        </a>
+        <a href="{{ route('laporan.print', request()->query()) }}" class="btn btn-secondary" target="_blank">
+            <i class="bi bi-printer-fill"></i> Print
+        </a>
     </div>
 </div>
 
 {{-- Filter Form --}}
 <div class="card" style="margin-bottom:20px;">
-    <div class="card-header"><h5><i class="bi bi-funnel-fill" style="color:#3b82f6;margin-right:6px;"></i>Filter Laporan</h5></div>
+    <div class="card-header"><h5><i class="bi bi-funnel-fill" style="color:#3b82f6;margin-right:6px;"></i>Filter Data Laporan</h5></div>
     <div class="card-body">
         <form method="GET" action="{{ route('laporan.index') }}" id="filterForm">
             <div class="grid grid-3">
                 <div class="form-group">
-                    <label class="form-label">Periode *</label>
-                    <select name="periode_id" class="form-select" required>
-                        <option value="">-- Pilih Periode --</option>
+                    <label class="form-label">Periode</label>
+                    <select name="periode_id" class="form-select">
+                        <option value="">Semua Periode</option>
                         @foreach($periodes as $p)
                         <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>{{ $p->nama }}</option>
                         @endforeach
@@ -43,36 +55,23 @@
                     </select>
                 </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Tampilkan
+                    <i class="bi bi-search"></i> Terapkan Filter
                 </button>
-                <a href="{{ route('laporan.index') }}" class="btn btn-outline">Reset</a>
-                @if(request('periode_id'))
-                <div style="margin-left:auto;display:flex;gap:8px;">
-                    <a href="{{ route('laporan.export-excel', request()->query()) }}" class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel-fill"></i> Export Excel
-                    </a>
-                    <a href="{{ route('laporan.export-pdf', request()->query()) }}" class="btn btn-danger" target="_blank">
-                        <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
-                    </a>
-                    <a href="{{ route('laporan.print', request()->query()) }}" class="btn btn-secondary" target="_blank">
-                        <i class="bi bi-printer-fill"></i> Print
-                    </a>
-                </div>
-                @endif
+                <a href="{{ route('laporan.index') }}" class="btn btn-outline">Reset Filter</a>
             </div>
         </form>
     </div>
 </div>
 
-@if(isset($penilaians))
 {{-- Statistik ringkasan --}}
+@if($penilaians->isNotEmpty())
 <div class="grid grid-4" style="margin-bottom:20px;">
     <div class="stat-card blue">
         <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
         <div class="stat-value">{{ $penilaians->count() }}</div>
-        <div class="stat-label">Total Karyawan Dinilai</div>
+        <div class="stat-label">Total Penilaian</div>
     </div>
     <div class="stat-card green">
         <div class="stat-icon green"><i class="bi bi-trophy-fill"></i></div>
@@ -93,17 +92,17 @@
 
 {{-- Tabel Data --}}
 <div class="card">
-    <div class="card-header">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
         <h5><i class="bi bi-table" style="color:#059669;margin-right:6px;"></i>Data Penilaian</h5>
         <span class="badge badge-info">{{ $penilaians->count() }} data</span>
     </div>
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>#</th><th>NIP</th><th>Nama Karyawan</th><th>Jabatan</th><th>Divisi</th><th>Evaluator</th><th>Nilai Akhir</th><th>Kategori</th></tr>
+                <tr><th>#</th><th>NIP</th><th>Nama Karyawan</th><th>Jabatan</th><th>Divisi</th><th>Periode</th><th>Evaluator</th><th>Nilai Akhir</th><th>Kategori</th></tr>
             </thead>
             <tbody>
-                @forelse($penilaians->sortByDesc('nilai_akhir')->values() as $i => $p)
+                @foreach($penilaians->sortByDesc('nilai_akhir')->values() as $i => $p)
                 @php $kat = $p->kategori; @endphp
                 <tr>
                     <td>{{ $i + 1 }}</td>
@@ -111,9 +110,10 @@
                     <td style="font-weight:600;">{{ $p->karyawan->nama ?? '-' }}</td>
                     <td style="font-size:0.85rem;">{{ $p->karyawan->jabatan->nama ?? '-' }}</td>
                     <td style="font-size:0.85rem;">{{ $p->karyawan->divisi->nama ?? '-' }}</td>
+                    <td style="font-size:0.85rem;">{{ $p->periode->nama ?? '-' }}</td>
                     <td style="font-size:0.85rem;">{{ $p->evaluator->name ?? '-' }}</td>
                     <td>
-                        <span style="font-size:1rem;font-weight:700;color:{{ $kat?->warna=='success'?'#059669':($kat?->warna=='primary'?'#2563eb':($kat?->warna=='warning'?'#d97706':'#dc2626')) }}">
+                        <span class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:1rem;font-weight:700;">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}
                         </span>
                     </td>
@@ -121,9 +121,7 @@
                         @if($kat)<span class="badge badge-{{ $kat->warna }}">{{ $kat->nama }}</span>@endif
                     </td>
                 </tr>
-                @empty
-                <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">Tidak ada data untuk filter ini</td></tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
@@ -131,8 +129,8 @@
 @else
 <div class="card">
     <div class="card-body" style="text-align:center;padding:60px;">
-        <i class="bi bi-file-earmark-bar-graph" style="font-size:4rem;color:var(--text-muted);display:block;margin-bottom:16px;"></i>
-        <h5 style="color:var(--text-muted);">Pilih periode untuk menampilkan laporan</h5>
+        <i class="bi bi-file-earmark-x" style="font-size:3.5rem;color:var(--text-muted);display:block;margin-bottom:16px;"></i>
+        <h5 style="color:var(--text-muted);">Belum ada data penilaian untuk filter yang dipilih</h5>
     </div>
 </div>
 @endif

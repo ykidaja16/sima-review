@@ -81,7 +81,7 @@
                     </td>
                     <td>
                         @if($p)
-                        <span style="font-size:1.1rem;font-weight:700;color:{{ $kat?->warna=='success'?'#059669':($kat?->warna=='primary'?'#2563eb':($kat?->warna=='warning'?'#d97706':'#dc2626')) }}">
+                        <span class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:1.1rem;font-weight:700;">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}
                         </span>
                         @else —

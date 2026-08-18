@@ -87,10 +87,10 @@
                 @forelse($ranking as $i => $k)
                 @php
                     $avg = $k->avg_nilai ?? 0;
-                    $color = $avg >= 90 ? '#059669' : ($avg >= 75 ? '#2563eb' : ($avg >= 60 ? '#d97706' : '#dc2626'));
+                    $colorClass = $avg >= 88 ? 'success' : ($avg >= 63 ? 'primary' : ($avg >= 38 ? 'warning' : 'danger'));
                     $medal = match($i) { 0 => '🥇', 1 => '🥈', 2 => '🥉', default => '' };
                 @endphp
-                <tr style="{{ $i < 3 ? 'background:rgba(245,158,11,0.03);' : '' }}">
+                <tr class="{{ $i < 3 ? 'rank-top-3' : '' }}">
                     <td>
                         <div style="display:flex;align-items:center;gap:6px;">
                             <span style="font-weight:700;font-size:1rem;">{{ $i + 1 }}</span>
@@ -104,11 +104,10 @@
                     <td>{{ $k->divisi->nama ?? '—' }}</td>
                     <td>{{ $k->jabatan->nama ?? '—' }}</td>
                     <td>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;width:80px;">
-                                <div style="height:100%;width:{{ min($avg, 100) }}%;background:{{ $color }};border-radius:4px;"></div>
-                            </div>
-                            <span style="font-size:1.1rem;font-weight:700;color:{{ $color }};">{{ number_format($avg, 2) }}</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="badge badge-{{ $colorClass }}" style="font-size:0.85rem;padding:4px 10px;">
+                                {{ number_format($avg, 2) }}
+                            </span>
                         </div>
                     </td>
                     <td>{{ $k->penilaians_count ?? 0 }} periode</td>

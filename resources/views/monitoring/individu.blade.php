@@ -55,8 +55,11 @@
             </div>
             <div style="width:1px;background:var(--border);"></div>
             <div>
-                @php $avg = $penilaians->avg('nilai_akhir'); @endphp
-                <div style="font-size:1.8rem;font-weight:800;color:{{ $avg>=90?'#059669':($avg>=75?'#2563eb':($avg>=60?'#d97706':'#dc2626')) }};">
+                @php
+                    $avg = $penilaians->avg('nilai_akhir');
+                    $avgColorClass = $avg>=88 ? 'text-score-success' : ($avg>=63 ? 'text-score-primary' : ($avg>=38 ? 'text-score-warning' : 'text-score-danger'));
+                @endphp
+                <div class="{{ $avgColorClass }}" style="font-size:1.8rem;font-weight:800;">
                     {{ $avg ? number_format($avg, 2) : '—' }}
                 </div>
                 <div style="font-size:0.75rem;color:var(--text-muted);">Rata-rata</div>
@@ -64,7 +67,7 @@
             @if($penilaians->count() > 0)
             <div style="width:1px;background:var(--border);"></div>
             <div>
-                <div style="font-size:1.8rem;font-weight:800;color:#059669;">{{ number_format($penilaians->max('nilai_akhir'), 1) }}</div>
+                <div class="text-score-success" style="font-size:1.8rem;font-weight:800;">{{ number_format($penilaians->max('nilai_akhir'), 1) }}</div>
                 <div style="font-size:0.75rem;color:var(--text-muted);">Tertinggi</div>
             </div>
             @endif
@@ -96,7 +99,7 @@
                     <td>{{ $p->tanggal_penilaian?->format('d M Y') }}</td>
                     <td>{{ $p->evaluator->name ?? '-' }}</td>
                     <td>
-                        <span style="font-size:1.1rem;font-weight:800;color:{{ $kat?->warna=='success'?'#059669':($kat?->warna=='primary'?'#2563eb':($kat?->warna=='warning'?'#d97706':'#dc2626')) }}">
+                        <span class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:1.1rem;font-weight:800;">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}
                         </span>
                     </td>
@@ -131,10 +134,14 @@
 @endsection
 
 @if($penilaians->count() > 1)
+<script id="trendDataJson" type="application/json">
+{!! json_encode(['labels' => $penilaians->pluck('periode.nama'), 'values' => $penilaians->pluck('nilai_akhir')]) !!}
+</script>
 @push('scripts')
 <script>
-const labels  = @json($penilaians->pluck('periode.nama'));
-const values  = @json($penilaians->pluck('nilai_akhir'));
+const trendData = JSON.parse(document.getElementById('trendDataJson').textContent || '{}');
+const labels  = trendData.labels || [];
+const values  = trendData.values || [];
 new Chart(document.getElementById('trendChart'), {
     type: 'line',
     data: {

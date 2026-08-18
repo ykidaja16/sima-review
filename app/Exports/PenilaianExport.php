@@ -18,13 +18,13 @@ class PenilaianExport implements FromCollection, WithHeadings, WithStyles, Shoul
         return $this->penilaians->map(function ($p, $i) {
             return [
                 'No'           => $i + 1,
-                'NIP'          => $p->karyawan->nip,
-                'Nama'         => $p->karyawan->nama,
-                'Divisi'       => $p->karyawan->divisi->nama ?? '-',
-                'Jabatan'      => $p->karyawan->jabatan->nama ?? '-',
-                'Periode'      => $p->periode->nama ?? '-',
-                'Tgl Penilaian' => $p->tanggal_penilaian?->format('d/m/Y'),
-                'Evaluator'    => $p->evaluator->name ?? '-',
+                'NIP'          => $p->karyawan?->nip ?? '-',
+                'Nama'         => $p->karyawan?->nama ?? '-',
+                'Divisi'       => $p->karyawan?->divisi?->nama ?? '-',
+                'Jabatan'      => $p->karyawan?->jabatan?->nama ?? '-',
+                'Periode'      => $p->periode?->nama ?? '-',
+                'Tgl Penilaian' => $p->tanggal_penilaian?->format('d/m/Y') ?? '-',
+                'Evaluator'    => $p->evaluator?->name ?? '-',
                 'Nilai Akhir'  => number_format($p->nilai_akhir ?? 0, 2),
                 'Catatan'      => $p->catatan ?? '',
             ];

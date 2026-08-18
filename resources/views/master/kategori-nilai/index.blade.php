@@ -29,10 +29,7 @@
                     </td>
                     <td>
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <div style="width:20px;height:20px;border-radius:5px;background:{{ match($k->warna) {
-                                'success' => '#059669', 'primary' => '#2563eb',
-                                'warning' => '#d97706', 'danger' => '#dc2626', default => '#64748b'
-                            } }};"></div>
+                            <div class="bg-score-{{ $k->warna ?? 'secondary' }}" style="width:20px;height:20px;border-radius:5px;"></div>
                             <span style="font-size:0.8rem;color:var(--text-muted);">{{ $k->warna }}</span>
                         </div>
                     </td>

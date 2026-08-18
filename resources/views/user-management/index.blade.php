@@ -7,7 +7,7 @@
         <h2>User Management</h2>
         <p>Kelola akun pengguna sistem SIMA-REVIEW</p>
     </div>
-    <a href="{{ route('user-management.index', ['action' => 'create']) }}" class="btn btn-primary">
+    <a href="{{ route('user-management.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Tambah User
     </a>
 </div>
@@ -24,7 +24,7 @@
                     <td>{{ $users->firstItem() + $loop->index }}</td>
                     <td>
                         <div style="font-weight:700;font-family:monospace;">{{ $u->username }}</div>
-                        @if($u->id === auth()->id())
+                        @if($u->id === \Illuminate\Support\Facades\Auth::id())
                         <span style="font-size:0.68rem;background:rgba(59,130,246,0.1);color:#2563eb;padding:1px 6px;border-radius:4px;font-weight:600;">Anda</span>
                         @endif
                     </td>
@@ -51,7 +51,7 @@
                             <a href="{{ route('user-management.edit', $u) }}" class="btn btn-warning btn-sm" title="Edit">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            @if($u->id !== auth()->id())
+                            @if($u->id !== \Illuminate\Support\Facades\Auth::id())
                             <form action="{{ route('user-management.destroy', $u) }}" method="POST"
                                 onsubmit="return confirm('Hapus user {{ $u->username }}?')" style="display:inline;">
                                 @csrf @method('DELETE')

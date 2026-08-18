@@ -20,8 +20,8 @@ class ParameterSopController extends Controller
 
     public function create(): View
     {
-        $kategoris = ParameterSop::select('kategori')->distinct()->orderBy('kategori')->pluck('kategori');
-        return view('master.parameter-sop.create', compact('kategoris'));
+        $kategoriList = ParameterSop::select('kategori')->distinct()->orderBy('kategori')->pluck('kategori');
+        return view('master.parameter-sop.create', compact('kategoriList'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -35,6 +35,7 @@ class ParameterSopController extends Controller
             'is_active' => ['boolean'],
         ]);
 
+        $validated['is_active'] = $request->boolean('is_active', true);
         $parameter = ParameterSop::create($validated);
         AuditLogService::log('CREATE_PARAMETER_SOP', 'ParameterSop', $parameter->id, null, $parameter->toArray());
 
@@ -44,8 +45,8 @@ class ParameterSopController extends Controller
 
     public function edit(ParameterSop $parameterSop): View
     {
-        $kategoris = ParameterSop::select('kategori')->distinct()->orderBy('kategori')->pluck('kategori');
-        return view('master.parameter-sop.edit', compact('parameterSop', 'kategoris'));
+        $kategoriList = ParameterSop::select('kategori')->distinct()->orderBy('kategori')->pluck('kategori');
+        return view('master.parameter-sop.edit', compact('parameterSop', 'kategoriList'));
     }
 
     public function update(Request $request, ParameterSop $parameterSop): RedirectResponse
@@ -59,6 +60,7 @@ class ParameterSopController extends Controller
             'is_active' => ['boolean'],
         ]);
 
+        $validated['is_active'] = $request->boolean('is_active');
         $dataLama = $parameterSop->toArray();
         $parameterSop->update($validated);
         AuditLogService::log('UPDATE_PARAMETER_SOP', 'ParameterSop', $parameterSop->id, $dataLama, $parameterSop->fresh()->toArray());

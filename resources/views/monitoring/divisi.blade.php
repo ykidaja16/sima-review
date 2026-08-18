@@ -9,7 +9,7 @@
     </div>
     @if($periodeAktif)
     <span class="badge badge-success" style="padding:8px 14px;font-size:0.85rem;">
-        <i class="bi bi-calendar-check"></i> {{ $periodeAktif->nama }}
+        <i class="bi bi-calendar-check"></i> {{ $periodeAktif->nama ?? 'Periode Aktif' }}
     </span>
     @endif
 </div>
@@ -58,28 +58,26 @@
                 @php
                     $pct = $d->total_karyawan > 0 ? round(($d->sudah_dinilai / $d->total_karyawan) * 100) : 0;
                     $avg = $d->avg_nilai ?? 0;
-                    $barColor = $avg >= 90 ? '#059669' : ($avg >= 75 ? '#3b82f6' : ($avg >= 60 ? '#d97706' : '#dc2626'));
+                    $avgClass = $avg >= 88 ? 'success' : ($avg >= 63 ? 'primary' : ($avg >= 38 ? 'warning' : 'danger'));
+                    $progressClass = $pct == 100 ? 'bg-score-success' : 'bg-score-primary';
                 @endphp
                 <tr>
                     <td style="font-weight:600;">{{ $d->nama }}</td>
                     <td>{{ $d->total_karyawan }}</td>
                     <td>{{ $d->sudah_dinilai }}</td>
-                    <td style="min-width:150px;">
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
-                                <div style="height:100%;width:{{ $pct }}%;background:{{ $pct==100?'#059669':'#3b82f6' }};border-radius:4px;transition:width 0.5s;"></div>
-                            </div>
-                            <span style="font-size:0.8rem;font-weight:600;color:var(--text-muted);">{{ $pct }}%</span>
-                        </div>
+                    <td>
+                        <span class="badge {{ $pct == 100 ? 'badge-success' : 'badge-primary' }}" style="font-size:0.8rem;padding:4px 10px;">
+                            {{ $pct }}% Selesai
+                        </span>
                     </td>
                     <td>
                         @if($avg > 0)
-                        <span style="font-size:1.1rem;font-weight:700;color:{{ $barColor }};">{{ number_format($avg, 2) }}</span>
+                        <span class="text-score-{{ $avgClass }}" style="font-size:1.1rem;font-weight:700;">{{ number_format($avg, 2) }}</span>
                         @else <span style="color:var(--text-muted);">—</span>
                         @endif
                     </td>
-                    <td style="color:#059669;font-weight:600;">{{ $d->max_nilai ? number_format($d->max_nilai, 1) : '—' }}</td>
-                    <td style="color:#dc2626;font-weight:600;">{{ $d->min_nilai ? number_format($d->min_nilai, 1) : '—' }}</td>
+                    <td class="text-score-success" style="font-weight:600;">{{ $d->max_nilai ? number_format($d->max_nilai, 1) : '—' }}</td>
+                    <td class="text-score-danger" style="font-weight:600;">{{ $d->min_nilai ? number_format($d->min_nilai, 1) : '—' }}</td>
                 </tr>
                 @empty
                 <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Tidak ada data</td></tr>
@@ -91,12 +89,22 @@
 
 @endsection
 
+<script id="divisiChartDataJson" type="application/json">
+{!! json_encode([
+    'labels' => $divisiStats->pluck('nama'),
+    'avgValues' => $divisiStats->pluck('avg_nilai')->map(fn($v) => $v ? round($v, 2) : 0),
+    'sudah' => $divisiStats->pluck('sudah_dinilai'),
+    'total' => $divisiStats->pluck('total_karyawan'),
+]) !!}
+</script>
+
 @push('scripts')
 <script>
-const labels    = @json($divisiStats->pluck('nama'));
-const avgValues = @json($divisiStats->pluck('avg_nilai')->map(fn($v) => $v ? round($v, 2) : 0));
-const sudah     = @json($divisiStats->pluck('sudah_dinilai'));
-const total     = @json($divisiStats->pluck('total_karyawan'));
+const chartData = JSON.parse(document.getElementById('divisiChartDataJson').textContent || '{}');
+const labels    = chartData.labels || [];
+const avgValues = chartData.avgValues || [];
+const sudah     = chartData.sudah || [];
+const total     = chartData.total || [];
 
 // Chart rata-rata nilai
 new Chart(document.getElementById('nilaiChart'), {

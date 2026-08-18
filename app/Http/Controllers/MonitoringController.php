@@ -102,26 +102,31 @@ class MonitoringController extends Controller
     {
         $periodeId = $request->periode_id;
         $periodes  = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
-        $periode   = $periodeId ? PeriodePenilaian::find($periodeId) : PeriodePenilaian::aktif()->first();
+        $periodeAktif = $periodeId ? PeriodePenilaian::find($periodeId) : PeriodePenilaian::aktif()->first();
 
-        $divisis = Divisi::active()
-            ->with(['karyawans' => function ($q) use ($periode) {
+        $divisiStats = Divisi::active()
+            ->with(['karyawans' => function ($q) use ($periodeAktif) {
                 $q->active()
-                  ->with(['penilaians' => fn($p) => $p->when($periode, fn($p2) => $p2->where('periode_id', $periode?->id))]);
+                  ->with(['penilaians' => fn($p) => $p->when($periodeAktif, fn($p2) => $p2->where('periode_id', $periodeAktif?->id))]);
             }])
             ->get()
             ->map(function ($d) {
-                $nilaiAll = $d->karyawans->flatMap(fn($k) => $k->penilaians->pluck('nilai_akhir'));
-                $d->avg_nilai    = $nilaiAll->avg() ?? 0;
-                $d->total_dinilai = $nilaiAll->count();
+                $karyawans = $d->karyawans;
+                $d->total_karyawan = $karyawans->count();
+                $penilaians = $karyawans->flatMap(fn($k) => $k->penilaians);
+                $d->sudah_dinilai  = $penilaians->count();
+                $d->avg_nilai      = $penilaians->isNotEmpty() ? $penilaians->avg('nilai_akhir') : 0;
+                $d->max_nilai      = $penilaians->isNotEmpty() ? $penilaians->max('nilai_akhir') : null;
+                $d->min_nilai      = $penilaians->isNotEmpty() ? $penilaians->min('nilai_akhir') : null;
                 return $d;
             })
-            ->sortByDesc('avg_nilai');
+            ->sortByDesc('avg_nilai')
+            ->values();
 
-        $chartLabels = $divisis->pluck('nama');
-        $chartData   = $divisis->pluck('avg_nilai')->map(fn($v) => round($v, 2));
+        $chartLabels = $divisiStats->pluck('nama');
+        $chartData   = $divisiStats->pluck('avg_nilai')->map(fn($v) => round($v, 2));
 
-        return view('monitoring.divisi', compact('divisis', 'periodes', 'periode', 'chartLabels', 'chartData'));
+        return view('monitoring.divisi', compact('divisiStats', 'periodes', 'periodeAktif', 'chartLabels', 'chartData'));
     }
 
     /**

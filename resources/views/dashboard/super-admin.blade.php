@@ -60,7 +60,9 @@
             @endif
         </div>
         <div class="card-body">
-            <canvas id="divisiChart" height="220"></canvas>
+            <div style="position: relative; height: 240px; width: 100%;">
+                <canvas id="divisiChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -72,17 +74,18 @@
         </div>
         <div class="card-body" style="padding:0;">
             @forelse($ranking as $i => $k)
+            @php
+                $scoreColorClass = ($k->avg_nilai ?? 0) >= 88 ? 'text-score-success' : (($k->avg_nilai ?? 0) >= 63 ? 'text-score-primary' : (($k->avg_nilai ?? 0) >= 38 ? 'text-score-warning' : 'text-score-danger'));
+            @endphp
             <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);">
-                <div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;
-                    background:{{ $i==0 ? 'linear-gradient(135deg,#f59e0b,#ef4444)' : ($i==1?'linear-gradient(135deg,#94a3b8,#64748b)':($i==2?'linear-gradient(135deg,#92400e,#d97706)':'var(--bg)')) }};
-                    color:{{ $i<3 ? 'white' : 'var(--text-muted)' }};">
+                <div class="rank-badge-{{ min($i + 1, 4) }}" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">
                     {{ $i + 1 }}
                 </div>
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:0.875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $k->nama }}</div>
                     <div style="font-size:0.75rem;color:var(--text-muted);">{{ $k->divisi->nama ?? '-' }} • {{ $k->jabatan->nama ?? '-' }}</div>
                 </div>
-                <div style="font-size:1.1rem;font-weight:700;color:{{ $k->avg_nilai>=90?'#059669':($k->avg_nilai>=75?'#2563eb':($k->avg_nilai>=60?'#d97706':'#dc2626')) }};">
+                <div class="{{ $scoreColorClass }}" style="font-size:1.1rem;font-weight:700;">
                     {{ number_format($k->avg_nilai ?? 0, 1) }}
                 </div>
             </div>
@@ -154,14 +157,21 @@
     </div>
 </div>
 
-@endsection
+<script id="adminDivisiChartJson" type="application/json">
+{!! json_encode([
+    'labels' => $penilaianPerDivisi->pluck('nama'),
+    'dinilai' => $penilaianPerDivisi->pluck('total_penilaian'),
+    'total' => $penilaianPerDivisi->pluck('total_karyawan'),
+]) !!}
+</script>
 
 @push('scripts')
 <script>
     const ctx = document.getElementById('divisiChart');
-    const labels = @json($penilaianPerDivisi->pluck('nama'));
-    const dinilai = @json($penilaianPerDivisi->pluck('total_penilaian'));
-    const total = @json($penilaianPerDivisi->pluck('total_karyawan'));
+    const adminChartData = JSON.parse(document.getElementById('adminDivisiChartJson').textContent || '{}');
+    const labels = adminChartData.labels || [];
+    const dinilai = adminChartData.dinilai || [];
+    const total = adminChartData.total || [];
 
     new Chart(ctx, {
         type: 'bar',

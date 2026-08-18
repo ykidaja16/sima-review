@@ -53,8 +53,7 @@
         <div class="card-header"><h5><i class="bi bi-star-fill" style="color:#f59e0b;margin-right:6px;"></i>Hasil Akhir</h5></div>
         <div class="card-body" style="text-align:center;padding:28px;">
             <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);">Nilai Akhir (Skala 100)</div>
-            <div style="font-size:4.5rem;font-weight:800;line-height:1;margin:8px 0;
-                color:{{ $kat?->warna=='success'?'#059669':($kat?->warna=='primary'?'#2563eb':($kat?->warna=='warning'?'#d97706':'#dc2626')) }};">
+            <div class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:4.5rem;font-weight:800;line-height:1;margin:8px 0;">
                 {{ number_format($penilaian->nilai_akhir ?? 0, 2) }}
             </div>
             @if($kat)
@@ -92,11 +91,17 @@
         @foreach($details as $detail)
         @php
             $skor = (int) $detail->nilai;
-            $skorInfo = match($skor) {
-                4 => ['label' => 'Sangat Baik', 'color' => '#059669', 'bg' => '#dcfce7'],
-                3 => ['label' => 'Baik', 'color' => '#2563eb', 'bg' => '#dbeafe'],
-                2 => ['label' => 'Cukup', 'color' => '#d97706', 'bg' => '#fef9c3'],
-                default => ['label' => 'Kurang Baik', 'color' => '#dc2626', 'bg' => '#fee2e2'],
+            $badgeColor = match($skor) {
+                4 => 'success',
+                3 => 'primary',
+                2 => 'warning',
+                default => 'danger',
+            };
+            $skorLabel = match($skor) {
+                4 => 'Sangat Baik',
+                3 => 'Baik',
+                2 => 'Cukup',
+                default => 'Kurang Baik',
             };
         @endphp
         <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:center;">
@@ -110,11 +115,11 @@
                 @endif
             </div>
             <div style="text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:10px;">
-                <span style="font-size:0.8rem;font-weight:700;color:{{ $skorInfo['color'] }};background:{{ $skorInfo['bg'] }};padding:4px 10px;border-radius:12px;">
+                <span class="badge badge-{{ $badgeColor }}" style="padding:4px 10px;border-radius:12px;font-size:0.8rem;">
                     Skor: {{ $skor }} / 4
                 </span>
-                <span style="font-size:0.8rem;font-weight:600;color:{{ $skorInfo['color'] }};">
-                    {{ $skorInfo['label'] }}
+                <span class="text-score-{{ $badgeColor }}" style="font-size:0.8rem;font-weight:600;">
+                    {{ $skorLabel }}
                 </span>
             </div>
         </div>

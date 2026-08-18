@@ -66,13 +66,15 @@ Route::middleware('auth')->group(function () {
             ->name('periode.update-status');
     });
 
-    // ---- Penilaian Show (Bisa diakses semua role termasuk pelaksana untuk melihat penilaian sendiri) ----
-    Route::get('/penilaian/{penilaian}', [PenilaianController::class, 'show'])->name('penilaian.show');
-
     // ---- Penilaian CRUD (Super Admin, Manager, Supervisor) ----
     Route::middleware('role:super_admin,manager,supervisor')->group(function () {
         Route::resource('penilaian', PenilaianController::class)->except(['show']);
     });
+
+    // ---- Penilaian Show (Bisa diakses semua role termasuk pelaksana untuk melihat penilaian sendiri) ----
+    Route::get('/penilaian/{penilaian}', [PenilaianController::class, 'show'])
+        ->whereNumber('penilaian')
+        ->name('penilaian.show');
 
     // ---- Monitoring ----
     Route::prefix('monitoring')->name('monitoring.')->group(function () {
