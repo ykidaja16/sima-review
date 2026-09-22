@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Karyawan extends Model
 {
-    use SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -19,6 +17,7 @@ class Karyawan extends Model
         'no_hp',
         'divisi_id',
         'jabatan_id',
+        'cabang_id',
         'atasan_id',
         'is_active',
     ];
@@ -45,6 +44,11 @@ class Karyawan extends Model
     public function jabatan(): BelongsTo
     {
         return $this->belongsTo(Jabatan::class);
+    }
+
+    public function cabang(): BelongsTo
+    {
+        return $this->belongsTo(Cabang::class);
     }
 
     public function atasan(): BelongsTo

@@ -14,7 +14,7 @@
             <div class="form-group">
                 <label class="form-label">Nama Periode *</label>
                 <input type="text" name="nama" class="form-control @error('nama') is-invalid @enderror"
-                    value="{{ old('nama') }}" placeholder="Contoh: Periode I 2026 (1-14 Jan)" required>
+                    value="{{ old('nama') }}" placeholder="Contoh: Periode Januari 2026 / Triwulan I 2026" required>
                 @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="grid grid-2">

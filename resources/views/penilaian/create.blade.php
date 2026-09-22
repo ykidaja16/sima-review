@@ -65,7 +65,7 @@
                 @error('karyawan_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 @if($karyawans->isEmpty())
                 <div style="font-size:0.8rem;color:#d97706;margin-top:4px;">
-                    <i class="bi bi-exclamation-triangle"></i> Semua karyawan di divisi Anda sudah dinilai untuk periode ini.
+                    <i class="bi bi-exclamation-triangle"></i> Tidak ada karyawan dari divisi lain yang memenuhi kriteria untuk dinilai atau seluruhnya telah dinilai pada periode ini.
                 </div>
                 @endif
             </div>

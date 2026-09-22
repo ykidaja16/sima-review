@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'google_survey' => [
+        'url'   => env('GOOGLE_SURVEY_URL'),
+        'token' => env('GOOGLE_SURVEY_TOKEN'),
+    ],
+
 ];

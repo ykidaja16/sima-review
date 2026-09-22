@@ -7,6 +7,7 @@ use App\Models\Jabatan;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class JabatanController extends Controller
@@ -62,14 +63,20 @@ class JabatanController extends Controller
 
     public function destroy(Jabatan $jabatan): RedirectResponse
     {
-        if ($jabatan->karyawans()->count() > 0) {
-            return back()->with('error', "Jabatan {$jabatan->nama} tidak dapat dihapus karena masih digunakan.");
+        if ($jabatan->karyawans()->exists()) {
+            return back()->with('error', "Jabatan {$jabatan->nama} tidak dapat dihapus karena masih digunakan oleh data karyawan.");
         }
 
-        AuditLogService::log('DELETE_JABATAN', 'Jabatan', $jabatan->id, $jabatan->toArray(), null);
-        $jabatan->delete();
+        try {
+            DB::transaction(function () use ($jabatan) {
+                AuditLogService::log('DELETE_JABATAN', 'Jabatan', $jabatan->id, $jabatan->toArray(), null);
+                $jabatan->delete();
+            });
 
-        return redirect()->route('master.jabatan.index')
-            ->with('success', "Jabatan berhasil dihapus.");
+            return redirect()->route('master.jabatan.index')
+                ->with('success', "Jabatan berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Jabatan {$jabatan->nama} tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

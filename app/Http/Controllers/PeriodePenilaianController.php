@@ -6,6 +6,7 @@ use App\Models\PeriodePenilaian;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PeriodePenilaianController extends Controller
@@ -87,14 +88,20 @@ class PeriodePenilaianController extends Controller
 
     public function destroy(PeriodePenilaian $periode): RedirectResponse
     {
-        if ($periode->penilaians()->count() > 0) {
+        if ($periode->penilaians()->exists()) {
             return back()->with('error', "Periode tidak dapat dihapus karena sudah memiliki data penilaian.");
         }
 
-        AuditLogService::log('DELETE_PERIODE', 'PeriodePenilaian', $periode->id, $periode->toArray(), null);
-        $periode->delete();
+        try {
+            DB::transaction(function () use ($periode) {
+                AuditLogService::log('DELETE_PERIODE', 'PeriodePenilaian', $periode->id, $periode->toArray(), null);
+                $periode->delete();
+            });
 
-        return redirect()->route('periode.index')
-            ->with('success', "Periode berhasil dihapus.");
+            return redirect()->route('periode.index')
+                ->with('success', "Periode berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Periode tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

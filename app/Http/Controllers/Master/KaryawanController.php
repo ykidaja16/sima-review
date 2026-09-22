@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cabang;
 use App\Models\Divisi;
 use App\Models\Jabatan;
 use App\Models\Karyawan;
@@ -46,9 +47,10 @@ class KaryawanController extends Controller
         $divisis  = Divisi::active()->orderBy('nama')->get();
         $jabatans = Jabatan::active()->orderBy('nama')->get();
         $atasans  = Karyawan::active()->orderBy('nama')->get();
+        $cabangs  = Cabang::active()->orderBy('nama')->get();
 
-        $roles = Role::whereIn('slug', ['pelaksana', 'supervisor', 'manager'])->orderByDesc('level')->get();
-        return view('master.karyawan.create', compact('divisis', 'jabatans', 'atasans', 'roles'));
+        $roles = Role::whereIn('slug', ['pelaksana', 'supervisor', 'manager', 'kacab'])->orderByDesc('level')->get();
+        return view('master.karyawan.create', compact('divisis', 'jabatans', 'atasans', 'roles', 'cabangs'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -56,10 +58,11 @@ class KaryawanController extends Controller
         $validated = $request->validate([
             'nip'        => ['required', 'string', 'max:30', 'unique:karyawans,nip'],
             'nama'       => ['required', 'string', 'max:150'],
-            'email'      => ['nullable', 'email', 'max:150'],
-            'no_hp'      => ['nullable', 'string', 'max:20'],
+            'email'      => ['nullable', 'email', 'max:150', 'unique:karyawans,email'],
+            'no_hp'      => ['nullable', 'string', 'max:20', 'unique:karyawans,no_hp'],
             'divisi_id'  => ['required', 'exists:divisis,id'],
             'jabatan_id' => ['required', 'exists:jabatans,id'],
+            'cabang_id'  => ['nullable', 'exists:cabangs,id'],
             'atasan_id'  => ['nullable', 'exists:karyawans,id'],
             'is_active'  => ['boolean'],
             // Akun user (opsional)
@@ -69,6 +72,8 @@ class KaryawanController extends Controller
             'password'   => ['nullable', 'min:8', 'required_if:buat_akun,1'],
         ], [
             'username.alpha_dash' => 'Username hanya boleh huruf, angka, dash (-) dan underscore (_).',
+            'email.unique'        => 'Email ini sudah digunakan oleh karyawan lain.',
+            'no_hp.unique'        => 'Nomor HP ini sudah digunakan oleh karyawan lain.',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -94,6 +99,7 @@ class KaryawanController extends Controller
                 'no_hp'      => $validated['no_hp'] ?? null,
                 'divisi_id'  => $validated['divisi_id'],
                 'jabatan_id' => $validated['jabatan_id'],
+                'cabang_id'  => $validated['cabang_id'] ?? null,
                 'atasan_id'  => $validated['atasan_id'] ?? null,
                 'is_active'  => $request->boolean('is_active', true),
             ]);
@@ -116,8 +122,9 @@ class KaryawanController extends Controller
         $divisis  = Divisi::active()->orderBy('nama')->get();
         $jabatans = Jabatan::active()->orderBy('nama')->get();
         $atasans  = Karyawan::active()->where('id', '!=', $karyawan->id)->orderBy('nama')->get();
+        $cabangs  = Cabang::active()->orderBy('nama')->get();
 
-        return view('master.karyawan.edit', compact('karyawan', 'divisis', 'jabatans', 'atasans'));
+        return view('master.karyawan.edit', compact('karyawan', 'divisis', 'jabatans', 'atasans', 'cabangs'));
     }
 
     public function update(Request $request, Karyawan $karyawan): RedirectResponse
@@ -125,12 +132,16 @@ class KaryawanController extends Controller
         $validated = $request->validate([
             'nip'        => ['required', 'string', 'max:30', 'unique:karyawans,nip,' . $karyawan->id],
             'nama'       => ['required', 'string', 'max:150'],
-            'email'      => ['nullable', 'email', 'max:150'],
-            'no_hp'      => ['nullable', 'string', 'max:20'],
+            'email'      => ['nullable', 'email', 'max:150', 'unique:karyawans,email,' . $karyawan->id],
+            'no_hp'      => ['nullable', 'string', 'max:20', 'unique:karyawans,no_hp,' . $karyawan->id],
             'divisi_id'  => ['required', 'exists:divisis,id'],
             'jabatan_id' => ['required', 'exists:jabatans,id'],
+            'cabang_id'  => ['nullable', 'exists:cabangs,id'],
             'atasan_id'  => ['nullable', 'exists:karyawans,id'],
             'is_active'  => ['boolean'],
+        ], [
+            'email.unique' => 'Email ini sudah digunakan oleh karyawan lain.',
+            'no_hp.unique' => 'Nomor HP ini sudah digunakan oleh karyawan lain.',
         ]);
 
         $dataLama = $karyawan->toArray();
@@ -144,14 +155,20 @@ class KaryawanController extends Controller
 
     public function destroy(Karyawan $karyawan): RedirectResponse
     {
-        if ($karyawan->penilaians()->count() > 0) {
+        if ($karyawan->penilaians()->exists()) {
             return back()->with('error', "Karyawan {$karyawan->nama} tidak dapat dihapus karena memiliki riwayat penilaian.");
         }
 
-        AuditLogService::log('DELETE_KARYAWAN', 'Karyawan', $karyawan->id, $karyawan->toArray(), null);
-        $karyawan->delete();
+        try {
+            DB::transaction(function () use ($karyawan) {
+                AuditLogService::log('DELETE_KARYAWAN', 'Karyawan', $karyawan->id, $karyawan->toArray(), null);
+                $karyawan->delete();
+            });
 
-        return redirect()->route('master.karyawan.index')
-            ->with('success', "Karyawan berhasil dihapus.");
+            return redirect()->route('master.karyawan.index')
+                ->with('success', "Karyawan berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Karyawan {$karyawan->nama} tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

@@ -164,6 +164,7 @@
     'total' => $penilaianPerDivisi->pluck('total_karyawan'),
 ]) !!}
 </script>
+@endsection
 
 @push('scripts')
 <script>

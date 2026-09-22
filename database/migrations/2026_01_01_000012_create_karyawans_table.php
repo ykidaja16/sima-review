@@ -20,7 +20,6 @@ return new class extends Migration
             $table->foreignId('atasan_id')->nullable()->constrained('karyawans')->nullOnDelete();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

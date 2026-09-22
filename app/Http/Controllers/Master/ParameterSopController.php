@@ -7,6 +7,7 @@ use App\Models\ParameterSop;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ParameterSopController extends Controller
@@ -71,14 +72,20 @@ class ParameterSopController extends Controller
 
     public function destroy(ParameterSop $parameterSop): RedirectResponse
     {
-        if ($parameterSop->penilaianDetails()->count() > 0) {
+        if ($parameterSop->penilaianDetails()->exists()) {
             return back()->with('error', "Parameter ini tidak dapat dihapus karena sudah digunakan dalam penilaian.");
         }
 
-        AuditLogService::log('DELETE_PARAMETER_SOP', 'ParameterSop', $parameterSop->id, $parameterSop->toArray(), null);
-        $parameterSop->delete();
+        try {
+            DB::transaction(function () use ($parameterSop) {
+                AuditLogService::log('DELETE_PARAMETER_SOP', 'ParameterSop', $parameterSop->id, $parameterSop->toArray(), null);
+                $parameterSop->delete();
+            });
 
-        return redirect()->route('master.parameter-sop.index')
-            ->with('success', "Parameter SOP berhasil dihapus.");
+            return redirect()->route('master.parameter-sop.index')
+                ->with('success', "Parameter SOP berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Parameter ini tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

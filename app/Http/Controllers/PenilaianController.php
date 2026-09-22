@@ -19,6 +19,7 @@ class PenilaianController extends Controller
 
     public function index(Request $request): View
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         $query = Penilaian::with(['karyawan.divisi', 'evaluator', 'periode'])
@@ -26,9 +27,14 @@ class PenilaianController extends Controller
 
         // Filter berdasarkan role
         if ($user->isSupervisor() && $user->karyawan) {
-            $query->whereHas('karyawan', fn($q) => $q->where('atasan_id', $user->karyawan->id));
+            // Supervisor melihat penilaian yang dibuat oleh dirinya
+            $query->where('evaluator_id', $user->id);
         } elseif ($user->isManager() && $user->karyawan) {
-            $query->whereHas('karyawan', fn($q) => $q->where('divisi_id', $user->karyawan->divisi_id));
+            // Manager melihat penilaian yang dibuat oleh dirinya serta penilaian anggota divisinya
+            $query->where(function ($q) use ($user) {
+                $q->where('evaluator_id', $user->id)
+                    ->orWhereHas('karyawan', fn($k) => $k->where('divisi_id', $user->karyawan->divisi_id));
+            });
         } elseif ($user->isPelaksana() && $user->karyawan) {
             $query->where('karyawan_id', $user->karyawan->id);
         }
@@ -43,8 +49,9 @@ class PenilaianController extends Controller
         return view('penilaian.index', compact('penilaians', 'periodes'));
     }
 
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $periodeAktif = PeriodePenilaian::aktif()->first();
 
@@ -53,13 +60,32 @@ class PenilaianController extends Controller
                 ->with('error', 'Tidak ada periode penilaian yang aktif saat ini.');
         }
 
-        // Ambil karyawan yang bisa dinilai berdasarkan role
+        // Ambil karyawan yang bisa dinilai
         $karyawansQuery = Karyawan::active()->with(['divisi', 'jabatan']);
+        $userKaryawan = $user->karyawan;
 
-        if ($user->isSupervisor() && $user->karyawan) {
-            $karyawansQuery->where('atasan_id', $user->karyawan->id);
-        } elseif ($user->isManager() && $user->karyawan) {
-            $karyawansQuery->where('divisi_id', $user->karyawan->divisi_id);
+        // Role Kacab tidak perlu dinilai oleh siapapun
+        $karyawansQuery->whereDoesntHave('user.role', fn($q) => $q->where('slug', 'kacab'));
+
+        // 1. Penilai tidak menilai dirinya sendiri
+        if ($userKaryawan) {
+            $karyawansQuery->where('id', '!=', $userKaryawan->id);
+        }
+
+        // 2. Jika penilai adalah Supervisor atau Manager:
+        //    - Harus menilai karyawan dari divisi lain (bukan dari divisinya sendiri)
+        //    - Minimal penilai adalah level atasnya (level penilai > level yang dinilai)
+        if (($user->isSupervisor() || $user->isManager()) && $userKaryawan) {
+            $penilaiLevel = $userKaryawan->jabatan?->level ?? 0;
+
+            $karyawansQuery->where('divisi_id', '!=', $userKaryawan->divisi_id)
+                ->whereHas('jabatan', fn($q) => $q->where('level', '<', $penilaiLevel));
+        } elseif ($user->isKacab() && $userKaryawan) {
+            // Kepala Cabang: menilai karyawan di bawah level jabatannya
+            $penilaiLevel = $userKaryawan->jabatan?->level ?? 0;
+            if ($penilaiLevel > 0) {
+                $karyawansQuery->whereHas('jabatan', fn($q) => $q->where('level', '<', $penilaiLevel));
+            }
         }
 
         // Exclude yang sudah dinilai di periode ini
@@ -73,6 +99,9 @@ class PenilaianController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $userKaryawan = $user->karyawan;
         $parameterIds = ParameterSop::active()->pluck('id')->toArray();
 
         $rules = [
@@ -88,6 +117,32 @@ class PenilaianController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        // Validasi: tidak boleh menilai diri sendiri
+        if ($userKaryawan && $validated['karyawan_id'] == $userKaryawan->id) {
+            return back()->with('error', 'Penilai tidak dapat menilai dirinya sendiri.');
+        }
+
+        // Validasi: Kepala Cabang (Kacab) tidak dapat dinilai oleh siapapun
+        $targetKaryawan = Karyawan::with(['jabatan', 'user.role'])->find($validated['karyawan_id']);
+        if ($targetKaryawan?->user?->role?->slug === 'kacab') {
+            return back()->with('error', 'Kepala Cabang tidak dapat dinilai oleh siapapun.');
+        }
+
+        // Validasi aturan lintas divisi dan level atas untuk Supervisor & Manager
+        if (($user->isSupervisor() || $user->isManager()) && $userKaryawan) {
+            $targetKaryawan = Karyawan::with('jabatan')->find($validated['karyawan_id']);
+            $penilaiLevel = $userKaryawan->jabatan?->level ?? 0;
+            $targetLevel = $targetKaryawan?->jabatan?->level ?? 0;
+
+            if ($targetKaryawan && $targetKaryawan->divisi_id == $userKaryawan->divisi_id) {
+                return back()->with('error', 'Penilaian harus dilakukan terhadap karyawan dari divisi lain.');
+            }
+
+            if ($targetLevel >= $penilaiLevel) {
+                return back()->with('error', 'Penilai harus memiliki level jabatan di atas karyawan yang dinilai.');
+            }
+        }
 
         // Cek duplikasi
         $exists = Penilaian::where('karyawan_id', $validated['karyawan_id'])
@@ -123,6 +178,7 @@ class PenilaianController extends Controller
 
     public function show(Penilaian $penilaian): View
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         // Jika pelaksana, hanya boleh melihat penilaian milik dirinya sendiri

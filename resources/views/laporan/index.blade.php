@@ -39,9 +39,11 @@
                 <div class="form-group">
                     <label class="form-label">Divisi</label>
                     <select name="divisi_id" class="form-select">
+                        @if($canViewAll)
                         <option value="">Semua Divisi</option>
+                        @endif
                         @foreach($divisis as $d)
-                        <option value="{{ $d->id }}" {{ request('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
+                        <option value="{{ $d->id }}" {{ (request('divisi_id') == $d->id || (!$canViewAll && auth()->user()->karyawan?->divisi_id == $d->id)) ? 'selected' : '' }}>{{ $d->nama }}</option>
                         @endforeach
                     </select>
                 </div>

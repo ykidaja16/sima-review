@@ -17,7 +17,6 @@ return new class extends Migration
             $table->text('catatan')->nullable();
             $table->date('tanggal_penilaian');
             $table->timestamps();
-            $table->softDeletes();
 
             // Satu karyawan hanya boleh dinilai sekali per periode
             $table->unique(['karyawan_id', 'periode_id']);

@@ -7,6 +7,7 @@ use App\Models\Divisi;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DivisiController extends Controller
@@ -64,14 +65,20 @@ class DivisiController extends Controller
 
     public function destroy(Divisi $divisi): RedirectResponse
     {
-        if ($divisi->karyawans()->count() > 0) {
-            return back()->with('error', "Divisi {$divisi->nama} tidak dapat dihapus karena masih memiliki karyawan.");
+        if ($divisi->karyawans()->exists()) {
+            return back()->with('error', "Divisi {$divisi->nama} tidak dapat dihapus karena masih memiliki data karyawan.");
         }
 
-        AuditLogService::log('DELETE_DIVISI', 'Divisi', $divisi->id, $divisi->toArray(), null);
-        $divisi->delete();
+        try {
+            DB::transaction(function () use ($divisi) {
+                AuditLogService::log('DELETE_DIVISI', 'Divisi', $divisi->id, $divisi->toArray(), null);
+                $divisi->delete();
+            });
 
-        return redirect()->route('master.divisi.index')
-            ->with('success', "Divisi berhasil dihapus.");
+            return redirect()->route('master.divisi.index')
+                ->with('success', "Divisi berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Divisi {$divisi->nama} tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

@@ -151,17 +151,27 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 
-        // Unlink karyawan
-        Karyawan::where('user_id', $user->id)->update(['user_id' => null]);
+        if ($user->penilaians()->exists()) {
+            return back()->with('error', "User '{$user->name}' tidak dapat dihapus karena memiliki riwayat penilaian sebagai evaluator.");
+        }
 
-        AuditLogService::log('DELETE_USER', 'User', $user->id, [
-            'username' => $user->username,
-            'name'     => $user->name,
-        ], null);
+        try {
+            DB::transaction(function () use ($user) {
+                // Unlink karyawan
+                Karyawan::where('user_id', $user->id)->update(['user_id' => null]);
 
-        $user->delete();
+                AuditLogService::log('DELETE_USER', 'User', $user->id, [
+                    'username' => $user->username,
+                    'name'     => $user->name,
+                ], null);
 
-        return redirect()->route('user-management.index')
-            ->with('success', 'User berhasil dihapus.');
+                $user->delete();
+            });
+
+            return redirect()->route('user-management.index')
+                ->with('success', 'User berhasil dihapus.');
+        } catch (\Exception $e) {
+            return back()->with('error', "User tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

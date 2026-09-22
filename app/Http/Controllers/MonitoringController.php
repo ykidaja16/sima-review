@@ -6,6 +6,7 @@ use App\Models\Divisi;
 use App\Models\Karyawan;
 use App\Models\Penilaian;
 use App\Models\PeriodePenilaian;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -17,6 +18,7 @@ class MonitoringController extends Controller
      */
     public function individu(Request $request): View
     {
+        /** @var User $user */
         $user = Auth::user();
         $karyawanId = $request->karyawan_id ?? $user->karyawan?->id;
 
@@ -56,6 +58,7 @@ class MonitoringController extends Controller
      */
     public function tim(Request $request): View
     {
+        /** @var User $user */
         $user      = Auth::user();
         $periodeId = $request->periode_id;
         $periodes  = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
@@ -87,7 +90,7 @@ class MonitoringController extends Controller
             'penilaians' => fn($q) => $q->when(
                 $periodeAktif,
                 fn($p) => $p->where('periode_id', $periodeAktif->id)
-            )->with('kategori'),
+            ),
         ])->orderBy('nama')->get();
 
         $divisis = Divisi::active()->get();
@@ -140,6 +143,7 @@ class MonitoringController extends Controller
         $divisis   = Divisi::active()->get();
 
         $ranking = Karyawan::active()
+            ->whereDoesntHave('user.role', fn($q) => $q->where('slug', 'kacab'))
             ->with(['divisi', 'jabatan'])
             ->withAvg(['penilaians as avg_nilai' => function ($q) use ($periodeId) {
                 if ($periodeId) $q->where('periode_id', $periodeId);

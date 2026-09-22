@@ -44,6 +44,16 @@
                 </select>
             </div>
             <div class="form-group">
+                <label class="form-label">Cabang</label>
+                <select name="cabang_id" class="form-select @error('cabang_id') is-invalid @enderror">
+                    <option value="">-- Pilih Cabang --</option>
+                    @foreach($cabangs as $c)
+                    <option value="{{ $c->id }}" {{ old('cabang_id', $karyawan->cabang_id) == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
+                    @endforeach
+                </select>
+                @error('cabang_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-group">
                 <label class="form-label">Atasan Langsung</label>
                 <select name="atasan_id" class="form-select">
                     <option value="">-- Tidak ada --</option>

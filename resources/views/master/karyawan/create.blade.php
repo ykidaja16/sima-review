@@ -52,6 +52,16 @@
                 @error('jabatan_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">
+                <label class="form-label">Cabang</label>
+                <select name="cabang_id" class="form-select @error('cabang_id') is-invalid @enderror">
+                    <option value="">-- Pilih Cabang --</option>
+                    @foreach($cabangs as $c)
+                    <option value="{{ $c->id }}" {{ old('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
+                    @endforeach
+                </select>
+                @error('cabang_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-group">
                 <label class="form-label">Atasan Langsung</label>
                 <select name="atasan_id" class="form-select">
                     <option value="">-- Tidak ada --</option>
@@ -78,7 +88,7 @@
                     <span class="form-label" style="margin:0;font-size:0.9rem;">Buat akun login untuk karyawan ini</span>
                 </label>
             </div>
-            <div id="akunFields" class="{{ old('buat_akun') ? '' : 'd-none' }}">
+            <div id="akunFields" style="display:{{ old('buat_akun') ? 'block' : 'none' }};">
                 <div class="form-group">
                     <label class="form-label">Username Login *</label>
                     <input type="text" name="username" class="form-control @error('username') is-invalid @enderror"
@@ -114,9 +124,15 @@
 </form>
 
 <script>
-    document.getElementById('buatAkunCheck').addEventListener('change', function() {
-        const fields = document.getElementById('akunFields');
-        fields.style.display = this.checked ? 'block' : 'none';
-    });
+    const buatAkunCheck = document.getElementById('buatAkunCheck');
+    const akunFields    = document.getElementById('akunFields');
+
+    function toggleAkunFields() {
+        akunFields.style.display = buatAkunCheck.checked ? 'block' : 'none';
+    }
+
+    buatAkunCheck.addEventListener('change', toggleAkunFields);
+    // Inisiasi saat load (jika old value checked)
+    toggleAkunFields();
 </script>
 @endsection

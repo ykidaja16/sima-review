@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="page-title">
         <h2>Periode Penilaian</h2>
-        <p>Kelola periode evaluasi dua mingguan</p>
+        <p>Kelola periode evaluasi kinerja karyawan</p>
     </div>
     <a href="{{ route('periode.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Buat Periode Baru

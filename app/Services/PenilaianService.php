@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\AuditLogService;
 use App\Models\KategoriNilai;
 use App\Models\Penilaian;
 use App\Models\PenilaianDetail;
-use App\Services\AuditLogService as ServiceAuditLogService;
+use App\Services\AuditLogService;
 use Illuminate\Support\Facades\DB;
 
 class PenilaianService
@@ -67,7 +66,7 @@ class PenilaianService
                 ]);
             }
 
-            ServiceAuditLogService::log(
+            AuditLogService::log(
                 'CREATE_PENILAIAN', 'Penilaian', $penilaian->id,
                 null, $penilaian->toArray()
             );
@@ -101,7 +100,7 @@ class PenilaianService
                 ]);
             }
 
-            ServiceAuditLogService::log(
+            AuditLogService::log(
                 'UPDATE_PENILAIAN', 'Penilaian', $penilaian->id,
                 $dataLama, $penilaian->fresh()->toArray()
             );

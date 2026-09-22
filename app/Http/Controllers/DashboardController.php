@@ -6,6 +6,7 @@ use App\Models\Divisi;
 use App\Models\Karyawan;
 use App\Models\Penilaian;
 use App\Models\PeriodePenilaian;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -14,10 +15,12 @@ class DashboardController extends Controller
 {
     public function index(): View|RedirectResponse
     {
+        /** @var User $user */
         $user = Auth::user();
 
         return match ($user->role?->slug) {
             'super_admin' => $this->dashboardSuperAdmin(),
+            'kacab'       => $this->dashboardManager(),
             'manager'     => $this->dashboardManager(),
             'supervisor'  => $this->dashboardSupervisor(),
             'pelaksana'   => $this->dashboardPelaksana(),
@@ -51,6 +54,7 @@ class DashboardController extends Controller
             ->get();
 
         $ranking = Karyawan::active()
+            ->whereDoesntHave('user.role', fn($q) => $q->where('slug', 'kacab'))
             ->with(['divisi', 'jabatan'])
             ->withAvg(['penilaians as avg_nilai' => function ($q) use ($periodeAktif) {
                 if ($periodeAktif) $q->where('periode_id', $periodeAktif->id);
@@ -64,40 +68,59 @@ class DashboardController extends Controller
 
     private function dashboardManager(): View
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $karyawan = $user->karyawan;
         $divisiId = $karyawan?->divisi_id;
 
         $periodeAktif = PeriodePenilaian::aktif()->first();
 
+        // Karyawan divisi selain diri sendiri (karena penilai tidak menilai diri sendiri)
+        $karyawanDivisiQuery = Karyawan::active()
+            ->where('divisi_id', $divisiId)
+            ->when($karyawan, fn($q) => $q->where('id', '!=', $karyawan->id));
+
+        $totalKaryawanDivisi = $karyawanDivisiQuery->count();
+
+        $sudahDinilai = Penilaian::whereHas('karyawan', function ($q) use ($divisiId, $karyawan) {
+            $q->where('divisi_id', $divisiId);
+            if ($karyawan) {
+                $q->where('id', '!=', $karyawan->id);
+            }
+        })
+        ->when($periodeAktif, fn($q) => $q->where('periode_id', $periodeAktif->id))
+        ->count();
+
         $stats = [
-            'total_karyawan_divisi' => Karyawan::active()->where('divisi_id', $divisiId)->count(),
-            'sudah_dinilai'         => Penilaian::whereHas('karyawan', fn($q) => $q->where('divisi_id', $divisiId))
-                ->when($periodeAktif, fn($q) => $q->where('periode_id', $periodeAktif->id))
-                ->count(),
-            'belum_dinilai'         => 0,
+            'total_karyawan_divisi' => $totalKaryawanDivisi,
+            'sudah_dinilai'         => $sudahDinilai,
+            'belum_dinilai'         => max(0, $totalKaryawanDivisi - $sudahDinilai),
             'periode_aktif'         => $periodeAktif,
         ];
-        $stats['belum_dinilai'] = $stats['total_karyawan_divisi'] - $stats['sudah_dinilai'];
 
-        $karyawans = Karyawan::active()
-            ->where('divisi_id', $divisiId)
-            ->with(['jabatan', 'penilaians' => fn($q) => $q->when($periodeAktif, fn($p) => $p->where('periode_id', $periodeAktif->id))])
-            ->get();
+        $karyawans = $karyawan
+            ? Karyawan::active()
+                ->where('divisi_id', $divisiId)
+                ->where('id', '!=', $karyawan->id)
+                ->with(['jabatan', 'penilaians' => fn($q) => $q->when($periodeAktif, fn($p) => $p->where('periode_id', $periodeAktif->id))])
+                ->get()
+            : collect();
 
         return view('dashboard.manager', compact('stats', 'karyawans', 'periodeAktif'));
     }
 
     private function dashboardSupervisor(): View
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $karyawan = $user->karyawan;
         $periodeAktif = PeriodePenilaian::aktif()->first();
 
-        // Supervisor menilai bawahans langsung
+        // Supervisor memonitor bawahan langsung (tidak termasuk diri sendiri)
         $bawahans = $karyawan
             ? Karyawan::active()
                 ->where('atasan_id', $karyawan->id)
+                ->where('id', '!=', $karyawan->id)
                 ->with(['jabatan', 'penilaians' => fn($q) => $q->when($periodeAktif, fn($p) => $p->where('periode_id', $periodeAktif->id))])
                 ->get()
             : collect();
@@ -113,6 +136,7 @@ class DashboardController extends Controller
 
     private function dashboardPelaksana(): View
     {
+        /** @var User $user */
         $user = Auth::user();
         $karyawan = $user->karyawan;
 

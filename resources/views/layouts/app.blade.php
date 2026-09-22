@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — SIMA-REVIEW</title>
     <meta name="description" content="@yield('meta_description', 'Sistem Evaluasi Service Excellent')">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,6 +45,10 @@
             --radius: 12px;
             --radius-sm: 8px;
             --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        html, body {
+            overflow-x: hidden;
         }
 
         body {
@@ -224,17 +229,14 @@
         /* ==================== MAIN ==================== */
         .main-wrapper {
             margin-left: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-            min-width: 0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
             transition: var(--transition);
         }
 
         .main-wrapper.sidebar-collapsed {
             margin-left: var(--sidebar-collapsed-width);
-            width: calc(100% - var(--sidebar-collapsed-width));
         }
 
         /* ==================== TOPBAR ==================== */
@@ -615,6 +617,9 @@
         .d-none { display: none !important; }
 
         /* Responsive */
+        @media (max-width: 1200px) {
+            .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.mobile-open { transform: translateX(0); }
@@ -626,6 +631,19 @@
     </style>
 
     @stack('styles')
+
+    {{-- Fix sidebar flash: apply collapsed state before paint --}}
+    <script>
+        (function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-init-collapsed');
+            }
+        })();
+    </script>
+    <style>
+        html.sidebar-init-collapsed .sidebar { width: var(--sidebar-collapsed-width); }
+        html.sidebar-init-collapsed .main-wrapper { margin-left: var(--sidebar-collapsed-width); }
+    </style>
 </head>
 <body>
 
@@ -651,10 +669,10 @@
             </a>
 
             {{-- Penilaian --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','supervisor']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor']))
             <div class="nav-section-title">Penilaian</div>
 
-            @if(auth()->user()->hasRole(['super_admin','manager']))
+            @if(auth()->user()->hasRole(['super_admin','kacab']))
             <a href="{{ route('periode.index') }}"
                class="nav-item {{ request()->routeIs('periode.*') ? 'active' : '' }}"
                data-tooltip="Periode">
@@ -683,7 +701,7 @@
             @endif
 
             {{-- Monitoring --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','supervisor']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor']))
             <div class="nav-section-title">Monitoring</div>
             <a href="{{ route('monitoring.individu') }}"
                class="nav-item {{ request()->routeIs('monitoring.individu') ? 'active' : '' }}"
@@ -697,7 +715,7 @@
                 <i class="bi bi-people-fill"></i>
                 <span>Monitoring Tim</span>
             </a>
-            @if(auth()->user()->hasRole(['super_admin','manager']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab']))
             <a href="{{ route('monitoring.divisi') }}"
                class="nav-item {{ request()->routeIs('monitoring.divisi') ? 'active' : '' }}"
                data-tooltip="Divisi">
@@ -714,18 +732,41 @@
             @endif
 
             {{-- Laporan --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','supervisor']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor']))
             <a href="{{ route('laporan.index') }}"
                class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}"
                data-tooltip="Laporan">
                 <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                <span>Laporan & Export</span>
+                <span>Laporan &amp; Export</span>
             </a>
             @endif
+
+            {{-- Ketidaksesuaian: semua role --}}
+            <div class="nav-section-title">Review</div>
+            <a href="{{ route('ketidaksesuaian.index') }}"
+               class="nav-item {{ request()->routeIs('ketidaksesuaian.*') ? 'active' : '' }}"
+               data-tooltip="FTKP">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>FTKP / Ketidaksesuaian</span>
+            </a>
+
+            {{-- Survei Pelanggan: semua role --}}
+            <a href="{{ route('survei-pelanggan.index') }}"
+               class="nav-item {{ request()->routeIs('survei-pelanggan.*') ? 'active' : '' }}"
+               data-tooltip="Survei">
+                <i class="bi bi-star-half"></i>
+                <span>Survei Pelanggan</span>
+            </a>
 
             {{-- Master Data --}}
             @if(auth()->user()->isSuperAdmin())
             <div class="nav-section-title">Master Data</div>
+            <a href="{{ route('master.cabang.index') }}"
+               class="nav-item {{ request()->routeIs('master.cabang.*') ? 'active' : '' }}"
+               data-tooltip="Cabang">
+                <i class="bi bi-building-fill"></i>
+                <span>Cabang</span>
+            </a>
             <a href="{{ route('master.divisi.index') }}"
                class="nav-item {{ request()->routeIs('master.divisi.*') ? 'active' : '' }}"
                data-tooltip="Divisi">
@@ -755,6 +796,12 @@
                data-tooltip="Kategori Nilai">
                 <i class="bi bi-tags-fill"></i>
                 <span>Kategori Nilai</span>
+            </a>
+            <a href="{{ route('master.jenis-ketidaksesuaian.index') }}"
+               class="nav-item {{ request()->routeIs('master.jenis-ketidaksesuaian.*') ? 'active' : '' }}"
+               data-tooltip="Jenis FTKP">
+                <i class="bi bi-card-checklist"></i>
+                <span>Jenis Ketidaksesuaian</span>
             </a>
 
             <div class="nav-section-title">Administrasi</div>
@@ -868,15 +915,17 @@
 
     <script>
         // Sidebar toggle
-        const sidebar = document.getElementById('sidebar');
+        const sidebar     = document.getElementById('sidebar');
         const mainWrapper = document.getElementById('mainWrapper');
-        const toggleBtn = document.getElementById('sidebarToggle');
+        const toggleBtn   = document.getElementById('sidebarToggle');
 
+        // Init state
         const sidebarState = localStorage.getItem('sidebarCollapsed') === 'true';
         if (sidebarState) {
             sidebar.classList.add('collapsed');
             mainWrapper.classList.add('sidebar-collapsed');
         }
+        document.documentElement.classList.remove('sidebar-init-collapsed');
 
         toggleBtn.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');

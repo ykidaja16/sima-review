@@ -7,6 +7,7 @@ use App\Models\KategoriNilai;
 use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class KategoriNilaiController extends Controller
@@ -64,10 +65,16 @@ class KategoriNilaiController extends Controller
 
     public function destroy(KategoriNilai $kategoriNilai): RedirectResponse
     {
-        AuditLogService::log('DELETE_KATEGORI_NILAI', 'KategoriNilai', $kategoriNilai->id, $kategoriNilai->toArray(), null);
-        $kategoriNilai->delete();
+        try {
+            DB::transaction(function () use ($kategoriNilai) {
+                AuditLogService::log('DELETE_KATEGORI_NILAI', 'KategoriNilai', $kategoriNilai->id, $kategoriNilai->toArray(), null);
+                $kategoriNilai->delete();
+            });
 
-        return redirect()->route('master.kategori-nilai.index')
-            ->with('success', "Kategori nilai berhasil dihapus.");
+            return redirect()->route('master.kategori-nilai.index')
+                ->with('success', "Kategori nilai berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->with('error', "Kategori nilai tidak dapat dihapus karena masih terhubung dengan data lain.");
+        }
     }
 }

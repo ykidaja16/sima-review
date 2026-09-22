@@ -97,12 +97,8 @@
                         <a href="{{ route('monitoring.individu', ['karyawan_id' => $k->id]) }}" class="btn btn-outline btn-sm" title="Track Record">
                             <i class="bi bi-graph-up"></i>
                         </a>
-                        @if(!$p && $periodeAktif && !auth()->user()->isPelaksana())
-                        <a href="{{ route('penilaian.create', ['karyawan_id' => $k->id]) }}" class="btn btn-primary btn-sm" title="Input Penilaian">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        @elseif($p)
-                        <a href="{{ route('penilaian.show', $p) }}" class="btn btn-info btn-sm" title="Detail">
+                        @if($p)
+                        <a href="{{ route('penilaian.show', $p) }}" class="btn btn-info btn-sm" title="Detail Penilaian">
                             <i class="bi bi-eye"></i>
                         </a>
                         @endif

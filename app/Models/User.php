@@ -67,6 +67,11 @@ class User extends Authenticatable
         return $this->role?->slug === 'super_admin';
     }
 
+    public function isKacab(): bool
+    {
+        return $this->role?->slug === 'kacab';
+    }
+
     public function isManager(): bool
     {
         return $this->role?->slug === 'manager';

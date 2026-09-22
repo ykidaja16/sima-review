@@ -14,12 +14,18 @@ class RoleSeeder extends Seeder
                 'nama'      => 'Super Admin',
                 'slug'      => 'super_admin',
                 'deskripsi' => 'Akses penuh ke seluruh sistem termasuk master data dan konfigurasi',
+                'level'     => 5,
+            ],
+            [
+                'nama'      => 'Kepala Cabang',
+                'slug'      => 'kacab',
+                'deskripsi' => 'Kepala Cabang: memantau seluruh aktivitas cabang, verifikasi akhir ketidaksesuaian, dan mengelola periode penilaian',
                 'level'     => 4,
             ],
             [
                 'nama'      => 'Manager',
                 'slug'      => 'manager',
-                'deskripsi' => 'Mengatur periode penilaian dan memantau divisi yang dibawahinya',
+                'deskripsi' => 'Mengatur dan memantau divisi yang dibawahinya, verifikasi tindak lanjut ketidaksesuaian',
                 'level'     => 3,
             ],
             [

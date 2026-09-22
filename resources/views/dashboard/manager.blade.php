@@ -56,7 +56,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($karyawans as $k)
+                @forelse($karyawans as $k)
                 @php $penilaian = $k->penilaians->first(); @endphp
                 <tr>
                     <td>{{ $k->nip }}</td>
@@ -78,17 +78,26 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('monitoring.individu', ['karyawan_id' => $k->id]) }}" class="btn btn-outline btn-sm">
-                            <i class="bi bi-graph-up"></i>
-                        </a>
-                        @if(!$penilaian && $periodeAktif)
-                        <a href="{{ route('penilaian.create', ['karyawan_id' => $k->id]) }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        @endif
+                        <div style="display:flex;gap:4px;">
+                            <a href="{{ route('monitoring.individu', ['karyawan_id' => $k->id]) }}" class="btn btn-outline btn-sm" title="Track Record">
+                                <i class="bi bi-graph-up"></i>
+                            </a>
+                            @if($penilaian)
+                            <a href="{{ route('penilaian.show', $penilaian) }}" class="btn btn-info btn-sm" title="Lihat Detail Penilaian">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            @endif
+                        </div>
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="6" style="text-align:center;padding:28px;color:var(--text-muted);">
+                        <i class="bi bi-people" style="font-size:1.8rem;display:block;margin-bottom:6px;"></i>
+                        Belum ada anggota staf di divisi Anda
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
