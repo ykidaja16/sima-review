@@ -49,7 +49,7 @@ class KaryawanController extends Controller
         $atasans  = Karyawan::active()->orderBy('nama')->get();
         $cabangs  = Cabang::active()->orderBy('nama')->get();
 
-        $roles = Role::whereIn('slug', ['pelaksana', 'supervisor', 'manager', 'kacab'])->orderByDesc('level')->get();
+        $roles = Role::where('slug', '!=', 'super_admin')->orderByDesc('level')->get();
         return view('master.karyawan.create', compact('divisis', 'jabatans', 'atasans', 'roles', 'cabangs'));
     }
 
