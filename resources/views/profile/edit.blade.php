@@ -52,7 +52,7 @@
                         <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:8px;">
                             <i class="bi bi-info-circle-fill" style="color:#3b82f6;margin-right:4px;"></i>Data Kepegawaian
                         </div>
-                        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:10px;font-size:0.85rem;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;font-size:0.85rem;">
                             <div>
                                 <span style="color:var(--text-muted);display:block;font-size:0.75rem;">NIP</span>
                                 <strong>{{ $user->karyawan->nip ?: '—' }}</strong>

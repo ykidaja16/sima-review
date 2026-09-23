@@ -31,6 +31,26 @@
     border-left: 1px solid var(--border);
     align-items: center;
 }
+@media (max-width: 640px) {
+    .param-row, .param-header-grid {
+        grid-template-columns: 1fr 160px;
+    }
+    .skor-grid {
+        grid-template-columns: repeat(4, 40px);
+    }
+}
+@media (max-width: 420px) {
+    .param-row, .param-header-grid {
+        grid-template-columns: 1fr 140px;
+    }
+    .skor-grid {
+        grid-template-columns: repeat(4, 35px);
+    }
+    .skor-grid input[type="radio"] {
+        width: 16px;
+        height: 16px;
+    }
+}
 </style>
 @endpush
 

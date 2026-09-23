@@ -1,6 +1,52 @@
 @extends('layouts.app')
 @section('title', 'Ranking Karyawan')
 
+@push('styles')
+<style>
+.podium-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding: 20px;
+    width: 100%;
+}
+@media (max-width: 640px) {
+    .podium-wrapper {
+        gap: 6px;
+        padding: 12px 2px;
+        margin-bottom: 16px;
+    }
+    .podium-col {
+        max-width: none !important;
+        flex: 1 1 0 !important;
+        padding: 0 2px;
+    }
+    .podium-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 15px !important;
+    }
+    .podium-first .podium-avatar {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 18px !important;
+    }
+    .podium-name {
+        font-size: 0.75rem !important;
+        word-break: break-word;
+    }
+    .podium-divisi {
+        font-size: 0.65rem !important;
+    }
+    .podium-score {
+        font-size: 1.25rem !important;
+    }
+}
+</style>
+@endpush
+
 @section('content')
 <div class="page-header">
     <div class="page-title">
@@ -37,40 +83,40 @@
 
 {{-- Top 3 Podium --}}
 @if($ranking->count() >= 3)
-<div style="display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:20px;">
+<div class="podium-wrapper">
     {{-- 2nd --}}
     @php $second = $ranking->get(1); @endphp
-    <div style="text-align:center;flex:1;max-width:200px;">
-        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#94a3b8,#64748b);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;margin:0 auto 8px;">
+    <div class="podium-col" style="text-align:center;flex:1;max-width:200px;">
+        <div class="podium-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#94a3b8,#64748b);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;margin:0 auto 8px;">
             {{ substr($second->nama, 0, 1) }}
         </div>
-        <div style="font-weight:700;font-size:0.9rem;">{{ $second->nama }}</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);">{{ $second->divisi->nama ?? '-' }}</div>
-        <div style="font-size:1.6rem;font-weight:800;color:#64748b;margin:4px 0;">{{ number_format($second->avg_nilai ?? 0, 1) }}</div>
+        <div class="podium-name" style="font-weight:700;font-size:0.9rem;">{{ $second->nama }}</div>
+        <div class="podium-divisi" style="font-size:0.75rem;color:var(--text-muted);">{{ $second->divisi->nama ?? '-' }}</div>
+        <div class="podium-score" style="font-size:1.6rem;font-weight:800;color:#64748b;margin:4px 0;">{{ number_format($second->avg_nilai ?? 0, 1) }}</div>
         <div style="background:linear-gradient(135deg,#94a3b8,#64748b);padding:20px 0 8px;border-radius:8px 8px 0 0;color:white;font-weight:700;font-size:1.2rem;">🥈</div>
     </div>
 
     {{-- 1st --}}
     @php $first = $ranking->get(0); @endphp
-    <div style="text-align:center;flex:1;max-width:220px;transform:scale(1.05);">
-        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;margin:0 auto 8px;box-shadow:0 8px 24px rgba(245,158,11,0.4);">
+    <div class="podium-col podium-first" style="text-align:center;flex:1;max-width:220px;transform:scale(1.05);">
+        <div class="podium-avatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;margin:0 auto 8px;box-shadow:0 8px 24px rgba(245,158,11,0.4);">
             {{ substr($first->nama, 0, 1) }}
         </div>
-        <div style="font-weight:700;font-size:1rem;">{{ $first->nama }}</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);">{{ $first->divisi->nama ?? '-' }}</div>
-        <div style="font-size:2rem;font-weight:800;color:#d97706;margin:4px 0;">{{ number_format($first->avg_nilai ?? 0, 1) }}</div>
+        <div class="podium-name" style="font-weight:700;font-size:1rem;">{{ $first->nama }}</div>
+        <div class="podium-divisi" style="font-size:0.75rem;color:var(--text-muted);">{{ $first->divisi->nama ?? '-' }}</div>
+        <div class="podium-score" style="font-size:2rem;font-weight:800;color:#d97706;margin:4px 0;">{{ number_format($first->avg_nilai ?? 0, 1) }}</div>
         <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:32px 0 8px;border-radius:8px 8px 0 0;color:white;font-weight:700;font-size:1.5rem;">🥇</div>
     </div>
 
     {{-- 3rd --}}
     @php $third = $ranking->get(2); @endphp
-    <div style="text-align:center;flex:1;max-width:200px;">
-        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#92400e,#d97706);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;margin:0 auto 8px;">
+    <div class="podium-col" style="text-align:center;flex:1;max-width:200px;">
+        <div class="podium-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#92400e,#d97706);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:white;margin:0 auto 8px;">
             {{ substr($third->nama, 0, 1) }}
         </div>
-        <div style="font-weight:700;font-size:0.9rem;">{{ $third->nama }}</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);">{{ $third->divisi->nama ?? '-' }}</div>
-        <div style="font-size:1.6rem;font-weight:800;color:#92400e;margin:4px 0;">{{ number_format($third->avg_nilai ?? 0, 1) }}</div>
+        <div class="podium-name" style="font-weight:700;font-size:0.9rem;">{{ $third->nama }}</div>
+        <div class="podium-divisi" style="font-size:0.75rem;color:var(--text-muted);">{{ $third->divisi->nama ?? '-' }}</div>
+        <div class="podium-score" style="font-size:1.6rem;font-weight:800;color:#92400e;margin:4px 0;">{{ number_format($third->avg_nilai ?? 0, 1) }}</div>
         <div style="background:linear-gradient(135deg,#92400e,#b45309);padding:12px 0 8px;border-radius:8px 8px 0 0;color:white;font-weight:700;font-size:1.2rem;">🥉</div>
     </div>
 </div>
