@@ -15,6 +15,7 @@ use App\Http\Controllers\Master\ParameterSopController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PeriodePenilaianController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SurveiPelangganController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -117,4 +118,8 @@ Route::middleware('auth')->group(function () {
 
     // ---- Survei Pelanggan (Semua role yang login) ----
     Route::get('/survei-pelanggan', [SurveiPelangganController::class, 'index'])->name('survei-pelanggan.index');
+
+    // ---- Update Data Diri & Akun (Semua role yang login) ----
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });

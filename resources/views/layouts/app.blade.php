@@ -819,15 +819,25 @@
             </a>
             @endif
 
+            {{-- Pengaturan Akun Saya (Semua Role) --}}
+            <div class="nav-section-title">Akun</div>
+            <a href="{{ route('profile.edit') }}"
+               class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}"
+               data-tooltip="Update Data Diri">
+                <i class="bi bi-person-gear"></i>
+                <span>Update Data Diri</span>
+            </a>
+
         </nav>
 
-        <div class="sidebar-user">
+        <a href="{{ route('profile.edit') }}" class="sidebar-user" title="Update Data Diri" style="text-decoration:none;color:inherit;cursor:pointer;">
             <div class="user-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
             <div class="user-info">
                 <div class="name">{{ auth()->user()->name }}</div>
                 <div class="role">{{ auth()->user()->role_label }}</div>
             </div>
-        </div>
+            <i class="bi bi-pencil-square" style="color:rgba(255,255,255,0.4);margin-left:auto;font-size:0.85rem;" title="Edit Data Diri"></i>
+        </a>
     </aside>
 
     <!-- ==================== MAIN WRAPPER ==================== -->
@@ -850,17 +860,19 @@
             <div class="topbar-actions">
                 <div class="topbar-divider"></div>
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <div class="user-avatar" style="width:32px;height:32px;font-size:12px;">
-                        {{ substr(auth()->user()->name, 0, 1) }}
-                    </div>
-                    <div>
-                        <div class="topbar-user">
-                            <div>
-                                <div class="name">{{ auth()->user()->name }}</div>
-                            </div>
-                            <span class="role-badge">{{ auth()->user()->role_label }}</span>
+                    <a href="{{ route('profile.edit') }}" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; cursor:pointer;" title="Update Data Diri">
+                        <div class="user-avatar" style="width:32px;height:32px;font-size:12px;">
+                            {{ substr(auth()->user()->name, 0, 1) }}
                         </div>
-                    </div>
+                        <div>
+                            <div class="topbar-user">
+                                <div>
+                                    <div class="name">{{ auth()->user()->name }}</div>
+                                </div>
+                                <span class="role-badge">{{ auth()->user()->role_label }}</span>
+                            </div>
+                        </div>
+                    </a>
                     <form action="{{ route('logout') }}" method="POST" class="logout-form">
                         @csrf
                         <button type="submit" class="topbar-btn" title="Logout">
