@@ -15,7 +15,7 @@
         <div class="card-header"><h5>Informasi Karyawan</h5></div>
         <div class="card-body">
             <table style="width:100%;border-collapse:collapse;">
-                <tr><td style="padding:6px 0;color:var(--text-muted);width:40%;">NIP</td><td style="font-weight:600;">{{ $karyawan->nip }}</td></tr>
+                <tr><td style="padding:6px 0;color:var(--text-muted);width:40%;">NIP</td><td style="font-weight:600;">{{ $karyawan->nip ?: '—' }}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--text-muted);">Nama</td><td style="font-weight:600;">{{ $karyawan->nama }}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--text-muted);">Email</td><td>{{ $karyawan->email ?? '—' }}</td></tr>
                 <tr><td style="padding:6px 0;color:var(--text-muted);">No. HP</td><td>{{ $karyawan->no_hp ?? '—' }}</td></tr>

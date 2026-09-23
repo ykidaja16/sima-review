@@ -56,7 +56,7 @@ class KaryawanController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'nip'        => ['required', 'string', 'max:30', 'unique:karyawans,nip'],
+            'nip'        => ['nullable', 'string', 'max:30', 'unique:karyawans,nip'],
             'nama'       => ['required', 'string', 'max:150'],
             'email'      => ['nullable', 'email', 'max:150', 'unique:karyawans,email'],
             'no_hp'      => ['nullable', 'string', 'max:20', 'unique:karyawans,no_hp'],
@@ -93,7 +93,7 @@ class KaryawanController extends Controller
 
             $karyawan = Karyawan::create([
                 'user_id'    => $userId,
-                'nip'        => $validated['nip'],
+                'nip'        => !empty($validated['nip']) ? $validated['nip'] : null,
                 'nama'       => $validated['nama'],
                 'email'      => $validated['email'] ?? null,
                 'no_hp'      => $validated['no_hp'] ?? null,
@@ -130,7 +130,7 @@ class KaryawanController extends Controller
     public function update(Request $request, Karyawan $karyawan): RedirectResponse
     {
         $validated = $request->validate([
-            'nip'        => ['required', 'string', 'max:30', 'unique:karyawans,nip,' . $karyawan->id],
+            'nip'        => ['nullable', 'string', 'max:30', 'unique:karyawans,nip,' . $karyawan->id],
             'nama'       => ['required', 'string', 'max:150'],
             'email'      => ['nullable', 'email', 'max:150', 'unique:karyawans,email,' . $karyawan->id],
             'no_hp'      => ['nullable', 'string', 'max:20', 'unique:karyawans,no_hp,' . $karyawan->id],
@@ -143,6 +143,8 @@ class KaryawanController extends Controller
             'email.unique' => 'Email ini sudah digunakan oleh karyawan lain.',
             'no_hp.unique' => 'Nomor HP ini sudah digunakan oleh karyawan lain.',
         ]);
+
+        $validated['nip'] = !empty($validated['nip']) ? $validated['nip'] : null;
 
         $dataLama = $karyawan->toArray();
         $karyawan->update($validated);

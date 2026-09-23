@@ -77,6 +77,6 @@ class Karyawan extends Model
 
     public function getNamaLengkapAttribute(): string
     {
-        return $this->nip . ' - ' . $this->nama;
+        return $this->nip ? ($this->nip . ' - ' . $this->nama) : $this->nama;
     }
 }

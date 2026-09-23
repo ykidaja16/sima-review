@@ -11,8 +11,8 @@
         <form action="{{ route('master.karyawan.update', $karyawan) }}" method="POST">
             @csrf @method('PUT')
             <div class="form-group">
-                <label class="form-label">NIP *</label>
-                <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror" value="{{ old('nip', $karyawan->nip) }}" required>
+                <label class="form-label">NIP <span style="font-weight:400;color:var(--text-muted);font-size:0.8rem;">(Opsional - kosongkan jika bukan karyawan tetap)</span></label>
+                <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror" value="{{ old('nip', $karyawan->nip) }}" placeholder="Kosongkan jika bukan karyawan tetap">
                 @error('nip')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">

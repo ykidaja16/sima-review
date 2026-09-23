@@ -48,7 +48,7 @@
                 @forelse($karyawans as $k)
                 <tr>
                     <td>{{ $karyawans->firstItem() + $loop->index }}</td>
-                    <td style="font-family:monospace;">{{ $k->nip }}</td>
+                    <td style="font-family:monospace;">{{ $k->nip ?: '—' }}</td>
                     <td style="font-weight:600;">{{ $k->nama }}</td>
                     <td>{{ $k->jabatan->nama ?? '—' }}</td>
                     <td>{{ $k->divisi->nama ?? '—' }}</td>

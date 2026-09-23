@@ -24,7 +24,7 @@
                     <option value="">-- Tidak ditautkan ke karyawan --</option>
                     @foreach($karyawansTanpaAkun as $k)
                     <option value="{{ $k->id }}" {{ old('karyawan_id') == $k->id ? 'selected' : '' }}>
-                        {{ $k->nip }} — {{ $k->nama }} ({{ $k->jabatan->nama ?? '-' }} / {{ $k->divisi->nama ?? '-' }})
+                        {{ $k->nip ? ($k->nip . ' — ') : '' }}{{ $k->nama }} ({{ $k->jabatan->nama ?? '-' }} / {{ $k->divisi->nama ?? '-' }})
                     </option>
                     @endforeach
                 </select>

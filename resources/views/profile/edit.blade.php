@@ -55,7 +55,7 @@
                         <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:10px;font-size:0.85rem;">
                             <div>
                                 <span style="color:var(--text-muted);display:block;font-size:0.75rem;">NIP</span>
-                                <strong>{{ $user->karyawan->nip }}</strong>
+                                <strong>{{ $user->karyawan->nip ?: '—' }}</strong>
                             </div>
                             <div>
                                 <span style="color:var(--text-muted);display:block;font-size:0.75rem;">Divisi</span>
