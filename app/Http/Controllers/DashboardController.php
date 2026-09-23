@@ -24,6 +24,7 @@ class DashboardController extends Controller
             'manager'     => $this->dashboardManager(),
             'supervisor'  => $this->dashboardSupervisor(),
             'pelaksana'   => $this->dashboardPelaksana(),
+            'mutu'        => $this->dashboardSuperAdmin(),
             default       => abort(403),
         };
     }

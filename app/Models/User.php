@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->role?->slug === 'pelaksana';
     }
 
+    public function isMutu(): bool
+    {
+        return $this->role?->slug === 'mutu';
+    }
+
     /**
      * Cek apakah user memiliki salah satu dari role yang diberikan (by slug).
      */

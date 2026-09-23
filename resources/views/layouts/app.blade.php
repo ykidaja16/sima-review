@@ -701,7 +701,7 @@
             @endif
 
             {{-- Monitoring --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor','mutu']))
             <div class="nav-section-title">Monitoring</div>
             <a href="{{ route('monitoring.individu') }}"
                class="nav-item {{ request()->routeIs('monitoring.individu') ? 'active' : '' }}"
@@ -715,7 +715,7 @@
                 <i class="bi bi-people-fill"></i>
                 <span>Monitoring Tim</span>
             </a>
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab','mutu']))
             <a href="{{ route('monitoring.divisi') }}"
                class="nav-item {{ request()->routeIs('monitoring.divisi') ? 'active' : '' }}"
                data-tooltip="Divisi">
@@ -732,7 +732,7 @@
             @endif
 
             {{-- Laporan --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor']))
+            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor','mutu']))
             <a href="{{ route('laporan.index') }}"
                class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}"
                data-tooltip="Laporan">

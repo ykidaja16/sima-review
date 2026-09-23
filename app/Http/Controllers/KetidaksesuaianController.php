@@ -20,21 +20,17 @@ class KetidaksesuaianController extends Controller
 {
     /**
      * Cek apakah user bisa melihat semua tiket.
-     * Kacab, Super Admin, dan divisi yang mengandung kata "Mutu" bisa lihat semua.
+     * Kacab, Super Admin, dan Role Mutu bisa lihat semua.
      */
     private function canViewAll(): bool
     {
         /** @var User $user */
         $user = Auth::user();
-        if ($user->hasRole(['super_admin', 'kacab'])) {
-            return true;
+        if (!$user) {
+            return false;
         }
-        // Cek apakah karyawan dari divisi "Mutu"
-        $karyawan = Karyawan::where('user_id', $user->id)->first();
-        if ($karyawan && $karyawan->divisi && str_contains(strtolower($karyawan->divisi->nama), 'mutu')) {
-            return true;
-        }
-        return false;
+
+        return $user->hasRole(['super_admin', 'kacab', 'mutu']) || $user->isMutu();
     }
 
     public function index(): View

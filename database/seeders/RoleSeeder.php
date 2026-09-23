@@ -40,6 +40,12 @@ class RoleSeeder extends Seeder
                 'deskripsi' => 'Karyawan yang dinilai, hanya dapat melihat data penilaian miliknya sendiri',
                 'level'     => 1,
             ],
+            [
+                'nama'      => 'Mutu',
+                'slug'      => 'mutu',
+                'deskripsi' => 'Pengendali Mutu: monitoring kualitas layanan, tindak lanjut ketidaksesuaian, dan akses laporan seluruh divisi',
+                'level'     => 3,
+            ],
         ];
 
         foreach ($roles as $role) {

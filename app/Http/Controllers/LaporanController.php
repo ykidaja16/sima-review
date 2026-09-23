@@ -17,7 +17,7 @@ class LaporanController extends Controller
 {
     /**
      * Cek apakah user berhak melihat semua divisi pada laporan & export.
-     * Super Admin, Kacab, dan divisi/role yang mengandung kata "Mutu" bisa melihat semua divisi.
+     * Super Admin, Kacab, dan Role Mutu bisa melihat semua divisi.
      */
     private function canViewAllDivisi(): bool
     {
@@ -27,22 +27,7 @@ class LaporanController extends Controller
             return false;
         }
 
-        if ($user->hasRole(['super_admin', 'kacab'])) {
-            return true;
-        }
-
-        // Cek apakah karyawan dari divisi yang mengandung kata "Mutu"
-        $karyawan = $user->karyawan;
-        if ($karyawan && $karyawan->divisi && str_contains(mb_strtolower($karyawan->divisi->nama), 'mutu')) {
-            return true;
-        }
-
-        // Cek apakah user memiliki role yang mengandung kata "Mutu"
-        if ($user->role && (str_contains(mb_strtolower($user->role->slug), 'mutu') || str_contains(mb_strtolower($user->role->nama), 'mutu'))) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole(['super_admin', 'kacab', 'mutu']) || $user->isMutu();
     }
 
     private function buildQuery(Request $request)

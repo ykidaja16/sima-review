@@ -89,16 +89,16 @@ Route::middleware('auth')->group(function () {
             ->middleware('pelaksana.access')
             ->name('individu');
 
-        // Tim, Divisi, Ranking: khusus manager ke atas
-        Route::middleware('role:super_admin,manager,kacab,supervisor')->group(function () {
+        // Tim, Divisi, Ranking: khusus manager ke atas & mutu
+        Route::middleware('role:super_admin,manager,kacab,supervisor,mutu')->group(function () {
             Route::get('/tim', [MonitoringController::class, 'tim'])->name('tim');
             Route::get('/divisi', [MonitoringController::class, 'divisi'])->name('divisi');
             Route::get('/ranking', [MonitoringController::class, 'ranking'])->name('ranking');
         });
     });
 
-    // ---- Laporan (Super Admin, Manager, Kacab, Supervisor) ----
-    Route::middleware('role:super_admin,manager,kacab,supervisor')->prefix('laporan')->name('laporan.')->group(function () {
+    // ---- Laporan (Super Admin, Manager, Kacab, Supervisor, Mutu) ----
+    Route::middleware('role:super_admin,manager,kacab,supervisor,mutu')->prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [LaporanController::class, 'index'])->name('index');
         Route::get('/export-excel', [LaporanController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export-pdf', [LaporanController::class, 'exportPdf'])->name('export-pdf');
