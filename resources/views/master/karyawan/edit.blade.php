@@ -58,9 +58,12 @@
                 <select name="atasan_id" class="form-select">
                     <option value="">-- Tidak ada --</option>
                     @foreach($atasans as $a)
-                    <option value="{{ $a->id }}" {{ old('atasan_id', $karyawan->atasan_id) == $a->id ? 'selected' : '' }}>{{ $a->nip }} — {{ $a->nama }}</option>
+                    <option value="{{ $a->id }}" {{ old('atasan_id', $karyawan->atasan_id) == $a->id ? 'selected' : '' }}>
+                        {{ $a->nip ? ($a->nip . ' — ') : '' }}{{ $a->nama }} ({{ $a->jabatan->nama ?? '-' }})
+                    </option>
                     @endforeach
                 </select>
+                <small style="color:var(--text-muted);font-size:0.75rem;">Hanya menampilkan karyawan level Supervisor ke atas.</small>
             </div>
             <div class="form-group">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">

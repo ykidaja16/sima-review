@@ -46,7 +46,7 @@ class KaryawanController extends Controller
     {
         $divisis  = Divisi::active()->orderBy('nama')->get();
         $jabatans = Jabatan::active()->orderBy('nama')->get();
-        $atasans  = Karyawan::active()->orderBy('nama')->get();
+        $atasans  = Karyawan::calonAtasan()->with('jabatan')->orderBy('nama')->get();
         $cabangs  = Cabang::active()->orderBy('nama')->get();
 
         $roles = Role::where('slug', '!=', 'super_admin')->orderByDesc('level')->get();
@@ -121,7 +121,7 @@ class KaryawanController extends Controller
     {
         $divisis  = Divisi::active()->orderBy('nama')->get();
         $jabatans = Jabatan::active()->orderBy('nama')->get();
-        $atasans  = Karyawan::active()->where('id', '!=', $karyawan->id)->orderBy('nama')->get();
+        $atasans  = Karyawan::calonAtasan($karyawan->id, $karyawan->atasan_id)->with('jabatan')->orderBy('nama')->get();
         $cabangs  = Cabang::active()->orderBy('nama')->get();
 
         return view('master.karyawan.edit', compact('karyawan', 'divisis', 'jabatans', 'atasans', 'cabangs'));

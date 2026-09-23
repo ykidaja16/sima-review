@@ -73,6 +73,22 @@ class Karyawan extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeCalonAtasan($query, ?int $excludeId = null, ?int $includeId = null)
+    {
+        return $query->where('is_active', true)
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->where(function ($q) use ($includeId) {
+                $q->where(function ($sub) {
+                    $sub->whereHas('jabatan', fn($j) => $j->where('level', '>=', 3))
+                        ->orWhereHas('user.role', fn($r) => $r->whereIn('slug', ['supervisor', 'manager', 'kacab', 'super_admin'])->orWhere('level', '>=', 2));
+                });
+
+                if ($includeId) {
+                    $q->orWhere('id', $includeId);
+                }
+            });
+    }
+
     // ---- Accessors ----
 
     public function getNamaLengkapAttribute(): string
