@@ -23,7 +23,7 @@
                 <div style="background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:0.875rem;">
                     <i class="bi bi-check-circle-fill" style="color:#059669;"></i>
                     Saat ini terhubung ke: <strong>{{ $user->karyawan->nama }}</strong>
-                    ({{ $user->karyawan->nip }})
+                    {{ $user->karyawan->nip ? '(' . $user->karyawan->nip . ')' : '' }}
                 </div>
                 @endif
                 <select name="karyawan_id" class="form-select">
@@ -31,7 +31,7 @@
                     @foreach($karyawansTanpaAkun as $k)
                     <option value="{{ $k->id }}"
                         {{ old('karyawan_id', $user->karyawan?->id) == $k->id ? 'selected' : '' }}>
-                        {{ $k->nip }} — {{ $k->nama }} ({{ $k->jabatan->nama ?? '-' }} / {{ $k->divisi->nama ?? '-' }})
+                        {{ $k->nip ? ($k->nip . ' — ') : '' }}{{ $k->nama }} ({{ $k->jabatan->nama ?? '-' }} / {{ $k->divisi->nama ?? '-' }})
                     </option>
                     @endforeach
                 </select>

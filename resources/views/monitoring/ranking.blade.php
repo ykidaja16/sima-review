@@ -99,7 +99,7 @@
                     </td>
                     <td>
                         <div style="font-weight:600;">{{ $k->nama }}</div>
-                        <div style="font-size:0.75rem;color:var(--text-muted);">{{ $k->nip }}</div>
+                        @if($k->nip)<div style="font-size:0.75rem;color:var(--text-muted);">{{ $k->nip }}</div>@endif
                     </td>
                     <td>{{ $k->divisi->nama ?? '—' }}</td>
                     <td>{{ $k->jabatan->nama ?? '—' }}</td>

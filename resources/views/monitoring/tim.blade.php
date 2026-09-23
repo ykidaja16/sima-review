@@ -66,7 +66,7 @@
                     <td>{{ $i + 1 }}</td>
                     <td>
                         <div style="font-weight:600;">{{ $k->nama }}</div>
-                        <div style="font-size:0.75rem;color:var(--text-muted);">{{ $k->nip }}</div>
+                        @if($k->nip)<div style="font-size:0.75rem;color:var(--text-muted);">{{ $k->nip }}</div>@endif
                     </td>
                     <td>
                         <div style="font-size:0.85rem;">{{ $k->divisi->nama ?? '-' }}</div>
