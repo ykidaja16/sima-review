@@ -57,7 +57,7 @@
             <div>
                 @php
                     $avg = $penilaians->avg('nilai_akhir');
-                    $avgColorClass = $avg>=88 ? 'text-score-success' : ($avg>=63 ? 'text-score-primary' : ($avg>=38 ? 'text-score-warning' : 'text-score-danger'));
+                    $avgColorClass = $avg>=90 ? 'text-score-success' : ($avg>=75 ? 'text-score-primary' : ($avg>=60 ? 'text-score-warning' : 'text-score-danger'));
                 @endphp
                 <div class="{{ $avgColorClass }}" style="font-size:1.8rem;font-weight:800;">
                     {{ $avg ? number_format($avg, 2) : '—' }}

@@ -77,9 +77,9 @@
 
 {{-- Detail per Parameter --}}
 <div class="card">
-    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
-        <h5><i class="bi bi-list-check" style="color:#0284c7;margin-right:6px;"></i>Rincian Nilai per Indikator SOP</h5>
-        <div style="display:flex;gap:6px;font-size:0.75rem;">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <h5><i class="bi bi-list-check" style="color:#0284c7;margin-right:6px;"></i>Instrumen Penilaian Service Excellence</h5>
+        <div style="display:flex;gap:6px;font-size:0.75rem;flex-wrap:wrap;">
             <span class="badge badge-success">4 = Sangat Baik</span>
             <span class="badge badge-primary">3 = Baik</span>
             <span class="badge badge-warning">2 = Cukup</span>
@@ -89,9 +89,14 @@
     <div class="card-body" style="padding:0;">
         @php $grouped = $penilaian->details->groupBy(fn($d) => $d->parameter?->kategori ?? 'Lainnya'); @endphp
         @foreach($grouped as $kategori => $details)
-        <div style="padding:10px 20px;background:#f8fafc;border-bottom:1px solid var(--border);border-top:1px solid var(--border);font-size:0.8rem;font-weight:700;color:var(--text);display:flex;justify-content:space-between;">
+        <div style="padding:10px 20px;background:#f8fafc;border-bottom:1px solid var(--border);border-top:1px solid var(--border);font-size:0.82rem;font-weight:700;color:var(--text);display:flex;justify-content:space-between;">
             <span><i class="bi bi-folder2-open" style="color:var(--primary);margin-right:6px;"></i>{{ $kategori }}</span>
             <span style="color:var(--text-muted);font-weight:600;font-size:0.75rem;">{{ $details->count() }} Indikator</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 180px 260px;gap:16px;padding:8px 20px;background:#f1f5f9;border-bottom:1px solid var(--border);font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+            <div>DIMENSI &amp; INDIKATOR PENILAIAN</div>
+            <div style="text-align:center;">SKOR (1–4)</div>
+            <div>CATATAN PENGAMATAN</div>
         </div>
         @foreach($details as $detail)
         @php
@@ -109,23 +114,27 @@
                 default => 'Kurang Baik',
             };
         @endphp
-        <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 200px;gap:16px;align-items:center;">
+        <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 180px 260px;gap:16px;align-items:center;">
             <div>
-                <div style="font-weight:500;font-size:0.875rem;color:var(--text);">{{ $detail->parameter?->nama ?? 'Parameter ' . $detail->parameter_id }}</div>
+                <div style="font-weight:600;font-size:0.875rem;color:var(--text);line-height:1.45;">{{ $detail->parameter?->nama ?? 'Indikator ' . $detail->parameter_id }}</div>
                 @if($detail->parameter?->deskripsi)
-                <div style="font-size:0.73rem;color:var(--text-muted);margin-top:2px;">{{ $detail->parameter->deskripsi }}</div>
-                @endif
-                @if($detail->catatan)
-                <div style="font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:4px;">Catatan: {{ $detail->catatan }}</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">{{ $detail->parameter->deskripsi }}</div>
                 @endif
             </div>
-            <div style="text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:10px;">
-                <span class="badge badge-{{ $badgeColor }}" style="padding:4px 10px;border-radius:12px;font-size:0.8rem;">
+            <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <span class="badge badge-{{ $badgeColor }}" style="padding:4px 12px;border-radius:12px;font-size:0.82rem;font-weight:700;">
                     Skor: {{ $skor }} / 4
                 </span>
-                <span class="text-score-{{ $badgeColor }}" style="font-size:0.8rem;font-weight:600;">
+                <span class="text-score-{{ $badgeColor }}" style="font-size:0.78rem;font-weight:600;">
                     {{ $skorLabel }}
                 </span>
+            </div>
+            <div style="font-size:0.82rem;background:#f8fafc;padding:8px 12px;border-radius:6px;border:1px solid var(--border);min-height:38px;display:flex;align-items:center;">
+                @if($detail->catatan)
+                    <span style="color:var(--text);"><i class="bi bi-chat-left-dots-fill" style="color:var(--primary);margin-right:6px;"></i>{{ $detail->catatan }}</span>
+                @else
+                    <span style="color:var(--text-muted);font-style:italic;">—</span>
+                @endif
             </div>
         </div>
         @endforeach

@@ -22,7 +22,7 @@
         </div>
         <div style="text-align:right;">
             <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:2px;">Rata-rata Semua Periode</div>
-            @php $avgClass = $rataRata>=88 ? 'text-score-success' : ($rataRata>=63 ? 'text-score-primary' : ($rataRata>=38 ? 'text-score-warning' : 'text-score-danger')); @endphp
+            @php $avgClass = $rataRata>=90 ? 'text-score-success' : ($rataRata>=75 ? 'text-score-primary' : ($rataRata>=60 ? 'text-score-warning' : 'text-score-danger')); @endphp
             <div class="{{ $avgClass }}" style="font-size:2rem;font-weight:800;">
                 {{ $rataRata ? number_format($rataRata, 2) : '—' }}
             </div>

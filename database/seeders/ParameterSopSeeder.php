@@ -4,187 +4,162 @@ namespace Database\Seeders;
 
 use App\Models\ParameterSop;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ParameterSopSeeder extends Seeder
 {
     /**
-     * Parameter sesuai formulir penilaian praktek diklat Service Excellence.
+     * Instrumen Penilaian Pelayanan Service Excellence.
      * Skor: 4 = Sangat Baik, 3 = Baik, 2 = Cukup, 1 = Kurang Baik.
-     * Semua parameter berbobot 1 (setara) kecuali disebutkan lain.
      */
     public function run(): void
     {
-        // Hapus data lama secara aman (FK constraint aware)
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         ParameterSop::truncate();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $parameters = [
             // ===================================================
-            // I. ATTITUDE
+            // I. DIMENSI ATTITUDE & EMOTIONAL INTELLIGENCE (SIKAP)
             // ===================================================
 
-            // 1. Komponen Pengetahuan
+            // 1. Cognitive Component (Aspek Pengetahuan Standar Layanan)
             [
-                'kategori' => 'I. Attitude — Komponen Pengetahuan',
-                'nama'     => 'Peserta memahami prinsip dasar Service Excellence',
-                'deskripsi'=> 'Wawancara: pemahaman prinsip dasar service excellence',
-                'bobot'    => 2, 'urutan' => 101,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 1. Cognitive Component',
+                'nama'     => 'a. Menunjukkan pemahaman regulasi pelayanan melalui Nilai Post-Test.',
+                'deskripsi'=> 'Aspek Pengetahuan Standar Layanan',
+                'bobot'    => 1, 'urutan' => 101, 'is_active' => true,
             ],
             [
-                'kategori' => 'I. Attitude — Komponen Pengetahuan',
-                'nama'     => 'Dapat menyebutkan langkah-langkah pelayanan prima',
-                'deskripsi'=> 'Wawancara: kemampuan menyebutkan langkah pelayanan',
-                'bobot'    => 2, 'urutan' => 102,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 1. Cognitive Component',
+                'nama'     => 'b. Mampu menjelaskan esensi Service Excellence bagi reputasi organisasi.',
+                'deskripsi'=> 'Aspek Pengetahuan Standar Layanan',
+                'bobot'    => 1, 'urutan' => 102, 'is_active' => true,
             ],
             [
-                'kategori' => 'I. Attitude — Komponen Pengetahuan',
-                'nama'     => 'Mengetahui pentingnya empati dan komunikasi dalam pelayanan',
-                'deskripsi'=> 'Wawancara: pemahaman tentang empati dan komunikasi',
-                'bobot'    => 2, 'urutan' => 103,
-            ],
-            [
-                'kategori' => 'I. Attitude — Komponen Pengetahuan',
-                'nama'     => 'Memahami standar pelayanan organisasi (SOP/aturan layanan)',
-                'deskripsi'=> 'Wawancara: pemahaman SOP dan aturan layanan',
-                'bobot'    => 2, 'urutan' => 104,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 1. Cognitive Component',
+                'nama'     => 'c. Memahami dan mampu menguraikan alur SOP pelayanan secara runtut.',
+                'deskripsi'=> 'Aspek Pengetahuan Standar Layanan',
+                'bobot'    => 1, 'urutan' => 103, 'is_active' => true,
             ],
 
-            // 2. Komponen Afektif
+            // 2. Affective Component (Orientasi Pelayanan & Regulasi Emosi)
             [
-                'kategori' => 'I. Attitude — Komponen Afektif',
-                'nama'     => 'Semangat Melayani',
-                'bobot'    => 3, 'urutan' => 201,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 2. Affective Component',
+                'nama'     => 'a. Emotional Labor Management: Mampu mengontrol emosi, tetap tenang, dan profesional saat menghadapi situasi tertekan (under pressure).',
+                'deskripsi'=> 'Orientasi Pelayanan & Regulasi Emosi',
+                'bobot'    => 1, 'urutan' => 104, 'is_active' => true,
             ],
             [
-                'kategori' => 'I. Attitude — Komponen Afektif',
-                'nama'     => 'Bisa mengontrol emosi saat keadaan "under pressure"',
-                'bobot'    => 3, 'urutan' => 202,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 2. Affective Component',
+                'nama'     => 'b. Customer Centric Mindset: Menunjukkan motivasi intrinsik dan antusiasme tinggi untuk membantu menyelesaikan masalah pelanggan.',
+                'deskripsi'=> 'Orientasi Pelayanan & Regulasi Emosi',
+                'bobot'    => 1, 'urutan' => 105, 'is_active' => true,
             ],
             [
-                'kategori' => 'I. Attitude — Komponen Afektif',
-                'nama'     => 'Senang memberikan pelayanan yang berorientasi kepuasan pelanggan',
-                'bobot'    => 3, 'urutan' => 203,
-            ],
-            [
-                'kategori' => 'I. Attitude — Komponen Afektif',
-                'nama'     => 'Empati terhadap Pelanggan',
-                'bobot'    => 3, 'urutan' => 204,
-            ],
-            [
-                'kategori' => 'I. Attitude — Komponen Afektif',
-                'nama'     => 'Bertanggung jawab terhadap kualitas pelayanan dan hasil pekerjaannya',
-                'bobot'    => 3, 'urutan' => 205,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 2. Affective Component',
+                'nama'     => 'c. Accountability: Bertanggung jawab penuh terhadap kualitas hasil kerjanya tanpa melempar kesalahan kepada pihak lain.',
+                'deskripsi'=> 'Orientasi Pelayanan & Regulasi Emosi',
+                'bobot'    => 1, 'urutan' => 106, 'is_active' => true,
             ],
 
-            // 3. Perilaku
+            // 3. Behavioral Component (Tindakan Nyata di Lapangan)
             [
-                'kategori' => 'I. Attitude — Perilaku',
-                'nama'     => 'Selalu bersemangat saat memberikan pelayanan',
-                'bobot'    => 2, 'urutan' => 301,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 3. Behavioral Component',
+                'nama'     => 'a. Secara konsisten menampilkan ekspresi ramah, senyum tulus, dan kontak mata yang membangun kenyamanan sejak awal interaksi.',
+                'deskripsi'=> 'Tindakan Nyata di Lapangan',
+                'bobot'    => 1, 'urutan' => 107, 'is_active' => true,
             ],
             [
-                'kategori' => 'I. Attitude — Perilaku',
-                'nama'     => 'Selalu tersenyum ramah',
-                'bobot'    => 2, 'urutan' => 302,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 3. Behavioral Component',
+                'nama'     => 'b. Service Recovery Readiness: Responsif, cekatan, dan solutif saat menanggapi komplain atau pasien yang kebingungan.',
+                'deskripsi'=> 'Tindakan Nyata di Lapangan',
+                'bobot'    => 1, 'urutan' => 108, 'is_active' => true,
             ],
             [
-                'kategori' => 'I. Attitude — Perilaku',
-                'nama'     => 'Selalu berkomunikasi dengan efektif, sopan dan santun',
-                'bobot'    => 2, 'urutan' => 303,
-            ],
-            [
-                'kategori' => 'I. Attitude — Perilaku',
-                'nama'     => 'Selalu menjaga kualitas pekerjaan',
-                'bobot'    => 2, 'urutan' => 304,
-            ],
-            [
-                'kategori' => 'I. Attitude — Perilaku',
-                'nama'     => 'Responsif menanggapi pasien terhadap pasien kurang paham / keluhan',
-                'bobot'    => 3, 'urutan' => 305,
-            ],
-            [
-                'kategori' => 'I. Attitude — Perilaku',
-                'nama'     => 'Pasca melayani selalu mengucapkan: Terima Kasih, Ada yang bisa dibantu?, Semoga sehat selalu',
-                'bobot'    => 2, 'urutan' => 306,
+                'kategori' => 'I. ATTITUDE & EMOTIONAL INTELLIGENCE — 3. Behavioral Component',
+                'nama'     => 'c. Mempraktikkan closing statement bermakna pasca-pelayanan (mengucapkan terima kasih, menawarkan bantuan tambahan, dan mendoakan kesehatan).',
+                'deskripsi'=> 'Tindakan Nyata di Lapangan',
+                'bobot'    => 1, 'urutan' => 109, 'is_active' => true,
             ],
 
             // ===================================================
-            // II. ABILITY (KEMAMPUAN KOMUNIKASI)
+            // II. DIMENSI ABILITY & INTERPERSONAL COMMUNICATION (KEMAMPUAN)
             // ===================================================
 
-            // 1. Kesan Pertama (P-S-B-S)
+            // 1. Kesan Pertama & Atribut Fisik (Tangibles)
             [
-                'kategori' => 'II. Ability — Kesan Pertama Yang Baik (P-S-B-S)',
-                'nama'     => 'Penampilan: Pastikan penampilan Anda rapi dan profesional',
-                'bobot'    => 2, 'urutan' => 401,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 1. Kesan Pertama & Atribut Fisik (Tangibles)',
+                'nama'     => 'a. Memenuhi standar Grooming: Penampilan rapi, bersih, wangi, sesuai dengan aturan seragam instansi.',
+                'deskripsi'=> 'Kesan Pertama & Atribut Fisik',
+                'bobot'    => 1, 'urutan' => 201, 'is_active' => true,
             ],
             [
-                'kategori' => 'II. Ability — Kesan Pertama Yang Baik (P-S-B-S)',
-                'nama'     => 'Senyum: Berikan senyuman ramah saat bertemu pelanggan',
-                'bobot'    => 2, 'urutan' => 402,
-            ],
-            [
-                'kategori' => 'II. Ability — Kesan Pertama Yang Baik (P-S-B-S)',
-                'nama'     => 'Bahasa Tubuh: Gunakan bahasa tubuh yang sopan dan terbuka',
-                'bobot'    => 2, 'urutan' => 403,
-            ],
-            [
-                'kategori' => 'II. Ability — Kesan Pertama Yang Baik (P-S-B-S)',
-                'nama'     => 'Sapaan: Sapa pelanggan dengan sapaan yang hangat dan ramah',
-                'bobot'    => 2, 'urutan' => 404,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 1. Kesan Pertama & Atribut Fisik (Tangibles)',
+                'nama'     => 'b. Menerapkan formula P-S-B-S (Penampilan, Senyum, Bahasa Tubuh, Sapaan) sebagai standar penyambutan awal secara natural.',
+                'deskripsi'=> 'Kesan Pertama & Atribut Fisik',
+                'bobot'    => 1, 'urutan' => 202, 'is_active' => true,
             ],
 
-            // 2-6. Kemampuan Komunikasi
+            // 2. Komunikasi Verbal & Keterampilan Interpersonal (Assurance)
             [
-                'kategori' => 'II. Ability — Kemampuan Komunikasi',
-                'nama'     => 'Dengarkan dengan Aktif',
-                'bobot'    => 3, 'urutan' => 501,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 2. Komunikasi Verbal & Keterampilan Interpersonal (Assurance)',
+                'nama'     => 'a. Active Listening: Mendengarkan dengan penuh perhatian tanpa memotong pembicaraan, melakukan verifikasi (konfirmasi ulang) maksud pelanggan.',
+                'deskripsi'=> 'Komunikasi Verbal & Keterampilan Interpersonal',
+                'bobot'    => 1, 'urutan' => 203, 'is_active' => true,
             ],
             [
-                'kategori' => 'II. Ability — Kemampuan Komunikasi',
-                'nama'     => 'Jelas dan Ringkas',
-                'bobot'    => 3, 'urutan' => 502,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 2. Komunikasi Verbal & Keterampilan Interpersonal (Assurance)',
+                'nama'     => 'b. Clarity & Brevity: Memberikan informasi atau edukasi dengan kalimat yang jelas, ringkas, mudah dipahami (menghindari jargon medis/birokrasi yang rumit).',
+                'deskripsi'=> 'Komunikasi Verbal & Keterampilan Interpersonal',
+                'bobot'    => 1, 'urutan' => 204, 'is_active' => true,
             ],
             [
-                'kategori' => 'II. Ability — Kemampuan Komunikasi',
-                'nama'     => 'Personalisasi',
-                'bobot'    => 2, 'urutan' => 503,
-            ],
-            [
-                'kategori' => 'II. Ability — Kemampuan Komunikasi',
-                'nama'     => 'Respons Tepat Waktu',
-                'bobot'    => 3, 'urutan' => 504,
-            ],
-            [
-                'kategori' => 'II. Ability — Kemampuan Komunikasi',
-                'nama'     => 'Empati',
-                'bobot'    => 3, 'urutan' => 505,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 2. Komunikasi Verbal & Keterampilan Interpersonal (Assurance)',
+                'nama'     => 'c. Personalization: Melakukan pendekatan personal secara sopan (menyebut nama pelanggan, menyesuaikan gaya bicara dengan usia/kondisi pelanggan).',
+                'deskripsi'=> 'Komunikasi Verbal & Keterampilan Interpersonal',
+                'bobot'    => 1, 'urutan' => 205, 'is_active' => true,
             ],
 
-            // 7. Komunikasi Non Verbal
+            // 3. Ketanggapan Pelayanan (Responsiveness)
             [
-                'kategori' => 'II. Ability — Komunikasi Non Verbal',
-                'nama'     => 'Ekspresi Wajah',
-                'bobot'    => 2, 'urutan' => 601,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 3. Ketanggapan Pelayanan (Responsiveness)',
+                'nama'     => 'a. Menunjukkan waktu respons yang cepat dan efisien (tidak membiarkan pelanggan menunggu tanpa kejelasan).',
+                'deskripsi'=> 'Ketanggapan Pelayanan',
+                'bobot'    => 1, 'urutan' => 206, 'is_active' => true,
+            ],
+
+            // 4. Kedekatan Emosional (Empathy)
+            [
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 4. Kedekatan Emosional (Empathy)',
+                'nama'     => 'a. Menunjukkan rasa peduli melalui kalimat validasi emosi (contoh: "Saya memahami kondisi Ibu, mari saya bantu...").',
+                'deskripsi'=> 'Kedekatan Emosional',
+                'bobot'    => 1, 'urutan' => 207, 'is_active' => true,
+            ],
+
+            // 5. Komunikasi Non-Verbal & Kinesik
+            [
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 5. Komunikasi Non-Verbal & Kinesik',
+                'nama'     => 'a. Membaca dan merespons isyarat non-verbal (bahasa tubuh, ekspresi wajah) dari pelanggan secara tepat.',
+                'deskripsi'=> 'Komunikasi Non-Verbal & Kinesik',
+                'bobot'    => 1, 'urutan' => 208, 'is_active' => true,
             ],
             [
-                'kategori' => 'II. Ability — Komunikasi Non Verbal',
-                'nama'     => 'Gestur dan Bahasa Tubuh',
-                'bobot'    => 2, 'urutan' => 602,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 5. Komunikasi Non-Verbal & Kinesik',
+                'nama'     => 'b. Paralinguistic Control: Mengontrol kualitas vokal secara ideal (intonasi ramah, volume suara cukup terdengar tetapi tidak membentak, tempo bicara stabil).',
+                'deskripsi'=> 'Komunikasi Non-Verbal & Kinesik',
+                'bobot'    => 1, 'urutan' => 209, 'is_active' => true,
             ],
             [
-                'kategori' => 'II. Ability — Komunikasi Non Verbal',
-                'nama'     => 'Parabahasa (Kecepatan Bicara, Intonasi, Volume Suara)',
-                'bobot'    => 2, 'urutan' => 603,
+                'kategori' => 'II. ABILITY & INTERPERSONAL COMMUNICATION — 5. Komunikasi Non-Verbal & Kinesik',
+                'nama'     => 'c. Menjaga postur tubuh yang tegap namun terbuka (open body language) dan condong ke arah pelanggan saat berinteraksi.',
+                'deskripsi'=> 'Komunikasi Non-Verbal & Kinesik',
+                'bobot'    => 1, 'urutan' => 210, 'is_active' => true,
             ],
         ];
 
         foreach ($parameters as $param) {
-            ParameterSop::create(array_merge($param, [
-                'is_active' => true,
-                'deskripsi' => $param['deskripsi'] ?? null,
-            ]));
+            ParameterSop::create($param);
         }
     }
 }

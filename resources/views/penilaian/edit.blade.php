@@ -10,16 +10,17 @@
 .skor-col-1 { color: #dc2626; }
 .param-row {
     display: grid;
-    grid-template-columns: 1fr 240px;
+    grid-template-columns: 1fr 240px 300px;
     gap: 0;
     border-bottom: 1px solid var(--border);
+    align-items: stretch;
 }
 .param-row:last-child {
     border-bottom: none;
 }
 .param-header-grid {
     display: grid;
-    grid-template-columns: 1fr 240px;
+    grid-template-columns: 1fr 240px 300px;
     gap: 0;
     border-bottom: 1px solid var(--border);
     background: #f8fafc;
@@ -31,24 +32,34 @@
     border-left: 1px solid var(--border);
     align-items: center;
 }
-@media (max-width: 640px) {
+.catatan-col {
+    padding: 8px 12px;
+    border-left: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+}
+@media (max-width: 992px) {
     .param-row, .param-header-grid {
-        grid-template-columns: 1fr 160px;
+        grid-template-columns: 1fr 200px 220px;
     }
     .skor-grid {
-        grid-template-columns: repeat(4, 40px);
+        grid-template-columns: repeat(4, 50px);
     }
 }
-@media (max-width: 420px) {
+@media (max-width: 768px) {
     .param-row, .param-header-grid {
-        grid-template-columns: 1fr 140px;
+        grid-template-columns: 1fr;
     }
     .skor-grid {
-        grid-template-columns: repeat(4, 35px);
+        grid-template-columns: repeat(4, 1fr);
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding: 8px 0;
     }
-    .skor-grid input[type="radio"] {
-        width: 16px;
-        height: 16px;
+    .catatan-col {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding: 8px 12px 12px;
     }
 }
 </style>
@@ -92,13 +103,38 @@
     </div>
 </div>
 
-{{-- Legenda Skor --}}
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-    <span style="font-size:0.8rem;font-weight:600;color:var(--text-muted);margin-right:4px;">Keterangan Skor:</span>
-    <span style="padding:4px 12px;background:#dcfce7;color:#166534;border-radius:20px;font-size:0.8rem;font-weight:700;">4 — Sangat Baik</span>
-    <span style="padding:4px 12px;background:#dbeafe;color:#1e40af;border-radius:20px;font-size:0.8rem;font-weight:700;">3 — Baik</span>
-    <span style="padding:4px 12px;background:#fef9c3;color:#854d0e;border-radius:20px;font-size:0.8rem;font-weight:700;">2 — Cukup</span>
-    <span style="padding:4px 12px;background:#fee2e2;color:#991b1b;border-radius:20px;font-size:0.8rem;font-weight:700;">1 — Kurang Baik</span>
+{{-- Rubrik & Panduan Penilaian --}}
+<div class="card" style="margin-bottom:16px;background:#f8fafc;border:1px solid #cbd5e1;">
+    <div class="card-body" style="padding:16px;">
+        <div style="font-weight:700;font-size:0.88rem;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:6px;">
+            <i class="bi bi-info-circle-fill" style="color:var(--primary);"></i> RUBRIK PENILAIAN (PANDUAN EVALUATOR)
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:10px;font-size:0.8rem;line-height:1.45;">
+            <div style="background:white;padding:10px 12px;border-radius:8px;border-left:4px solid #059669;box-shadow:var(--shadow-sm);">
+                <strong style="color:#059669;display:block;margin-bottom:2px;">Skor 4 (Sangat Baik):</strong>
+                Petugas melakukan indikator secara konsisten, natural, proaktif, dan melampaui ekspektasi standar SOP.
+            </div>
+            <div style="background:white;padding:10px 12px;border-radius:8px;border-left:4px solid #2563eb;box-shadow:var(--shadow-sm);">
+                <strong style="color:#2563eb;display:block;margin-bottom:2px;">Skor 3 (Baik):</strong>
+                Petugas melakukan indikator sesuai standar SOP, namun terkadang masih terlihat kurang fleksibel atau perlu sedikit stimulus.
+            </div>
+            <div style="background:white;padding:10px 12px;border-radius:8px;border-left:4px solid #d97706;box-shadow:var(--shadow-sm);">
+                <strong style="color:#d97706;display:block;margin-bottom:2px;">Skor 2 (Cukup):</strong>
+                Petugas melakukan indikator hanya jika diingatkan atau hanya terlihat di awal sesi, terdapat beberapa aspek yang terlewat.
+            </div>
+            <div style="background:white;padding:10px 12px;border-radius:8px;border-left:4px solid #dc2626;box-shadow:var(--shadow-sm);">
+                <strong style="color:#dc2626;display:block;margin-bottom:2px;">Skor 1 (Kurang Baik):</strong>
+                Petugas gagal menunjukkan indikator tersebut atau perilakunya kontradiktif dengan prinsip pelayanan prima.
+            </div>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.78rem;">
+            <span style="font-weight:700;color:var(--text);">Predikat Nilai:</span>
+            <span class="badge badge-success" style="font-size:0.76rem;padding:4px 8px;">90% - 100% : Sangat Kompeten (Role Model)</span>
+            <span class="badge badge-primary" style="font-size:0.76rem;padding:4px 8px;">75% - 89% : Kompeten (Standar Instansi)</span>
+            <span class="badge badge-warning" style="font-size:0.76rem;padding:4px 8px;">60% - 74% : Cukup Kompeten (Perlu Pemantauan)</span>
+            <span class="badge badge-danger" style="font-size:0.76rem;padding:4px 8px;">&lt; 60% : Belum Kompeten (Remedial/Coaching)</span>
+        </div>
+    </div>
 </div>
 
 @foreach($parameters as $kategoriNama => $params)
@@ -108,27 +144,31 @@
             <i class="bi bi-check2-square" style="color:#0284c7;margin-right:8px;"></i>
             {{ $kategoriNama }}
         </h5>
-        <span class="badge badge-info" style="font-size:0.72rem;">{{ $params->count() }} parameter</span>
+        <span class="badge badge-info" style="font-size:0.72rem;">{{ $params->count() }} Indikator</span>
     </div>
 
     {{-- Header --}}
     <div class="param-header-grid">
-        <div style="padding:8px 16px;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Indikator Penilaian</div>
+        <div style="padding:10px 16px;font-size:0.74rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">DIMENSI &amp; INDIKATOR PENILAIAN</div>
         <div class="skor-grid">
             <div class="skor-col-4" style="padding:8px 0;font-size:0.78rem;font-weight:700;">4</div>
             <div class="skor-col-3" style="padding:8px 0;font-size:0.78rem;font-weight:700;">3</div>
             <div class="skor-col-2" style="padding:8px 0;font-size:0.78rem;font-weight:700;">2</div>
             <div class="skor-col-1" style="padding:8px 0;font-size:0.78rem;font-weight:700;">1</div>
         </div>
+        <div style="padding:10px 14px;font-size:0.74rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;border-left:1px solid var(--border);">CATATAN PENGAMATAN</div>
     </div>
 
     @foreach($params as $param)
-    @php $nilaiLama = old('nilai_' . $param->id, $detailsMap[$param->id]->nilai ?? 3); @endphp
+    @php
+        $nilaiLama = old('nilai_' . $param->id, $detailsMap[$param->id]->nilai ?? 3);
+        $catatanLama = old('catatan_' . $param->id, $detailsMap[$param->id]->catatan ?? '');
+    @endphp
     <div class="param-row">
         <div style="padding:12px 16px;">
-            <div style="font-size:0.875rem;font-weight:500;">{{ $param->nama }}</div>
+            <div style="font-size:0.875rem;font-weight:600;color:var(--text);line-height:1.45;">{{ $param->nama }}</div>
             @if($param->deskripsi)
-            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">{{ $param->deskripsi }}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px;">{{ $param->deskripsi }}</div>
             @endif
         </div>
         <div class="skor-grid">
@@ -142,6 +182,14 @@
                     style="width:18px;height:18px;cursor:pointer;">
             </label>
             @endforeach
+        </div>
+        <div class="catatan-col">
+            <input type="text"
+                name="catatan_{{ $param->id }}"
+                class="form-control"
+                style="font-size:0.83rem;padding:6px 10px;"
+                value="{{ $catatanLama }}"
+                placeholder="Catatan pengamatan (opsional)">
         </div>
     </div>
     @endforeach
@@ -193,10 +241,10 @@ function recalculate() {
     const pct = totalBobotMax > 0 ? (totalWeighted / totalBobotMax * 100) : 0;
     document.getElementById('previewNilai').textContent = pct.toFixed(2);
 
-    let color = '#dc2626', kat = 'Kurang Baik';
-    if (pct >= 88)      { color = '#059669'; kat = 'Sangat Baik'; }
-    else if (pct >= 63) { color = '#2563eb'; kat = 'Baik'; }
-    else if (pct >= 38) { color = '#d97706'; kat = 'Cukup'; }
+    let color = '#dc2626', kat = 'Belum Kompeten';
+    if (pct >= 90)      { color = '#059669'; kat = 'Sangat Kompeten'; }
+    else if (pct >= 75) { color = '#2563eb'; kat = 'Kompeten'; }
+    else if (pct >= 60) { color = '#d97706'; kat = 'Cukup Kompeten'; }
 
     document.getElementById('previewNilai').style.color = color;
     document.getElementById('previewKategori').textContent = kat;
