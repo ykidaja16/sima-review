@@ -45,6 +45,7 @@ class UserController extends Controller
             'email'       => ['nullable', 'email', 'unique:users,email'],
             'role_id'     => ['required', 'exists:roles,id'],
             'is_active'   => ['nullable'],
+            'is_dinilai'  => ['nullable'],
             'karyawan_id' => ['nullable', 'exists:karyawans,id'],
             'password'    => ['required', 'string', 'min:6', 'confirmed'],
         ], [
@@ -55,18 +56,22 @@ class UserController extends Controller
 
         DB::transaction(function () use ($validated, $request) {
             $user = User::create([
-                'username'  => $validated['username'],
-                'name'      => $validated['name'],
-                'email'     => $validated['email'] ?? null,
-                'role_id'   => $validated['role_id'],
-                'is_active' => $request->boolean('is_active', true),
-                'password'  => Hash::make($validated['password']),
+                'username'   => $validated['username'],
+                'name'       => $validated['name'],
+                'email'      => $validated['email'] ?? null,
+                'role_id'    => $validated['role_id'],
+                'is_active'  => $request->boolean('is_active', true),
+                'is_dinilai' => $request->boolean('is_dinilai', true),
+                'password'   => Hash::make($validated['password']),
             ]);
 
             // Link ke karyawan jika dipilih
             if (!empty($validated['karyawan_id'])) {
                 Karyawan::where('id', $validated['karyawan_id'])
-                    ->update(['user_id' => $user->id]);
+                    ->update([
+                        'user_id'    => $user->id,
+                        'is_dinilai' => $user->is_dinilai,
+                    ]);
             }
 
             AuditLogService::log('CREATE_USER', 'User', $user->id, null, [
@@ -103,6 +108,7 @@ class UserController extends Controller
             'email'       => ['nullable', 'email', 'unique:users,email,' . $user->id],
             'role_id'     => ['required', 'exists:roles,id'],
             'is_active'   => ['nullable'],
+            'is_dinilai'  => ['nullable'],
             'karyawan_id' => ['nullable', 'exists:karyawans,id'],
             'password'    => ['nullable', 'string', 'min:6', 'confirmed'],
         ], [
@@ -117,11 +123,12 @@ class UserController extends Controller
             // Unlink karyawan lama jika ada
             Karyawan::where('user_id', $user->id)->update(['user_id' => null]);
 
-            $user->username  = $validated['username'];
-            $user->name      = $validated['name'];
-            $user->email     = $validated['email'] ?? null;
-            $user->role_id   = $validated['role_id'];
-            $user->is_active = $request->boolean('is_active');
+            $user->username   = $validated['username'];
+            $user->name       = $validated['name'];
+            $user->email      = $validated['email'] ?? null;
+            $user->role_id    = $validated['role_id'];
+            $user->is_active  = $request->boolean('is_active');
+            $user->is_dinilai = $request->boolean('is_dinilai');
 
             if (!empty($validated['password'])) {
                 $user->password = Hash::make($validated['password']);
@@ -131,7 +138,10 @@ class UserController extends Controller
             // Link ke karyawan baru
             if (!empty($validated['karyawan_id'])) {
                 Karyawan::where('id', $validated['karyawan_id'])
-                    ->update(['user_id' => $user->id]);
+                    ->update([
+                        'user_id'    => $user->id,
+                        'is_dinilai' => $user->is_dinilai,
+                    ]);
             }
         });
 

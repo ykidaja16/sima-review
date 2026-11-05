@@ -20,12 +20,14 @@ class Karyawan extends Model
         'cabang_id',
         'atasan_id',
         'is_active',
+        'is_dinilai',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active' => 'boolean',
+            'is_active'  => 'boolean',
+            'is_dinilai' => 'boolean',
         ];
     }
 

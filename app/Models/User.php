@@ -22,6 +22,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'is_active',
+        'is_dinilai',
     ];
 
     protected $hidden = [
@@ -32,8 +33,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password'  => 'hashed',
-            'is_active' => 'boolean',
+            'password'   => 'hashed',
+            'is_active'  => 'boolean',
+            'is_dinilai' => 'boolean',
         ];
     }
 

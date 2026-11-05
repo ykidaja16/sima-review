@@ -76,8 +76,11 @@ class PenilaianController extends Controller
                 ->with('error', 'Tidak ada periode penilaian yang aktif saat ini.');
         }
 
-        // Ambil karyawan yang bisa dinilai
-        $karyawansQuery = Karyawan::active()->with(['divisi', 'jabatan']);
+        // Ambil karyawan yang bisa dinilai (hanya yang diflag wajib dinilai)
+        $karyawansQuery = Karyawan::active()
+            ->where('is_dinilai', true)
+            ->whereDoesntHave('user', fn($u) => $u->where('is_dinilai', false))
+            ->with(['divisi', 'jabatan']);
         $userKaryawan = $user->karyawan;
 
         // Role Kacab tidak perlu dinilai oleh siapapun
@@ -144,6 +147,11 @@ class PenilaianController extends Controller
         $targetKaryawan = Karyawan::with(['jabatan', 'user.role'])->find($validated['karyawan_id']);
         if ($targetKaryawan?->user?->role?->slug === 'kacab') {
             return back()->with('error', 'Kepala Cabang tidak dapat dinilai oleh siapapun.');
+        }
+
+        // Validasi: hanya karyawan yang masuk penilaian (flag is_dinilai = true) yang dapat dinilai
+        if (!$targetKaryawan?->is_dinilai || ($targetKaryawan?->user && !$targetKaryawan->user->is_dinilai)) {
+            return back()->with('error', 'Karyawan ini tidak termasuk dalam daftar karyawan yang dinilai.');
         }
 
         // Validasi aturan lintas divisi dan level atas untuk Supervisor & Manager
