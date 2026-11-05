@@ -19,6 +19,17 @@
         <a href="{{ route('ketidaksesuaian.export-pdf', $ketidaksesuaian) }}" class="btn btn-danger" target="_blank">
             <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
         </a>
+        @if(auth()->user()?->isSuperAdmin())
+        <form action="{{ route('ketidaksesuaian.destroy', $ketidaksesuaian) }}" method="POST"
+            onsubmit="return confirm('Apakah Anda yakin ingin menghapus FTKP {{ $ketidaksesuaian->nomor_ftkp }}? Tindakan ini tidak dapat dibatalkan.')"
+            style="display:inline;">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash-fill"></i> Hapus FTKP
+            </button>
+        </form>
+        @endif
         <a href="{{ route('ketidaksesuaian.index') }}" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Kembali</a>
     </div>
 </div>

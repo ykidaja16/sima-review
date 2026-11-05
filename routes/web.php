@@ -119,6 +119,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{ketidaksesuaian}/export-excel', [KetidaksesuaianController::class, 'exportExcel'])->name('export-excel');
         Route::post('/{ketidaksesuaian}/tindaklanjut', [KetidaksesuaianController::class, 'tindaklanjut'])->name('tindaklanjut');
         Route::post('/{ketidaksesuaian}/verifikasi', [KetidaksesuaianController::class, 'verifikasi'])->name('verifikasi');
+        Route::delete('/{ketidaksesuaian}', [KetidaksesuaianController::class, 'destroy'])
+            ->middleware('role:super_admin')
+            ->name('destroy');
     });
 
     // ---- Survei Pelanggan (Semua role yang login) ----

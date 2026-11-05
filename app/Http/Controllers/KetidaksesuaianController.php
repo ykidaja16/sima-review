@@ -304,4 +304,24 @@ class KetidaksesuaianController extends Controller
             "FTKP-{$safeNomor}.xlsx"
         );
     }
+
+    public function destroy(Ketidaksesuaian $ketidaksesuaian): RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user || !$user->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang diizinkan menghapus FTKP.');
+        }
+
+        $nomorFtkp = $ketidaksesuaian->nomor_ftkp;
+        $dataLama = $ketidaksesuaian->toArray();
+
+        DB::transaction(function () use ($ketidaksesuaian, $dataLama) {
+            AuditLogService::log('DELETE_FTKP', 'Ketidaksesuaian', $ketidaksesuaian->id, $dataLama, null);
+            $ketidaksesuaian->delete();
+        });
+
+        return redirect()->route('ketidaksesuaian.index')
+            ->with('success', "FTKP {$nomorFtkp} berhasil dihapus.");
+    }
 }

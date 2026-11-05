@@ -130,6 +130,17 @@
                                 <a href="{{ route('ketidaksesuaian.export-excel', $k) }}" class="btn btn-success btn-sm" title="Export Excel">
                                     <i class="bi bi-file-earmark-excel-fill"></i>
                                 </a>
+                                @if(auth()->user()?->isSuperAdmin())
+                                <form action="{{ route('ketidaksesuaian.destroy', $k) }}" method="POST"
+                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus FTKP {{ $k->nomor_ftkp }}? Tindakan ini tidak dapat dibatalkan.')"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus FTKP">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </td>
                     </tr>
