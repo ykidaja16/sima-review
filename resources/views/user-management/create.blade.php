@@ -65,21 +65,12 @@
                 </select>
                 @error('role_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
-            <div class="grid grid-2" style="margin-bottom:1.25rem;">
-                <div class="form-group" style="margin-bottom:0;">
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}>
-                        <span class="form-label" style="margin:0;">Akun Aktif</span>
-                    </label>
-                    <small style="color:var(--text-muted);font-size:0.75rem;display:block;margin-top:2px;">User dapat login ke sistem.</small>
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="checkbox" name="is_dinilai" value="1" {{ old('is_dinilai', '1') ? 'checked' : '' }}>
-                        <span class="form-label" style="margin:0;"><strong style="color:var(--primary);">Masuk Penilaian (Wajib Dinilai)</strong></span>
-                    </label>
-                    <small style="color:var(--text-muted);font-size:0.75rem;display:block;margin-top:2px;">Hanya user/karyawan yang dicentang yang muncul di input penilaian periode.</small>
-                </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}>
+                    <span class="form-label" style="margin:0;">Akun Aktif</span>
+                </label>
+                <small style="color:var(--text-muted);font-size:0.75rem;display:block;margin-top:2px;">User dapat login ke sistem.</small>
             </div>
             <div class="grid grid-2">
                 <div class="form-group">

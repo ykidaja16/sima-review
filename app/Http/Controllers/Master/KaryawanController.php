@@ -65,6 +65,7 @@ class KaryawanController extends Controller
             'cabang_id'  => ['nullable', 'exists:cabangs,id'],
             'atasan_id'  => ['nullable', 'exists:karyawans,id'],
             'is_active'  => ['boolean'],
+            'is_dinilai' => ['boolean'],
             // Akun user (opsional)
             'buat_akun'  => ['boolean'],
             'username'   => ['nullable', 'string', 'max:50', 'alpha_dash', 'unique:users,username', 'required_if:buat_akun,1'],
@@ -79,14 +80,17 @@ class KaryawanController extends Controller
         DB::transaction(function () use ($validated, $request) {
             $userId = null;
 
+            $isDinilai = $request->boolean('is_dinilai', true);
+
             if ($request->boolean('buat_akun')) {
                 $user = User::create([
-                    'username' => $validated['username'],
-                    'name'     => $validated['nama'],
-                    'email'    => $validated['email'] ?? null,
-                    'password' => Hash::make($validated['password']),
-                    'role_id'  => $validated['role_id'],
-                    'is_active'=> true,
+                    'username'   => $validated['username'],
+                    'name'       => $validated['nama'],
+                    'email'      => $validated['email'] ?? null,
+                    'password'   => Hash::make($validated['password']),
+                    'role_id'    => $validated['role_id'],
+                    'is_active'  => true,
+                    'is_dinilai' => $isDinilai,
                 ]);
                 $userId = $user->id;
             }
@@ -102,6 +106,7 @@ class KaryawanController extends Controller
                 'cabang_id'  => $validated['cabang_id'] ?? null,
                 'atasan_id'  => $validated['atasan_id'] ?? null,
                 'is_active'  => $request->boolean('is_active', true),
+                'is_dinilai' => $isDinilai,
             ]);
 
             AuditLogService::log('CREATE_KARYAWAN', 'Karyawan', $karyawan->id, null, $karyawan->toArray());
@@ -139,15 +144,24 @@ class KaryawanController extends Controller
             'cabang_id'  => ['nullable', 'exists:cabangs,id'],
             'atasan_id'  => ['nullable', 'exists:karyawans,id'],
             'is_active'  => ['boolean'],
+            'is_dinilai' => ['boolean'],
         ], [
             'email.unique' => 'Email ini sudah digunakan oleh karyawan lain.',
             'no_hp.unique' => 'Nomor HP ini sudah digunakan oleh karyawan lain.',
         ]);
 
         $validated['nip'] = !empty($validated['nip']) ? $validated['nip'] : null;
+        $validated['is_active'] = $request->boolean('is_active');
+        $validated['is_dinilai'] = $request->boolean('is_dinilai');
 
         $dataLama = $karyawan->toArray();
         $karyawan->update($validated);
+
+        if ($karyawan->user_id) {
+            User::where('id', $karyawan->user_id)->update([
+                'is_dinilai' => $validated['is_dinilai'],
+            ]);
+        }
 
         AuditLogService::log('UPDATE_KARYAWAN', 'Karyawan', $karyawan->id, $dataLama, $karyawan->fresh()->toArray());
 

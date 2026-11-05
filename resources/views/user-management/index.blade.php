@@ -16,7 +16,7 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>#</th><th>Username</th><th>Nama</th><th>Email</th><th>Role</th><th>Status Akun</th><th>Penilaian</th><th>Dibuat</th><th>Aksi</th></tr>
+                <tr><th>#</th><th>Username</th><th>Nama</th><th>Email</th><th>Role</th><th>Status Akun</th><th>Dibuat</th><th>Aksi</th></tr>
             </thead>
             <tbody>
                 @forelse($users as $u)
@@ -43,13 +43,6 @@
                         <span class="badge badge-success"><i class="bi bi-check-circle"></i> Aktif</span>
                         @else
                         <span class="badge badge-danger"><i class="bi bi-x-circle"></i> Nonaktif</span>
-                        @endif
-                    </td>
-                    <td>
-                        @if($u->is_dinilai)
-                        <span class="badge badge-info" title="Masuk daftar karyawan yang dinilai"><i class="bi bi-clipboard2-check"></i> Dinilai</span>
-                        @else
-                        <span class="badge badge-secondary" title="Tidak masuk penilaian"><i class="bi bi-dash-circle"></i> Tidak</span>
                         @endif
                     </td>
                     <td style="font-size:0.8rem;color:var(--text-muted);">{{ $u->created_at->format('d M Y') }}</td>

@@ -42,7 +42,7 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>#</th><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Divisi</th><th>Atasan</th><th>Akun</th><th>Status</th><th>Aksi</th></tr>
+                <tr><th>#</th><th>NIP</th><th>Nama</th><th>Jabatan</th><th>Divisi</th><th>Atasan</th><th>Akun</th><th>Penilaian</th><th>Status</th><th>Aksi</th></tr>
             </thead>
             <tbody>
                 @forelse($karyawans as $k)
@@ -56,6 +56,13 @@
                     <td>
                         @if($k->user)
                         <span class="badge badge-success"><i class="bi bi-person-check"></i> Ya</span>
+                        @else
+                        <span class="badge badge-secondary">Tidak</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($k->is_dinilai)
+                        <span class="badge badge-info"><i class="bi bi-clipboard2-check"></i> Dinilai</span>
                         @else
                         <span class="badge badge-secondary">Tidak</span>
                         @endif
@@ -78,7 +85,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">Belum ada data karyawan</td></tr>
+                <tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted);">Belum ada data karyawan</td></tr>
                 @endforelse
             </tbody>
         </table>

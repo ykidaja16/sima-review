@@ -26,6 +26,10 @@
                     @if($karyawan->is_active)<span class="badge badge-success">Aktif</span>
                     @else<span class="badge badge-danger">Nonaktif</span>@endif
                 </td></tr>
+                <tr><td style="padding:6px 0;color:var(--text-muted);">Status Penilaian</td><td>
+                    @if($karyawan->is_dinilai)<span class="badge badge-info"><i class="bi bi-clipboard2-check"></i> Dinilai</span>
+                    @else<span class="badge badge-secondary">Tidak Dinilai</span>@endif
+                </td></tr>
                 <tr><td style="padding:6px 0;color:var(--text-muted);">Akun Login</td><td>
                     @if($karyawan->user)
                     <div style="font-weight:600;">{{ $karyawan->user->email }}</div>

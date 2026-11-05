@@ -65,10 +65,14 @@
                 </select>
                 <small style="color:var(--text-muted);font-size:0.75rem;">Hanya menampilkan karyawan level Supervisor ke atas.</small>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display:flex;gap:24px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                    <input type="checkbox" name="is_active" value="1" {{ $karyawan->is_active ? 'checked' : '' }}>
+                    <input type="checkbox" name="is_active" value="1" {{ old('is_active', $karyawan->is_active) ? 'checked' : '' }}>
                     <span class="form-label" style="margin:0;">Karyawan Aktif</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="is_dinilai" value="1" {{ old('is_dinilai', $karyawan->is_dinilai) ? 'checked' : '' }}>
+                    <span class="form-label" style="margin:0;"><i class="bi bi-clipboard2-check" style="color:var(--primary);margin-right:4px;"></i>Masuk Penilaian (Wajib Dinilai)</span>
                 </label>
             </div>
             <div style="display:flex;gap:8px;justify-content:flex-end;">
