@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>FTKP {{ $ketidaksesuaian->nomor_ftkp }} — SIMA-REVIEW</title>
+    <title>FTKP {{ $ketidaksesuaian->nomor_ftkp }} — SIMA-MONEV</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Arial, sans-serif; font-size: 11.5px; color: #1e293b; line-height: 1.5; padding: 24px 30px; }
@@ -150,7 +150,7 @@
     </div>
 
     <div class="footer">
-        Dicetak dari SIMA-REVIEW pada {{ now()->format('d/m/Y H:i') }} WIB
+        Dicetak dari SIMA-MONEV pada {{ now()->format('d/m/Y H:i') }} WIB
     </div>
 </body>
 </html>

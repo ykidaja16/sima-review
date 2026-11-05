@@ -7,7 +7,7 @@
 <div class="page-header">
     <div class="page-title">
         <h2>Dashboard</h2>
-        <p>Selamat datang, {{ auth()->user()->name }} — Ringkasan evaluasi SIMA-REVIEW</p>
+        <p>Selamat datang, {{ auth()->user()->name }} — Ringkasan evaluasi SIMA-MONEV</p>
     </div>
     @if($periodeAktif)
     <div style="display:flex;align-items:center;gap:8px;background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);padding:8px 14px;border-radius:10px;">

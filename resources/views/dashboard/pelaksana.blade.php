@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="page-title">
         <h2>Nilai Saya</h2>
-        <p>Track record evaluasi Service Excellent Anda</p>
+        <p>Track record evaluasi Service Excellence Anda</p>
     </div>
 </div>
 

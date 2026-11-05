@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') — SIMA-REVIEW</title>
-    <meta name="description" content="@yield('meta_description', 'Sistem Evaluasi Service Excellent')">
+    <title>@yield('title', 'Dashboard') — SIMA-MONEV</title>
+    <meta name="description" content="@yield('meta_description', 'Sistem Evaluasi Service Excellence')">
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -898,8 +898,8 @@
         <a href="{{ route('dashboard') }}" class="sidebar-brand">
             <img src="{{ asset('images/logosima.png') }}" alt="SIMA" style="height:34px;flex-shrink:0;">
             <div class="brand-text">
-                <h2>SIMA-REVIEW</h2>
-                <span>Service Excellent</span>
+                <h2>SIMA-MONEV</h2>
+                <span>Service Excellence</span>
             </div>
         </a>
 

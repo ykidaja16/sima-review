@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="page-title">
         <h2>Daftar Penilaian</h2>
-        <p>Riwayat penilaian Service Excellent karyawan</p>
+        <p>Riwayat penilaian Service Excellence karyawan</p>
     </div>
     @if(!auth()->user()->isPelaksana())
     <a href="{{ route('penilaian.create') }}" class="btn btn-primary">

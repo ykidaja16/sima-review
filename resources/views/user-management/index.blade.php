@@ -5,7 +5,7 @@
 <div class="page-header">
     <div class="page-title">
         <h2>User Management</h2>
-        <p>Kelola akun pengguna sistem SIMA-REVIEW</p>
+        <p>Kelola akun pengguna sistem SIMA-MONEV</p>
     </div>
     <a href="{{ route('user-management.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Tambah User

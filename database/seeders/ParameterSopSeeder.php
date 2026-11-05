@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 class ParameterSopSeeder extends Seeder
 {
     /**
-     * Parameter sesuai formulir penilaian praktek diklat Service Excellent.
+     * Parameter sesuai formulir penilaian praktek diklat Service Excellence.
      * Skor: 4 = Sangat Baik, 3 = Baik, 2 = Cukup, 1 = Kurang Baik.
      * Semua parameter berbobot 1 (setara) kecuali disebutkan lain.
      */
@@ -27,8 +27,8 @@ class ParameterSopSeeder extends Seeder
             // 1. Komponen Pengetahuan
             [
                 'kategori' => 'I. Attitude — Komponen Pengetahuan',
-                'nama'     => 'Peserta memahami prinsip dasar Service Excellent',
-                'deskripsi'=> 'Wawancara: pemahaman prinsip dasar service excellent',
+                'nama'     => 'Peserta memahami prinsip dasar Service Excellence',
+                'deskripsi'=> 'Wawancara: pemahaman prinsip dasar service excellence',
                 'bobot'    => 2, 'urutan' => 101,
             ],
             [

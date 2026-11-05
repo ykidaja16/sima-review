@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Penilaian — {{ $periode->nama ?? 'Semua' }} — SIMA-REVIEW</title>
+    <title>Laporan Penilaian — {{ $periode->nama ?? 'Semua' }} — SIMA-MONEV</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Arial', sans-serif; font-size: 12px; color: #1e293b; background: white; }
@@ -52,8 +52,8 @@
 
     <div style="padding:24px 32px;max-width:900px;margin:0 auto;">
         <div class="header">
-            <h1>SIMA-REVIEW</h1>
-            <h2>LAPORAN EVALUASI SERVICE EXCELLENT</h2>
+            <h1>SIMA-MONEV</h1>
+            <h2>LAPORAN EVALUASI SERVICE EXCELLENCE</h2>
             <p>{{ $periode->nama ?? 'Semua Periode' }} &nbsp;|&nbsp; Dicetak: {{ now()->format('d M Y, H:i') }} WIB &nbsp;|&nbsp; Oleh: {{ auth()->user()->name }}</p>
         </div>
 
@@ -128,7 +128,7 @@
         </table>
 
         <div class="footer">
-            <div>SIMA-REVIEW — Sistem Evaluasi Service Excellent &nbsp;|&nbsp; {{ config('app.url') }}</div>
+            <div>SIMA-MONEV — Sistem Evaluasi Service Excellence &nbsp;|&nbsp; {{ config('app.url') }}</div>
             <div>Halaman 1 / 1</div>
         </div>
 

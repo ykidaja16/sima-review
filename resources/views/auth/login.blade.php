@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login — SIMA-REVIEW</title>
-    <meta name="description" content="Sistem Evaluasi Service Excellent — Login">
+    <title>Login — SIMA-MONEV</title>
+    <meta name="description" content="Sistem Evaluasi Service Excellence — Login">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -214,8 +214,8 @@
             <div class="login-brand">
                 <img src="{{ asset('images/logosima.png') }}" alt="SIMA Logo">
                 <div class="login-brand-text">
-                    <h1>REVIEW System</h1>
-                    <p>Service Excellent Evaluation</p>
+                    <h1>MONEV System</h1>
+                    <p>Service Excellence Evaluation</p>
                 </div>
             </div>
 
@@ -294,7 +294,7 @@
         </div>
 
         <div class="login-footer">
-            &copy; {{ date('Y') }} SIMA Lab — Service Excellent Evaluation System
+            &copy; {{ date('Y') }} SIMA Lab — Service Excellence Evaluation System
         </div>
     </div>
 
