@@ -12,14 +12,33 @@ class JenisKetidaksesuaian extends Model
     protected $fillable = [
         'nama',
         'deskripsi',
+        'kategori_temuan',
         'is_active',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active' => 'boolean',
+            'kategori_temuan' => 'array',
+            'is_active'       => 'boolean',
         ];
+    }
+
+    public function getKategoriTemuanListAttribute(): array
+    {
+        if (!empty($this->kategori_temuan) && is_array($this->kategori_temuan)) {
+            return array_values(array_filter(array_map('trim', $this->kategori_temuan)));
+        }
+
+        $namaUpper = strtoupper($this->nama ?? '');
+        if (str_contains($namaUpper, 'AMI')) {
+            return ['AMI 1', 'AMI 2', 'AMI 3'];
+        }
+        if (str_contains($namaUpper, 'AME')) {
+            return ['Observasi', 'NC Minor', 'NC Mayor', 'OFI'];
+        }
+
+        return ['Observasi', 'NC Minor', 'NC Mayor', 'OFI'];
     }
 
     public function ketidaksesuaians(): HasMany

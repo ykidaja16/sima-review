@@ -489,6 +489,112 @@
         .form-control.is-invalid { border-color: var(--danger); }
         .invalid-feedback { font-size: 0.78rem; color: var(--danger); margin-top: 4px; }
 
+        /* Searchable Select */
+        .ss-wrapper { position: relative; width: 100%; }
+        .ss-control {
+            width: 100%;
+            padding: 8px 32px 8px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 39px;
+            user-select: none;
+            position: relative;
+        }
+        .ss-control::after {
+            content: '\F282';
+            font-family: 'bootstrap-icons';
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            transition: transform 0.2s ease;
+        }
+        .ss-wrapper.open .ss-control {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        }
+        .ss-wrapper.open .ss-control::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        .ss-control-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            width: 100%;
+        }
+        .ss-control-text.placeholder { color: var(--text-muted); }
+        .ss-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            z-index: 1050;
+            overflow: hidden;
+        }
+        .ss-wrapper.open .ss-dropdown { display: block; }
+        .ss-search-wrap {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+        .ss-search {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+        .ss-search:focus { border-color: var(--primary-light); }
+        .ss-list {
+            max-height: 220px;
+            overflow-y: auto;
+            list-style: none;
+            margin: 0;
+            padding: 4px 0;
+        }
+        .ss-option {
+            padding: 8px 12px;
+            font-size: 0.86rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .ss-option:hover, .ss-option.active {
+            background: rgba(59,130,246,0.08);
+            color: var(--primary);
+        }
+        .ss-option.selected {
+            background: rgba(59,130,246,0.12);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .ss-empty {
+            padding: 10px 12px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
         /* Badges */
         .badge {
             display: inline-flex; align-items: center;
@@ -1139,6 +1245,117 @@
                 setTimeout(() => alert.remove(), 500);
             }, 5000);
         });
+
+        // Initialize Searchable Selects
+        function initSearchableSelects() {
+            document.querySelectorAll('select.searchable-select').forEach(select => {
+                if (select.dataset.ssInitialized === 'true') return;
+                select.dataset.ssInitialized = 'true';
+                select.style.display = 'none';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'ss-wrapper';
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+
+                const control = document.createElement('div');
+                control.className = 'ss-control';
+                const controlText = document.createElement('span');
+                controlText.className = 'ss-control-text';
+                control.appendChild(controlText);
+                wrapper.appendChild(control);
+
+                const dropdown = document.createElement('div');
+                dropdown.className = 'ss-dropdown';
+                const searchWrap = document.createElement('div');
+                searchWrap.className = 'ss-search-wrap';
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.className = 'ss-search';
+                searchInput.placeholder = select.dataset.placeholder || 'Ketik untuk mencari...';
+                searchWrap.appendChild(searchInput);
+                dropdown.appendChild(searchWrap);
+
+                const list = document.createElement('ul');
+                list.className = 'ss-list';
+                dropdown.appendChild(list);
+                wrapper.appendChild(dropdown);
+
+                function renderOptions(filterText = '') {
+                    list.innerHTML = '';
+                    const q = filterText.toLowerCase().trim();
+                    let visibleCount = 0;
+
+                    Array.from(select.options).forEach(opt => {
+                        if (opt.hidden || opt.disabled && opt.value !== '') return;
+                        const text = opt.textContent.trim();
+                        if (q && !text.toLowerCase().includes(q)) return;
+
+                        visibleCount++;
+                        const li = document.createElement('li');
+                        li.className = 'ss-option' + (opt.selected ? ' selected' : '');
+                        li.textContent = text;
+                        li.dataset.value = opt.value;
+                        li.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            select.value = opt.value;
+                            updateSelectedDisplay();
+                            wrapper.classList.remove('open');
+                            searchInput.value = '';
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        });
+                        list.appendChild(li);
+                    });
+
+                    if (visibleCount === 0) {
+                        const empty = document.createElement('li');
+                        empty.className = 'ss-empty';
+                        empty.textContent = 'Tidak ditemukan hasil';
+                        list.appendChild(empty);
+                    }
+                }
+
+                function updateSelectedDisplay() {
+                    const selectedOpt = select.options[select.selectedIndex];
+                    if (selectedOpt && (!selectedOpt.hidden)) {
+                        controlText.textContent = selectedOpt.textContent.trim();
+                        controlText.classList.toggle('placeholder', selectedOpt.value === '');
+                    } else {
+                        const firstOpt = select.options[0];
+                        controlText.textContent = firstOpt ? firstOpt.textContent.trim() : '-- Pilih --';
+                        controlText.classList.add('placeholder');
+                    }
+                }
+
+                control.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const wasOpen = wrapper.classList.contains('open');
+                    document.querySelectorAll('.ss-wrapper.open').forEach(w => w.classList.remove('open'));
+                    if (!wasOpen) {
+                        wrapper.classList.add('open');
+                        searchInput.value = '';
+                        renderOptions('');
+                        setTimeout(() => searchInput.focus(), 10);
+                    }
+                });
+
+                searchInput.addEventListener('click', e => e.stopPropagation());
+                searchInput.addEventListener('input', () => renderOptions(searchInput.value));
+
+                select._refreshSearchableSelect = () => {
+                    updateSelectedDisplay();
+                    renderOptions(searchInput.value);
+                };
+
+                updateSelectedDisplay();
+            });
+        }
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.ss-wrapper.open').forEach(w => w.classList.remove('open'));
+        });
+
+        document.addEventListener('DOMContentLoaded', initSearchableSelects);
     </script>
 
     @stack('scripts')

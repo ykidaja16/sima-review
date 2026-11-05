@@ -61,11 +61,17 @@
             </div>
             <div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;">Nilai Akhir</div>
         </div>
-        <div class="card-footer" style="font-size:0.78rem;color:var(--text-muted);">
-            <i class="bi bi-person"></i> {{ $p->evaluator->name ?? '-' }}
-            @if($p->catatan)
-            <div style="margin-top:4px;font-style:italic;">"{{ Str::limit($p->catatan, 60) }}"</div>
-            @endif
+        <div class="card-footer" style="font-size:0.78rem;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div>
+                @if($p->catatan)
+                <div style="font-style:italic;">"{{ Str::limit($p->catatan, 60) }}"</div>
+                @else
+                <span>Periode {{ $p->periode->nama ?? '-' }}</span>
+                @endif
+            </div>
+            <a href="{{ route('penilaian.show', $p) }}" class="btn btn-info btn-sm" title="Detail & Beri Tanggapan">
+                <i class="bi bi-eye"></i> Detail
+            </a>
         </div>
     </div>
     @empty

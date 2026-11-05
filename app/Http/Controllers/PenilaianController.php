@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Divisi;
 use App\Models\Karyawan;
 use App\Models\ParameterSop;
 use App\Models\Penilaian;
@@ -40,13 +41,28 @@ class PenilaianController extends Controller
         }
 
         // Filter opsional
-        if ($request->filled('periode_id')) $query->where('periode_id', $request->periode_id);
-        if ($request->filled('karyawan_id')) $query->where('karyawan_id', $request->karyawan_id);
+        if ($request->filled('periode_id')) {
+            $query->where('periode_id', $request->periode_id);
+        }
+        if ($request->filled('karyawan_id')) {
+            $query->where('karyawan_id', $request->karyawan_id);
+        }
+        if ($request->filled('divisi_id')) {
+            $query->whereHas('karyawan', fn($q) => $q->where('divisi_id', $request->divisi_id));
+        }
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->whereHas('karyawan', function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%");
+            });
+        }
 
         $penilaians = $query->paginate(15)->withQueryString();
         $periodes   = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
+        $divisis    = Divisi::active()->orderBy('nama')->get();
 
-        return view('penilaian.index', compact('penilaians', 'periodes'));
+        return view('penilaian.index', compact('penilaians', 'periodes', 'divisis'));
     }
 
     public function create(Request $request): View|RedirectResponse
@@ -92,9 +108,10 @@ class PenilaianController extends Controller
         $karyawansQuery->whereDoesntHave('penilaians', fn($q) => $q->where('periode_id', $periodeAktif->id));
 
         $karyawans  = $karyawansQuery->orderBy('nama')->get();
+        $divisis    = Divisi::active()->orderBy('nama')->get();
         $parameters = ParameterSop::active()->get()->groupBy('kategori');
 
-        return view('penilaian.create', compact('karyawans', 'parameters', 'periodeAktif'));
+        return view('penilaian.create', compact('karyawans', 'divisis', 'parameters', 'periodeAktif'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -245,5 +262,34 @@ class PenilaianController extends Controller
 
         return redirect()->route('penilaian.index')
             ->with('success', 'Penilaian berhasil dihapus.');
+    }
+
+    public function tanggapan(Request $request, Penilaian $penilaian): RedirectResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if (!$user->karyawan || $penilaian->karyawan_id !== $user->karyawan->id) {
+            return back()->with('error', 'Hanya karyawan yang dinilai yang dapat memberikan tanggapan.');
+        }
+
+        $validated = $request->validate([
+            'tanggapan' => ['required', 'string', 'max:2000'],
+        ], [
+            'tanggapan.required' => 'Tanggapan tidak boleh kosong.',
+            'tanggapan.max'      => 'Tanggapan maksimal 2000 karakter.',
+        ]);
+
+        $penilaian->update([
+            'tanggapan'         => $validated['tanggapan'],
+            'tanggal_tanggapan' => now(),
+        ]);
+
+        AuditLogService::log('TANGGAPAN_PENILAIAN', 'Penilaian', $penilaian->id, null, [
+            'tanggapan' => $validated['tanggapan'],
+        ]);
+
+        return redirect()->route('penilaian.show', $penilaian)
+            ->with('success', 'Tanggapan Anda berhasil disimpan.');
     }
 }

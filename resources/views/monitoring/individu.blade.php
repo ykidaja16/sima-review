@@ -84,12 +84,25 @@
 @endif
 
 {{-- Tabel Riwayat --}}
+@php
+    $isViewingSelf = auth()->user()->karyawan && $karyawan && $karyawan->id === auth()->user()->karyawan->id;
+@endphp
 <div class="card">
     <div class="card-header"><h5><i class="bi bi-clock-history" style="color:#0284c7;margin-right:6px;"></i>Riwayat Penilaian</h5></div>
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>Periode</th><th>Tanggal</th><th>Evaluator</th><th>Nilai Akhir</th><th>Kategori</th><th>Catatan</th><th>Aksi</th></tr>
+                <tr>
+                    <th>Periode</th>
+                    <th>Tanggal</th>
+                    @if(!$isViewingSelf)
+                    <th>Evaluator</th>
+                    @endif
+                    <th>Nilai Akhir</th>
+                    <th>Kategori</th>
+                    <th>Catatan</th>
+                    <th>Aksi</th>
+                </tr>
             </thead>
             <tbody>
                 @forelse($penilaians as $p)
@@ -97,7 +110,9 @@
                 <tr>
                     <td style="font-weight:600;">{{ $p->periode->nama ?? '-' }}</td>
                     <td>{{ $p->tanggal_penilaian?->format('d M Y') }}</td>
+                    @if(!$isViewingSelf)
                     <td>{{ $p->evaluator->name ?? '-' }}</td>
+                    @endif
                     <td>
                         <span class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:1.1rem;font-weight:800;">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}
@@ -114,7 +129,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted);">Belum ada penilaian</td></tr>
+                <tr><td colspan="{{ $isViewingSelf ? 6 : 7 }}" style="text-align:center;padding:32px;color:var(--text-muted);">Belum ada penilaian</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -15,14 +15,17 @@ class Penilaian extends Model
         'periode_id',
         'nilai_akhir',
         'catatan',
+        'tanggapan',
+        'tanggal_tanggapan',
         'tanggal_penilaian',
     ];
 
     protected function casts(): array
     {
         return [
-            'nilai_akhir'      => 'float',
+            'nilai_akhir'       => 'float',
             'tanggal_penilaian' => 'date',
+            'tanggal_tanggapan' => 'datetime',
         ];
     }
 

@@ -71,13 +71,22 @@
 <div class="card" style="margin-bottom:20px;">
     <div class="card-header"><h5><i class="bi bi-person-badge-fill" style="color:#3b82f6;margin-right:6px;"></i>Data Karyawan & Penilaian</h5></div>
     <div class="card-body">
-        <div class="grid grid-3">
+        <div class="grid grid-4">
             <div class="form-group">
-                <label class="form-label">Karyawan Dinilai *</label>
-                <select name="karyawan_id" class="form-select @error('karyawan_id') is-invalid @enderror" required id="karyawanSelect">
+                <label class="form-label">Filter Divisi</label>
+                <select id="filterDivisiSelect" class="form-select searchable-select" data-placeholder="Cari divisi...">
+                    <option value="">Semua Divisi</option>
+                    @foreach($divisis as $d)
+                    <option value="{{ $d->id }}">{{ $d->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Cari & Pilih Karyawan Dinilai *</label>
+                <select name="karyawan_id" class="form-select searchable-select @error('karyawan_id') is-invalid @enderror" required id="karyawanSelect" data-placeholder="Cari nama karyawan...">
                     <option value="">-- Pilih Karyawan --</option>
                     @foreach($karyawans as $k)
-                    <option value="{{ $k->id }}" {{ old('karyawan_id') == $k->id ? 'selected' : '' }}>
+                    <option value="{{ $k->id }}" data-divisi="{{ $k->divisi_id }}" {{ old('karyawan_id') == $k->id ? 'selected' : '' }}>
                         {{ $k->nama }} — {{ $k->jabatan->nama ?? '-' }} ({{ $k->divisi->nama ?? '-' }})
                     </option>
                     @endforeach
@@ -219,5 +228,25 @@ function recalculate() {
 
 // Init on load
 recalculate();
+
+const filterDivisiEl = document.getElementById('filterDivisiSelect');
+const karyawanSelectEl = document.getElementById('karyawanSelect');
+if (filterDivisiEl && karyawanSelectEl) {
+    filterDivisiEl.addEventListener('change', function() {
+        const divId = this.value;
+        Array.from(karyawanSelectEl.options).forEach(opt => {
+            if (!opt.value) return;
+            const match = !divId || opt.dataset.divisi === divId;
+            opt.hidden = !match;
+            opt.disabled = !match;
+        });
+        if (karyawanSelectEl.selectedOptions[0]?.hidden) {
+            karyawanSelectEl.value = '';
+        }
+        if (typeof karyawanSelectEl._refreshSearchableSelect === 'function') {
+            karyawanSelectEl._refreshSearchableSelect();
+        }
+    });
+}
 </script>
 @endpush

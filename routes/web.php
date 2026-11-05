@@ -78,10 +78,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('penilaian', PenilaianController::class)->except(['show']);
     });
 
-    // ---- Penilaian Show (Bisa diakses semua role termasuk pelaksana untuk melihat penilaian sendiri) ----
+    // ---- Penilaian Show & Tanggapan (Bisa diakses semua role termasuk pelaksana untuk melihat & menanggapi penilaian sendiri) ----
     Route::get('/penilaian/{penilaian}', [PenilaianController::class, 'show'])
         ->whereNumber('penilaian')
         ->name('penilaian.show');
+    Route::post('/penilaian/{penilaian}/tanggapan', [PenilaianController::class, 'tanggapan'])
+        ->whereNumber('penilaian')
+        ->name('penilaian.tanggapan');
 
     // ---- Monitoring ----
     Route::prefix('monitoring')->name('monitoring.')->group(function () {
@@ -112,6 +115,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [KetidaksesuaianController::class, 'create'])->name('create');
         Route::post('/', [KetidaksesuaianController::class, 'store'])->name('store');
         Route::get('/{ketidaksesuaian}', [KetidaksesuaianController::class, 'show'])->name('show');
+        Route::get('/{ketidaksesuaian}/export-pdf', [KetidaksesuaianController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/{ketidaksesuaian}/export-excel', [KetidaksesuaianController::class, 'exportExcel'])->name('export-excel');
         Route::post('/{ketidaksesuaian}/tindaklanjut', [KetidaksesuaianController::class, 'tindaklanjut'])->name('tindaklanjut');
         Route::post('/{ketidaksesuaian}/verifikasi', [KetidaksesuaianController::class, 'verifikasi'])->name('verifikasi');
     });

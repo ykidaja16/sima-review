@@ -26,13 +26,23 @@ class JenisKetidaksesuaianController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'nama'      => ['required', 'string', 'max:100'],
-            'deskripsi' => ['nullable', 'string'],
-            'is_active' => ['boolean'],
+            'nama'                  => ['required', 'string', 'max:100'],
+            'deskripsi'             => ['nullable', 'string'],
+            'kategori_temuan_input' => ['nullable', 'string'],
+            'is_active'             => ['boolean'],
         ]);
 
-        $validated['is_active'] = $request->boolean('is_active', true);
-        $jenis = JenisKetidaksesuaian::create($validated);
+        $kategoriRaw = $request->input('kategori_temuan_input', '');
+        $kategoris   = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', (string) $kategoriRaw))));
+
+        $data = [
+            'nama'            => $validated['nama'],
+            'deskripsi'       => $validated['deskripsi'] ?? null,
+            'kategori_temuan' => !empty($kategoris) ? $kategoris : null,
+            'is_active'       => $request->boolean('is_active', true),
+        ];
+
+        $jenis = JenisKetidaksesuaian::create($data);
         AuditLogService::log('CREATE_JENIS_KETIDAKSESUAIAN', 'JenisKetidaksesuaian', $jenis->id, null, $jenis->toArray());
 
         return redirect()->route('master.jenis-ketidaksesuaian.index')
@@ -47,14 +57,24 @@ class JenisKetidaksesuaianController extends Controller
     public function update(Request $request, JenisKetidaksesuaian $jenisKetidaksesuaian): RedirectResponse
     {
         $validated = $request->validate([
-            'nama'      => ['required', 'string', 'max:100'],
-            'deskripsi' => ['nullable', 'string'],
-            'is_active' => ['boolean'],
+            'nama'                  => ['required', 'string', 'max:100'],
+            'deskripsi'             => ['nullable', 'string'],
+            'kategori_temuan_input' => ['nullable', 'string'],
+            'is_active'             => ['boolean'],
         ]);
 
-        $validated['is_active'] = $request->boolean('is_active');
+        $kategoriRaw = $request->input('kategori_temuan_input', '');
+        $kategoris   = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', (string) $kategoriRaw))));
+
+        $data = [
+            'nama'            => $validated['nama'],
+            'deskripsi'       => $validated['deskripsi'] ?? null,
+            'kategori_temuan' => !empty($kategoris) ? $kategoris : null,
+            'is_active'       => $request->boolean('is_active'),
+        ];
+
         $dataLama = $jenisKetidaksesuaian->toArray();
-        $jenisKetidaksesuaian->update($validated);
+        $jenisKetidaksesuaian->update($data);
         AuditLogService::log('UPDATE_JENIS_KETIDAKSESUAIAN', 'JenisKetidaksesuaian', $jenisKetidaksesuaian->id, $dataLama, $jenisKetidaksesuaian->fresh()->toArray());
 
         return redirect()->route('master.jenis-ketidaksesuaian.index')

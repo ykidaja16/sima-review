@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 @section('title', 'Detail FTKP: ' . $ketidaksesuaian->nomor_ftkp)
 @section('content')
 
@@ -12,7 +12,15 @@
         <h2>FTKP: {{ $ketidaksesuaian->nomor_ftkp }}</h2>
         <p>Dibuat: {{ $ketidaksesuaian->tanggal_laporan->format('d F Y') }} &mdash; <span class="badge badge-{{ $statusColor }}">{{ $statusLabel }}</span></p>
     </div>
-    <a href="{{ route('ketidaksesuaian.index') }}" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="{{ route('ketidaksesuaian.export-excel', $ketidaksesuaian) }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel-fill"></i> Export Excel
+        </a>
+        <a href="{{ route('ketidaksesuaian.export-pdf', $ketidaksesuaian) }}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
+        </a>
+        <a href="{{ route('ketidaksesuaian.index') }}" class="btn btn-outline"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
 </div>
 
 {{-- BAGIAN 1: PENGGAGAS --}}
@@ -36,7 +44,7 @@
             </div>
             <div>
                 <div class="form-label">Kategori Temuan</div>
-                <span class="badge badge-{{ match($ketidaksesuaian->kategori_temuan) { 'ok' => 'success', 'observasi' => 'warning', default => 'danger' } }}">
+                <span class="badge badge-{{ $ketidaksesuaian->kategori_color }}">
                     {{ $ketidaksesuaian->kategori_label }}
                 </span>
             </div>
@@ -84,12 +92,12 @@
                 <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border);white-space:pre-wrap;font-size:0.875rem;">{{ $tl->akar_masalah }}</div>
             </div>
             <div>
-                <div class="form-label">Tindakan Korektif</div>
+                <div class="form-label">Tindakan Korektif/Perbaikan</div>
                 <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border);white-space:pre-wrap;font-size:0.875rem;">{{ $tl->tindakan_korektif }}</div>
             </div>
         </div>
         <div style="margin-top:16px;">
-            <div class="form-label">Tindakan Pencegahan</div>
+            <div class="form-label">Tindakan Koreksi</div>
             <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border);white-space:pre-wrap;font-size:0.875rem;">{{ $tl->tindakan_pencegahan }}</div>
         </div>
         @else
@@ -110,12 +118,12 @@
                 </div>
                 <div class="grid grid-2">
                     <div class="form-group">
-                        <label class="form-label">Tindakan Korektif *</label>
+                        <label class="form-label">Tindakan Korektif/Perbaikan *</label>
                         <textarea name="tindakan_korektif" class="form-control @error('tindakan_korektif') is-invalid @enderror" rows="3" required>{{ old('tindakan_korektif') }}</textarea>
                         @error('tindakan_korektif')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Tindakan Pencegahan *</label>
+                        <label class="form-label">Tindakan Koreksi *</label>
                         <textarea name="tindakan_pencegahan" class="form-control @error('tindakan_pencegahan') is-invalid @enderror" rows="3" required>{{ old('tindakan_pencegahan') }}</textarea>
                         @error('tindakan_pencegahan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -142,10 +150,10 @@
     </div>
     <div class="card-body">
         <div class="grid grid-2">
-            {{-- Verifikasi Manager --}}
+            {{-- Verifikasi 1 (Manager Penggagas / Kacab) --}}
             <div style="border:1px solid var(--border);border-radius:10px;padding:16px;">
                 <div style="font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-                    <i class="bi bi-person-check-fill" style="color:#0284c7;"></i> Verifikasi Manager
+                    <i class="bi bi-person-check-fill" style="color:#0284c7;"></i> Verifikasi 1 (Manager Penggagas / Kacab)
                 </div>
                 @if($ketidaksesuaian->verifikasiManager)
                 @php $vm = $ketidaksesuaian->verifikasiManager; @endphp
@@ -157,7 +165,7 @@
                 <div style="font-size:0.85rem;color:var(--text-muted);">Oleh: {{ $vm->verifikator->name }}</div>
                 @if($vm->alasan)<div style="font-size:0.875rem;margin-top:8px;">{{ $vm->alasan }}</div>@endif
                 @else
-                <div style="color:var(--text-muted);font-size:0.875rem;">Menunggu verifikasi manager...</div>
+                <div style="color:var(--text-muted);font-size:0.875rem;">Menunggu verifikasi Manager Penggagas / Kepala Cabang...</div>
                 @if($bisaVerifManager)
                 <form action="{{ route('ketidaksesuaian.verifikasi', $ketidaksesuaian) }}" method="POST" style="margin-top:12px;">
                     @csrf

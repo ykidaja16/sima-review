@@ -18,7 +18,20 @@
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body">
         <form method="GET" action="{{ route('penilaian.index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-            <div style="flex:1;min-width:200px;">
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Cari Nama / NIP</label>
+                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Ketik nama atau NIP...">
+            </div>
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Filter Divisi</label>
+                <select name="divisi_id" class="form-select searchable-select" data-placeholder="Cari divisi...">
+                    <option value="">Semua Divisi</option>
+                    @foreach($divisis as $d)
+                    <option value="{{ $d->id }}" {{ request('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="flex:1;min-width:180px;">
                 <label class="form-label">Filter Periode</label>
                 <select name="periode_id" class="form-select">
                     <option value="">Semua Periode</option>
@@ -35,6 +48,10 @@
     </div>
 </div>
 
+@php
+    $isSelfViewOnly = auth()->user()->isPelaksana();
+@endphp
+
 <div class="card">
     <div class="table-wrapper">
         <table>
@@ -45,14 +62,20 @@
                     <th>Divisi</th>
                     <th>Periode</th>
                     <th>Tanggal</th>
+                    @if(!$isSelfViewOnly)
                     <th>Evaluator</th>
+                    @endif
                     <th>Nilai Akhir</th>
+                    <th>Tanggapan</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($penilaians as $p)
-                @php $kat = $p->kategori; @endphp
+                @php
+                    $kat = $p->kategori;
+                    $isMyOwnScore = auth()->user()->karyawan && $p->karyawan_id === auth()->user()->karyawan->id;
+                @endphp
                 <tr>
                     <td style="color:var(--text-muted);">{{ $penilaians->firstItem() + $loop->index }}</td>
                     <td>
@@ -62,12 +85,23 @@
                     <td>{{ $p->karyawan->divisi->nama ?? '-' }}</td>
                     <td>{{ $p->periode->nama ?? '-' }}</td>
                     <td>{{ $p->tanggal_penilaian?->format('d/m/Y') }}</td>
-                    <td>{{ $p->evaluator->name ?? '-' }}</td>
+                    @if(!$isSelfViewOnly)
+                    <td>{{ $isMyOwnScore ? '—' : ($p->evaluator->name ?? '-') }}</td>
+                    @endif
                     <td>
                         <div class="badge badge-{{ $kat?->warna ?? 'secondary' }}" style="font-size:0.85rem;font-weight:700;">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}
                         </div>
                         @if($kat)<div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">{{ $kat->nama }}</div>@endif
+                    </td>
+                    <td>
+                        @if($p->tanggapan)
+                            <span class="badge badge-info" title="{{ Str::limit($p->tanggapan, 100) }}">
+                                <i class="bi bi-chat-dots-fill" style="margin-right:4px;"></i> Ada Tanggapan
+                            </span>
+                        @else
+                            <span style="font-size:0.78rem;color:var(--text-muted);">Belum ada</span>
+                        @endif
                     </td>
                     <td>
                         <div style="display:flex;gap:4px;">

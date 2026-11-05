@@ -99,12 +99,33 @@ class Ketidaksesuaian extends Model
 
     public function getKategoriLabelAttribute(): string
     {
-        return match($this->kategori_temuan) {
+        return match(strtolower((string) $this->kategori_temuan)) {
             'ok'        => 'OK',
             'observasi' => 'Observasi',
             'nc'        => 'NC (Ketidaksesuaian)',
-            default     => $this->kategori_temuan,
+            'nc minor'  => 'NC Minor',
+            'nc mayor'  => 'NC Mayor',
+            'ofi'       => 'OFI',
+            default     => (string) $this->kategori_temuan,
         };
+    }
+
+    public function getKategoriColorAttribute(): string
+    {
+        $val = strtolower((string) $this->kategori_temuan);
+        if ($val === 'ok' || $val === 'ofi') {
+            return 'success';
+        }
+        if ($val === 'observasi' || str_contains($val, 'ami 1') || str_contains($val, 'minor')) {
+            return 'warning';
+        }
+        if (str_contains($val, 'ami 2')) {
+            return 'info';
+        }
+        if ($val === 'nc' || str_contains($val, 'mayor') || str_contains($val, 'ami 3')) {
+            return 'danger';
+        }
+        return 'primary';
     }
 
     // ---- Auto-generate nomor FTKP ----

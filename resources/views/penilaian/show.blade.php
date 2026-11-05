@@ -35,7 +35,10 @@
     <div class="card">
         <div class="card-header"><h5><i class="bi bi-person-badge-fill" style="color:#3b82f6;margin-right:6px;"></i>Informasi Karyawan & Penilaian</h5></div>
         <div class="card-body">
-            @php $k = $penilaian->karyawan; @endphp
+            @php
+                $k = $penilaian->karyawan;
+                $isOwnPenilaian = auth()->user()->karyawan && $penilaian->karyawan_id === auth()->user()->karyawan->id;
+            @endphp
             <table style="width:100%;border-collapse:collapse;">
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;width:40%;">NIP</td><td style="font-weight:600;">{{ $k->nip }}</td></tr>
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Nama Karyawan</td><td style="font-weight:600;">{{ $k->nama }}</td></tr>
@@ -43,7 +46,9 @@
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Divisi</td><td>{{ $k->divisi->nama ?? '-' }}</td></tr>
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Periode</td><td style="font-weight:600;color:var(--primary);">{{ $penilaian->periode->nama ?? '-' }}</td></tr>
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Tanggal Penilaian</td><td>{{ $penilaian->tanggal_penilaian?->format('d M Y') }}</td></tr>
+                @if(!$isOwnPenilaian)
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Evaluator</td><td>{{ $penilaian->evaluator->name ?? '-' }}</td></tr>
+                @endif
             </table>
         </div>
     </div>
@@ -125,6 +130,48 @@
         </div>
         @endforeach
         @endforeach
+    </div>
+</div>
+
+{{-- Tanggapan Karyawan terhadap Penilaian --}}
+<div class="card" style="margin-top:20px;">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <h5><i class="bi bi-chat-left-text-fill" style="color:#059669;margin-right:6px;"></i>Tanggapan Karyawan terhadap Penilaian</h5>
+        @if($penilaian->tanggal_tanggapan)
+        <span style="font-size:0.78rem;color:var(--text-muted);">
+            <i class="bi bi-clock"></i> Ditanggapi: {{ $penilaian->tanggal_tanggapan->format('d M Y, H:i') }}
+        </span>
+        @endif
+    </div>
+    <div class="card-body">
+        @if($penilaian->tanggapan)
+        <div style="padding:14px 16px;background:#f8fafc;border-left:4px solid #059669;border-radius:8px;margin-bottom:{{ $isOwnPenilaian ? '16px' : '0' }};">
+            <div style="font-size:0.8rem;font-weight:600;color:#059669;margin-bottom:4px;">
+                Tanggapan dari {{ $penilaian->karyawan->nama ?? 'Karyawan' }}:
+            </div>
+            <div style="font-size:0.9rem;color:var(--text);white-space:pre-wrap;">{{ $penilaian->tanggapan }}</div>
+        </div>
+        @else
+        <div style="color:var(--text-muted);font-size:0.875rem;margin-bottom:{{ $isOwnPenilaian ? '16px' : '0' }};">
+            <i class="bi bi-info-circle"></i> Belum ada tanggapan dari karyawan yang dinilai.
+        </div>
+        @endif
+
+        @if($isOwnPenilaian)
+        <form action="{{ route('penilaian.tanggapan', $penilaian) }}" method="POST">
+            @csrf
+            <div class="form-group">
+                <label class="form-label">{{ $penilaian->tanggapan ? 'Perbarui Tanggapan Anda' : 'Berikan Tanggapan Anda terhadap Penilaian Ini' }} *</label>
+                <textarea name="tanggapan" class="form-control @error('tanggapan') is-invalid @enderror" rows="3" required placeholder="Tuliskan tanggapan, masukan, atau konfirmasi Anda terkait hasil penilaian ini...">{{ old('tanggapan', $penilaian->tanggapan) }}</textarea>
+                @error('tanggapan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div style="display:flex;justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send-fill"></i> {{ $penilaian->tanggapan ? 'Perbarui Tanggapan' : 'Kirim Tanggapan' }}
+                </button>
+            </div>
+        </form>
+        @endif
     </div>
 </div>
 

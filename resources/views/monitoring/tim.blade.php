@@ -14,19 +14,36 @@
     @endif
 </div>
 
-{{-- Filter Periode --}}
+{{-- Filter Periode, Divisi & Search Nama --}}
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body">
-        <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-            <div style="flex:2;min-width:200px;">
+        <form method="GET" action="{{ route('monitoring.tim') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Cari Nama / NIP</label>
+                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Ketik nama atau NIP...">
+            </div>
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Filter Divisi</label>
+                <select name="divisi_id" class="form-select searchable-select" data-placeholder="Cari divisi...">
+                    <option value="">Semua Divisi</option>
+                    @foreach($divisis as $d)
+                    <option value="{{ $d->id }}" {{ request('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="flex:1;min-width:180px;">
                 <label class="form-label">Filter Periode</label>
-                <select name="periode_id" class="form-select" onchange="this.form.submit()">
+                <select name="periode_id" class="form-select">
                     <option value="">Periode Aktif</option>
                     @foreach($periodes as $p)
                     <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>{{ $p->nama }}</option>
                     @endforeach
                 </select>
             </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+            <a href="{{ route('monitoring.tim') }}" class="btn btn-outline">Reset</a>
         </form>
     </div>
 </div>

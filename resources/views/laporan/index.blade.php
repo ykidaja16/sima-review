@@ -28,11 +28,13 @@
         <form method="GET" action="{{ route('laporan.index') }}" id="filterForm">
             <div class="grid grid-3">
                 <div class="form-group">
-                    <label class="form-label">Periode</label>
-                    <select name="periode_id" class="form-select">
+                    <label class="form-label">Periode (Tanggal)</label>
+                    <select name="periode_id" class="form-select searchable-select" data-placeholder="Cari tanggal / nama periode...">
                         <option value="">Semua Periode</option>
                         @foreach($periodes as $p)
-                        <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>{{ $p->nama }}</option>
+                        <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>
+                            {{ $p->tanggal_mulai?->format('d M Y') }} – {{ $p->tanggal_selesai?->format('d M Y') }} ({{ $p->nama }})
+                        </option>
                         @endforeach
                     </select>
                 </div>

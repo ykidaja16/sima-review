@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 @section('title', 'Tambah Jenis Ketidaksesuaian')
 @section('content')
 <div class="page-header">
@@ -17,6 +17,11 @@
             <div class="form-group">
                 <label class="form-label">Deskripsi</label>
                 <textarea name="deskripsi" class="form-control" rows="3" placeholder="Keterangan tambahan (opsional)">{{ old('deskripsi') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pilihan Kategori Temuan (pisahkan dengan koma)</label>
+                <input type="text" name="kategori_temuan_input" class="form-control" value="{{ old('kategori_temuan_input', 'Observasi, NC Minor, NC Mayor, OFI') }}" placeholder="Contoh: AMI 1, AMI 2, AMI 3 atau Observasi, NC Minor, NC Mayor, OFI">
+                <small style="color:var(--text-muted);font-size:0.75rem;">Daftar kategori ini akan muncul otomatis saat jenis ketidaksesuaian ini dipilih pada form FTKP.</small>
             </div>
             <div class="form-group">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">

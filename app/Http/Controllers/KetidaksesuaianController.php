@@ -10,11 +10,13 @@ use App\Models\KetidaksesuaianVerifikasi;
 use App\Models\JenisKetidaksesuaian;
 use App\Models\User;
 use App\Services\AuditLogService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KetidaksesuaianController extends Controller
 {
@@ -33,13 +35,13 @@ class KetidaksesuaianController extends Controller
         return $user->hasRole(['super_admin', 'kacab', 'mutu']) || $user->isMutu();
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
         /** @var User $user */
         $user = Auth::user();
         $karyawan = Karyawan::where('user_id', $user->id)->first();
 
-        $query = Ketidaksesuaian::with(['pelapor', 'divisiTujuan', 'jenis', 'tindaklanjut', 'verifikasiManager', 'verifikasiKacab'])
+        $query = Ketidaksesuaian::with(['pelapor', 'divisiPelapor', 'divisiTujuan', 'jenis', 'tindaklanjut', 'verifikasiManager', 'verifikasiKacab'])
             ->orderBy('created_at', 'desc');
 
         if (!$this->canViewAll()) {
@@ -63,8 +65,45 @@ class KetidaksesuaianController extends Controller
             });
         }
 
-        $ketidaksesuaians = $query->paginate(15);
-        return view('ketidaksesuaian.index', compact('ketidaksesuaians', 'karyawan'));
+        // Filter tambahan sesuai permintaan
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_laporan', $request->tanggal);
+        }
+        if ($request->filled('divisi_pelapor_id')) {
+            $query->where('divisi_pelapor_id', $request->divisi_pelapor_id);
+        }
+        if ($request->filled('pelapor_id')) {
+            $query->where('pelapor_id', $request->pelapor_id);
+        }
+        if ($request->filled('divisi_tujuan_id')) {
+            $query->where('divisi_tujuan_id', $request->divisi_tujuan_id);
+        }
+        if ($request->filled('kategori_temuan')) {
+            $query->where('kategori_temuan', $request->kategori_temuan);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $ketidaksesuaians = $query->paginate(15)->withQueryString();
+
+        $divisis  = Divisi::orderBy('nama')->get();
+        $pelapors = Karyawan::active()->with('divisi')->orderBy('nama')->get();
+
+        // Kumpulkan seluruh opsi kategori temuan yang tersedia
+        $jenisKategoris = JenisKetidaksesuaian::active()->get()
+            ->flatMap(fn($j) => $j->kategori_temuan_list);
+        $existingKategoris = Ketidaksesuaian::select('kategori_temuan')->distinct()->pluck('kategori_temuan');
+        $kategoriList = $jenisKategoris
+            ->merge(['AMI 1', 'AMI 2', 'AMI 3', 'Observasi', 'NC Minor', 'NC Mayor', 'OFI', 'ok', 'observasi', 'nc'])
+            ->merge($existingKategoris)
+            ->filter()
+            ->unique()
+            ->values();
+
+        return view('ketidaksesuaian.index', compact(
+            'ketidaksesuaians', 'karyawan', 'divisis', 'pelapors', 'kategoriList'
+        ));
     }
 
     public function create(): View
@@ -84,7 +123,7 @@ class KetidaksesuaianController extends Controller
             'jenis_id'          => ['nullable', 'exists:jenis_ketidaksesuaians,id'],
             'jenis_lainnya'     => ['required_without:jenis_id', 'nullable', 'string', 'max:200'],
             'penjelasan_temuan' => ['required', 'string'],
-            'kategori_temuan'   => ['required', 'in:ok,observasi,nc'],
+            'kategori_temuan'   => ['required', 'string', 'max:100'],
             'divisi_tujuan_id'  => ['required', 'exists:divisis,id'],
         ]);
 
@@ -123,14 +162,15 @@ class KetidaksesuaianController extends Controller
             && $karyawan
             && $karyawan->divisi_id == $ketidaksesuaian->divisi_tujuan_id;
 
-        // Tentukan apakah user bisa verifikasi manager
+        // Tentukan apakah user bisa verifikasi manager (Verifikasi 1: Manager Penggagas atau diambil alih oleh Kacab/Super Admin)
         $bisaVerifManager = $ketidaksesuaian->status === 'verifikasi_manager'
             && !$ketidaksesuaian->verifikasiManager
-            && $user->hasRole(['manager'])
-            && $karyawan
-            && $karyawan->divisi_id == $ketidaksesuaian->divisi_tujuan_id;
+            && (
+                $user->hasRole(['super_admin', 'kacab'])
+                || ($user->hasRole(['manager']) && $karyawan && $karyawan->divisi_id == $ketidaksesuaian->divisi_pelapor_id)
+            );
 
-        // Tentukan apakah user bisa verifikasi kacab
+        // Tentukan apakah user bisa verifikasi kacab (Verifikasi 2: Kacab/Super Admin)
         $bisaVerifKacab = $ketidaksesuaian->status === 'verifikasi_kacab'
             && !$ketidaksesuaian->verifikasiKacab
             && $user->hasRole(['super_admin', 'kacab']);
@@ -180,14 +220,20 @@ class KetidaksesuaianController extends Controller
     public function verifikasi(Request $request, Ketidaksesuaian $ketidaksesuaian): RedirectResponse
     {
         /** @var User $user */
-        $user  = Auth::user();
-        $level = null;
+        $user     = Auth::user();
+        $karyawan = Karyawan::where('user_id', $user->id)->first();
+        $level    = null;
 
-        if ($user->hasRole(['manager']) && $ketidaksesuaian->status === 'verifikasi_manager') {
-            $level = 'manager';
-        } elseif ($user->hasRole(['super_admin', 'kacab']) && $ketidaksesuaian->status === 'verifikasi_kacab') {
+        if ($ketidaksesuaian->status === 'verifikasi_manager') {
+            $isManagerPenggagas = $user->hasRole(['manager']) && $karyawan && $karyawan->divisi_id == $ketidaksesuaian->divisi_pelapor_id;
+            if ($isManagerPenggagas || $user->hasRole(['super_admin', 'kacab'])) {
+                $level = 'manager';
+            }
+        } elseif ($ketidaksesuaian->status === 'verifikasi_kacab' && $user->hasRole(['super_admin', 'kacab'])) {
             $level = 'kacab';
-        } else {
+        }
+
+        if (!$level) {
             return back()->with('error', 'Anda tidak berhak melakukan verifikasi pada tahap ini.');
         }
 
@@ -226,5 +272,36 @@ class KetidaksesuaianController extends Controller
             : 'Verifikasi ditolak. Tindak lanjut perlu diulang.';
 
         return redirect()->route('ketidaksesuaian.show', $ketidaksesuaian)->with('success', $pesan);
+    }
+
+    public function exportPdf(Ketidaksesuaian $ketidaksesuaian)
+    {
+        $ketidaksesuaian->load([
+            'pelapor.divisi', 'divisiPelapor', 'jenis',
+            'divisiTujuan', 'tindaklanjut.user',
+            'verifikasiManager.verifikator', 'verifikasiKacab.verifikator',
+        ]);
+
+        $safeNomor = str_replace(['/', '\\'], '-', $ketidaksesuaian->nomor_ftkp);
+        $pdf = Pdf::loadView('ketidaksesuaian.pdf', compact('ketidaksesuaian'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download("FTKP-{$safeNomor}.pdf");
+    }
+
+    public function exportExcel(Ketidaksesuaian $ketidaksesuaian)
+    {
+        $ketidaksesuaian->load([
+            'pelapor.divisi', 'divisiPelapor', 'jenis',
+            'divisiTujuan', 'tindaklanjut.user',
+            'verifikasiManager.verifikator', 'verifikasiKacab.verifikator',
+        ]);
+
+        $safeNomor = str_replace(['/', '\\'], '-', $ketidaksesuaian->nomor_ftkp);
+
+        return Excel::download(
+            new \App\Exports\FtkpExport($ketidaksesuaian),
+            "FTKP-{$safeNomor}.xlsx"
+        );
     }
 }

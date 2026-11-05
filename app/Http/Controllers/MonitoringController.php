@@ -78,11 +78,20 @@ class MonitoringController extends Controller
             $query = Karyawan::active()
                 ->where('divisi_id', $karyawanUser->divisi_id);
         } else {
-            // Super admin: semua, bisa filter divisi
+            // Super admin / Kacab / Mutu: semua
             $query = Karyawan::active();
-            if ($request->filled('divisi_id')) {
-                $query->where('divisi_id', $request->divisi_id);
-            }
+        }
+
+        if ($request->filled('divisi_id')) {
+            $query->where('divisi_id', $request->divisi_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%");
+            });
         }
 
         $karyawans = $query->with([

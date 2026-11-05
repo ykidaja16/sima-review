@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 @section('title', 'Jenis Ketidaksesuaian')
 @section('content')
 <div class="page-header">
@@ -19,6 +19,7 @@
                     <tr>
                         <th>#</th>
                         <th>Nama Jenis</th>
+                        <th>Kategori Temuan</th>
                         <th>Deskripsi</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -29,6 +30,13 @@
                     <tr>
                         <td>{{ $jenis->firstItem() + $loop->index }}</td>
                         <td><strong>{{ $j->nama }}</strong></td>
+                        <td>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                @foreach($j->kategori_temuan_list as $katItem)
+                                <span class="badge badge-info" style="text-transform:none;">{{ $katItem }}</span>
+                                @endforeach
+                            </div>
+                        </td>
                         <td style="color:var(--text-muted);font-size:0.85rem;">{{ $j->deskripsi ?: '-' }}</td>
                         <td>
                             @if($j->is_active)
