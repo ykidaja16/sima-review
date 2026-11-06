@@ -75,10 +75,12 @@
             </div>
             <div class="form-group" style="display:flex;gap:24px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
                     <span class="form-label" style="margin:0;">Karyawan Aktif</span>
                 </label>
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="hidden" name="is_dinilai" value="0">
                     <input type="checkbox" name="is_dinilai" value="1" {{ old('is_dinilai', '1') == '1' ? 'checked' : '' }}>
                     <span class="form-label" style="margin:0;"><i class="bi bi-clipboard2-check" style="color:var(--primary);margin-right:4px;"></i>Masuk Penilaian (Wajib Dinilai)</span>
                 </label>

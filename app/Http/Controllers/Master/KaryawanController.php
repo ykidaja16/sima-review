@@ -80,7 +80,7 @@ class KaryawanController extends Controller
         DB::transaction(function () use ($validated, $request) {
             $userId = null;
 
-            $isDinilai = $request->boolean('is_dinilai', true);
+            $isDinilai = $request->boolean('is_dinilai');
 
             if ($request->boolean('buat_akun')) {
                 $user = User::create([
@@ -105,7 +105,7 @@ class KaryawanController extends Controller
                 'jabatan_id' => $validated['jabatan_id'],
                 'cabang_id'  => $validated['cabang_id'] ?? null,
                 'atasan_id'  => $validated['atasan_id'] ?? null,
-                'is_active'  => $request->boolean('is_active', true),
+                'is_active'  => $request->boolean('is_active'),
                 'is_dinilai' => $isDinilai,
             ]);
 
