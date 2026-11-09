@@ -27,8 +27,8 @@ class FtkpExport implements FromCollection, WithHeadings, WithStyles, ShouldAuto
         $vk = $k->verifikasiKacab;
 
         $jenisText = $k->jenis
-            ? $k->jenis->nama
-            : ($k->jenis_lainnya ? 'Lain-lain: ' . $k->jenis_lainnya : '-');
+            ? ($k->jenis->nama . ($k->jenis_lainnya ? ' (' . $k->jenis_lainnya . ')' : ''))
+            : ($k->jenis_lainnya ?: '-');
 
         $rows = [
             ['NOMOR FTKP', $k->nomor_ftkp],

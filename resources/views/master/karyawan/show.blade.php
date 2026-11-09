@@ -55,7 +55,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);">
                 <div>
                     <div style="font-size:0.875rem;font-weight:600;">{{ $p->periode->nama ?? '—' }}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted);">{{ $p->tanggal_penilaian?->format('d M Y') }} by {{ $p->evaluator->name ?? '—' }}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);">{{ $p->tanggal_penilaian?->format('d M Y') }}{{ (auth()->user()->isKacab() || auth()->user()->isSuperAdmin()) ? (' by ' . ($p->evaluator->name ?? '—')) : '' }}</div>
                 </div>
                 <div style="text-align:right;">
                     <span class="badge badge-{{ $kat?->warna ?? 'secondary' }}" style="font-size:0.85rem;">{{ number_format($p->nilai_akhir ?? 0, 2) }}</span>

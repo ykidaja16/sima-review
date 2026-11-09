@@ -46,7 +46,7 @@
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Divisi</td><td>{{ $k->divisi->nama ?? '-' }}</td></tr>
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Periode</td><td style="font-weight:600;color:var(--primary);">{{ $penilaian->periode->nama ?? '-' }}</td></tr>
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Tanggal Penilaian</td><td>{{ $penilaian->tanggal_penilaian?->format('d M Y') }}</td></tr>
-                @if(!$isOwnPenilaian)
+                @if(auth()->user()->isKacab() || auth()->user()->isSuperAdmin())
                 <tr><td style="padding:8px 0;color:var(--text-muted);font-size:0.85rem;">Evaluator</td><td>{{ $penilaian->evaluator->name ?? '-' }}</td></tr>
                 @endif
             </table>

@@ -61,7 +61,7 @@
         <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
             <div style="flex:2;min-width:200px;">
                 <label class="form-label">Periode</label>
-                <select name="periode_id" class="form-select" onchange="this.form.submit()">
+                <select name="periode_id" class="form-select searchable-select" data-placeholder="Cari periode..." onchange="this.form.submit()">
                     <option value="">Semua Periode</option>
                     @foreach($periodes as $p)
                     <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>{{ $p->nama }}</option>
@@ -70,7 +70,7 @@
             </div>
             <div style="flex:1;min-width:160px;">
                 <label class="form-label">Filter Divisi</label>
-                <select name="divisi_id" class="form-select" onchange="this.form.submit()">
+                <select name="divisi_id" class="form-select searchable-select" data-placeholder="Cari divisi..." onchange="this.form.submit()">
                     <option value="">Semua Divisi</option>
                     @foreach($divisis as $d)
                     <option value="{{ $d->id }}" {{ request('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>

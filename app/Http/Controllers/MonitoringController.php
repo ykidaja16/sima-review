@@ -20,7 +20,11 @@ class MonitoringController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        $karyawanId = $request->karyawan_id ?? $user->karyawan?->id;
+        $isSaya = $user->isPelaksana() || $request->boolean('saya');
+
+        $karyawanId = $isSaya
+            ? $user->karyawan?->id
+            : ($request->karyawan_id ?: null);
 
         $karyawan  = null;
         $penilaians = collect();
@@ -46,11 +50,45 @@ class MonitoringController extends Controller
             }
         }
 
-        $karyawans = $user->isPelaksana()
-            ? collect() // pelaksana tidak perlu list karyawan
-            : Karyawan::active()->with('divisi')->orderBy('nama')->get();
+        $periodeAktif = PeriodePenilaian::aktif()->first();
 
-        return view('monitoring.individu', compact('karyawan', 'penilaians', 'chartLabels', 'chartData', 'karyawans'));
+        // Karyawan list (hanya yang dinilai)
+        $karyawans = collect();
+        $divisis   = collect();
+
+        if (!$isSaya) {
+            $karyawanQuery = Karyawan::active()
+                ->where('is_dinilai', true)
+                ->with(['divisi', 'jabatan', 'penilaians' => function ($q) use ($periodeAktif) {
+                    if ($periodeAktif) {
+                        $q->where('periode_id', $periodeAktif->id);
+                    }
+                }]);
+
+            if ($user->isSupervisor()) {
+                // Supervisor: memonitor bawahan langsung
+                $karyawanQuery->where('atasan_id', $user->karyawan?->id);
+            } elseif ($user->isManager()) {
+                // Manager: memonitor divisi sendiri
+                if ($user->karyawan?->divisi_id) {
+                    $karyawanQuery->where('divisi_id', $user->karyawan->divisi_id);
+                }
+            }
+
+            $karyawans = $karyawanQuery->orderBy('nama')->get()->map(function ($k) {
+                $k->sudah_dinilai = $k->penilaians->isNotEmpty();
+                return $k;
+            });
+
+            $divisis = Divisi::active()
+                ->whereHas('karyawans', fn($q) => $q->active()->where('is_dinilai', true))
+                ->orderBy('nama')
+                ->get();
+        }
+
+        return view('monitoring.individu', compact(
+            'karyawan', 'penilaians', 'chartLabels', 'chartData', 'karyawans', 'divisis', 'periodeAktif', 'isSaya'
+        ));
     }
 
     /**
@@ -70,16 +108,18 @@ class MonitoringController extends Controller
         $karyawanUser = $user->karyawan;
 
         if ($user->isSupervisor() && $karyawanUser) {
-            // Supervisor: lihat bawahan langsung
+            // Supervisor: lihat bawahan langsung yang dinilai
             $query = Karyawan::active()
+                ->where('is_dinilai', true)
                 ->where('atasan_id', $karyawanUser->id);
         } elseif ($user->isManager() && $karyawanUser) {
-            // Manager: lihat divisi sendiri
+            // Manager: lihat divisi sendiri yang dinilai
             $query = Karyawan::active()
+                ->where('is_dinilai', true)
                 ->where('divisi_id', $karyawanUser->divisi_id);
         } else {
-            // Super admin / Kacab / Mutu: semua
-            $query = Karyawan::active();
+            // Super admin / Kacab / Mutu: semua yang dinilai
+            $query = Karyawan::active()->where('is_dinilai', true);
         }
 
         if ($request->filled('divisi_id')) {
@@ -102,7 +142,9 @@ class MonitoringController extends Controller
             ),
         ])->orderBy('nama')->get();
 
-        $divisis = Divisi::active()->get();
+        $divisis = Divisi::active()
+            ->whereHas('karyawans', fn($q) => $q->active()->where('is_dinilai', true))
+            ->get();
 
         return view('monitoring.tim', compact('karyawans', 'periodes', 'periodeAktif', 'divisis'));
     }
@@ -117,8 +159,10 @@ class MonitoringController extends Controller
         $periodeAktif = $periodeId ? PeriodePenilaian::find($periodeId) : PeriodePenilaian::aktif()->first();
 
         $divisiStats = Divisi::active()
+            ->whereHas('karyawans', fn($q) => $q->active()->where('is_dinilai', true))
             ->with(['karyawans' => function ($q) use ($periodeAktif) {
                 $q->active()
+                  ->where('is_dinilai', true)
                   ->with(['penilaians' => fn($p) => $p->when($periodeAktif, fn($p2) => $p2->where('periode_id', $periodeAktif?->id))]);
             }])
             ->get()
@@ -149,9 +193,12 @@ class MonitoringController extends Controller
         $periodeId = $request->periode_id;
         $divisiId  = $request->divisi_id;
         $periodes  = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
-        $divisis   = Divisi::active()->get();
+        $divisis   = Divisi::active()
+            ->whereHas('karyawans', fn($q) => $q->active()->where('is_dinilai', true))
+            ->get();
 
         $ranking = Karyawan::active()
+            ->where('is_dinilai', true)
             ->whereDoesntHave('user.role', fn($q) => $q->where('slug', 'kacab'))
             ->with(['divisi', 'jabatan'])
             ->withAvg(['penilaians as avg_nilai' => function ($q) use ($periodeId) {

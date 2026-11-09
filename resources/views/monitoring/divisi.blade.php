@@ -20,7 +20,7 @@
         <form method="GET" style="display:flex;gap:12px;align-items:flex-end;">
             <div style="flex:1;max-width:300px;">
                 <label class="form-label">Periode</label>
-                <select name="periode_id" class="form-select" onchange="this.form.submit()">
+                <select name="periode_id" class="form-select searchable-select" data-placeholder="Cari periode..." onchange="this.form.submit()">
                     <option value="">Semua Periode</option>
                     @foreach($periodes as $p)
                     <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>{{ $p->nama }}</option>

@@ -20,7 +20,10 @@
         <form method="GET" action="{{ route('monitoring.tim') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
             <div style="flex:1;min-width:180px;">
                 <label class="form-label">Cari Nama / NIP</label>
-                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Ketik nama atau NIP...">
+                <div class="search-input-box">
+                    <span class="search-icon"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama atau NIP...">
+                </div>
             </div>
             <div style="flex:1;min-width:180px;">
                 <label class="form-label">Filter Divisi</label>
@@ -33,7 +36,7 @@
             </div>
             <div style="flex:1;min-width:180px;">
                 <label class="form-label">Filter Periode</label>
-                <select name="periode_id" class="form-select">
+                <select name="periode_id" class="form-select searchable-select" data-placeholder="Cari periode...">
                     <option value="">Periode Aktif</option>
                     @foreach($periodes as $p)
                     <option value="{{ $p->id }}" {{ request('periode_id') == $p->id ? 'selected' : '' }}>{{ $p->nama }}</option>

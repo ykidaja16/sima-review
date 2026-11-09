@@ -206,9 +206,11 @@
                     {{ $penilaian->kategori?->nama ?? '-' }}
                 </div>
             </div>
+            @if(auth()->user()->isKacab() || auth()->user()->isSuperAdmin())
             <div style="font-size:0.75rem;color:var(--text-muted);max-width:260px;line-height:1.5;">
                 Dinilai oleh: <strong>{{ $penilaian->evaluator->name ?? '-' }}</strong>
             </div>
+            @endif
         </div>
         <div style="display:flex;gap:10px;">
             <a href="{{ route('penilaian.show', $penilaian) }}" class="btn btn-outline btn-lg">Batal</a>

@@ -67,7 +67,7 @@
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label class="form-label">Filter Status</label>
-                    <select name="status" class="form-select">
+                    <select name="status" class="form-select searchable-select" data-placeholder="Cari status...">
                         <option value="">Semua Status</option>
                         <option value="open" {{ request('status') === 'open' ? 'selected' : '' }}>Open</option>
                         <option value="verifikasi_manager" {{ request('status') === 'verifikasi_manager' ? 'selected' : '' }}>Verifikasi Manager</option>

@@ -15,8 +15,10 @@ class PenilaianExport implements FromCollection, WithHeadings, WithStyles, Shoul
 
     public function collection(): Collection
     {
-        return $this->penilaians->map(function ($p, $i) {
-            return [
+        $canSeeEvaluator = auth()->user()?->isKacab() || auth()->user()?->isSuperAdmin();
+
+        return $this->penilaians->map(function ($p, $i) use ($canSeeEvaluator) {
+            $row = [
                 'No'           => $i + 1,
                 'NIP'          => $p->karyawan?->nip ?? '-',
                 'Nama'         => $p->karyawan?->nama ?? '-',
@@ -24,16 +26,30 @@ class PenilaianExport implements FromCollection, WithHeadings, WithStyles, Shoul
                 'Jabatan'      => $p->karyawan?->jabatan?->nama ?? '-',
                 'Periode'      => $p->periode?->nama ?? '-',
                 'Tgl Penilaian' => $p->tanggal_penilaian?->format('d/m/Y') ?? '-',
-                'Evaluator'    => $p->evaluator?->name ?? '-',
-                'Nilai Akhir'  => number_format($p->nilai_akhir ?? 0, 2),
-                'Catatan'      => $p->catatan ?? '',
             ];
+
+            if ($canSeeEvaluator) {
+                $row['Evaluator'] = $p->evaluator?->name ?? '-';
+            }
+
+            $row['Nilai Akhir'] = number_format($p->nilai_akhir ?? 0, 2);
+            $row['Catatan']     = $p->catatan ?? '';
+
+            return $row;
         });
     }
 
     public function headings(): array
     {
-        return ['No', 'NIP', 'Nama', 'Divisi', 'Jabatan', 'Periode', 'Tgl Penilaian', 'Evaluator', 'Nilai Akhir', 'Catatan'];
+        $canSeeEvaluator = auth()->user()?->isKacab() || auth()->user()?->isSuperAdmin();
+        $headers = ['No', 'NIP', 'Nama', 'Divisi', 'Jabatan', 'Periode', 'Tgl Penilaian'];
+        if ($canSeeEvaluator) {
+            $headers[] = 'Evaluator';
+        }
+        $headers[] = 'Nilai Akhir';
+        $headers[] = 'Catatan';
+
+        return $headers;
     }
 
     public function styles(Worksheet $sheet): array

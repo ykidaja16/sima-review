@@ -13,11 +13,14 @@
         <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
             <div style="flex:2;min-width:200px;">
                 <label class="form-label">Cari Nama / NIP</label>
-                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="Nama atau NIP...">
+                <div class="search-input-box">
+                    <span class="search-icon"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama atau NIP...">
+                </div>
             </div>
             <div style="flex:1;min-width:150px;">
                 <label class="form-label">Divisi</label>
-                <select name="divisi_id" class="form-select">
+                <select name="divisi_id" class="form-select searchable-select" data-placeholder="Cari divisi...">
                     <option value="">Semua Divisi</option>
                     @foreach($divisis as $d)
                     <option value="{{ $d->id }}" {{ request('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>

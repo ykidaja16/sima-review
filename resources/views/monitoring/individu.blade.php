@@ -1,30 +1,52 @@
 @extends('layouts.app')
-@section('title', 'Track Record Individu')
+@section('title', !empty($isSaya) ? 'Track Record Saya' : 'Track Record Individu')
 
 @section('content')
 <div class="page-header">
     <div class="page-title">
-        <h2>Track Record Individu</h2>
-        <p>Riwayat penilaian per karyawan lintas periode</p>
+        <h2>{{ !empty($isSaya) ? 'Track Record Saya' : 'Track Record Individu' }}</h2>
+        <p>{{ !empty($isSaya) ? 'Riwayat hasil penilaian Service Excellence Anda lintas periode' : 'Riwayat penilaian per karyawan lintas periode' }}</p>
     </div>
 </div>
 
 {{-- Filter --}}
-@if(!auth()->user()->isPelaksana())
+@if(empty($isSaya))
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body">
-        <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-            <div style="flex:2;min-width:200px;">
-                <label class="form-label">Pilih Karyawan</label>
-                <select name="karyawan_id" class="form-select" onchange="this.form.submit()">
+        <form method="GET" action="{{ route('monitoring.individu') }}" id="formTrackRecordIndividu" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Filter Divisi</label>
+                <select name="divisi_id" id="filterDivisiTrack" class="form-select searchable-select" data-placeholder="Cari divisi...">
+                    <option value="">Semua Divisi</option>
+                    @foreach($divisis as $d)
+                    <option value="{{ $d->id }}" {{ request('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Status Penilaian</label>
+                <select name="status_penilaian" id="filterStatusTrack" class="form-select searchable-select" data-placeholder="Semua status...">
+                    <option value="">Semua Status</option>
+                    <option value="sudah" {{ request('status_penilaian') === 'sudah' ? 'selected' : '' }}>Sudah Dinilai</option>
+                    <option value="belum" {{ request('status_penilaian') === 'belum' ? 'selected' : '' }}>Belum Dinilai</option>
+                </select>
+            </div>
+            <div style="flex:2;min-width:220px;">
+                <label class="form-label">Pilih Karyawan Dinilai</label>
+                <select name="karyawan_id" id="filterKaryawanTrack" class="form-select searchable-select" data-placeholder="Cari nama atau NIP karyawan...">
                     <option value="">-- Pilih Karyawan --</option>
                     @foreach($karyawans as $k)
-                    <option value="{{ $k->id }}" {{ request('karyawan_id') == $k->id ? 'selected' : '' }}>
-                        {{ $k->nip }} — {{ $k->nama }} ({{ $k->divisi->nama ?? '-' }})
+                    <option value="{{ $k->id }}"
+                        data-divisi="{{ $k->divisi_id }}"
+                        data-status="{{ !empty($k->sudah_dinilai) ? 'sudah' : 'belum' }}"
+                        {{ request('karyawan_id') == $k->id ? 'selected' : '' }}>
+                        {{ $k->nip ? ($k->nip . ' — ') : '' }}{{ $k->nama }} ({{ $k->divisi->nama ?? '-' }})
                     </option>
                     @endforeach
                 </select>
             </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Tampilkan</button>
+            <a href="{{ route('monitoring.individu') }}" class="btn btn-outline">Reset</a>
         </form>
     </div>
 </div>
@@ -85,7 +107,7 @@
 
 {{-- Tabel Riwayat --}}
 @php
-    $isViewingSelf = auth()->user()->karyawan && $karyawan && $karyawan->id === auth()->user()->karyawan->id;
+    $canSeeEvaluator = auth()->user()->isKacab() || auth()->user()->isSuperAdmin();
 @endphp
 <div class="card">
     <div class="card-header"><h5><i class="bi bi-clock-history" style="color:#0284c7;margin-right:6px;"></i>Riwayat Penilaian</h5></div>
@@ -95,7 +117,7 @@
                 <tr>
                     <th>Periode</th>
                     <th>Tanggal</th>
-                    @if(!$isViewingSelf)
+                    @if($canSeeEvaluator)
                     <th>Evaluator</th>
                     @endif
                     <th>Nilai Akhir</th>
@@ -110,7 +132,7 @@
                 <tr>
                     <td style="font-weight:600;">{{ $p->periode->nama ?? '-' }}</td>
                     <td>{{ $p->tanggal_penilaian?->format('d M Y') }}</td>
-                    @if(!$isViewingSelf)
+                    @if($canSeeEvaluator)
                     <td>{{ $p->evaluator->name ?? '-' }}</td>
                     @endif
                     <td>
@@ -129,7 +151,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="{{ $isViewingSelf ? 6 : 7 }}" style="text-align:center;padding:32px;color:var(--text-muted);">Belum ada penilaian</td></tr>
+                <tr><td colspan="{{ $canSeeEvaluator ? 7 : 6 }}" style="text-align:center;padding:32px;color:var(--text-muted);">Belum ada penilaian</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -138,15 +160,61 @@
 
 @else
 <div class="card">
-    <div class="card-body" style="text-align:center;padding:48px;">
-        <i class="bi bi-person-x" style="font-size:3rem;color:var(--text-muted);display:block;margin-bottom:12px;"></i>
-        <h5>Pilih Karyawan</h5>
-        <p style="color:var(--text-muted);margin-top:8px;">Pilih karyawan dari dropdown di atas untuk melihat track record penilaiannya.</p>
+    <div class="card-body" style="text-align:center;padding:48px 16px;color:var(--text-muted);">
+        <i class="bi bi-person-x" style="font-size:3rem;color:var(--text-muted);display:block;margin-bottom:12px;opacity:0.6;"></i>
+        <h5>Tidak Ada Data Karyawan</h5>
+        <p style="color:var(--text-muted);margin-top:8px;">Pilih karyawan dari filter di atas atau tidak ada karyawan yang sesuai kriteria.</p>
     </div>
 </div>
 @endif
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterDivisiTrack = document.getElementById('filterDivisiTrack');
+    const filterStatusTrack = document.getElementById('filterStatusTrack');
+    const filterKaryawanTrack = document.getElementById('filterKaryawanTrack');
+
+    function syncKaryawanOptions(isUserAction = false) {
+        if (!filterKaryawanTrack) return;
+        const divId = filterDivisiTrack ? filterDivisiTrack.value : '';
+        const statusVal = filterStatusTrack ? filterStatusTrack.value : '';
+
+        Array.from(filterKaryawanTrack.options).forEach(opt => {
+            if (!opt.value) return;
+            const matchDivisi = !divId || opt.dataset.divisi === divId;
+            const matchStatus = !statusVal || opt.dataset.status === statusVal;
+            const match = matchDivisi && matchStatus;
+            opt.hidden = !match;
+        });
+
+        if (isUserAction && filterKaryawanTrack.selectedOptions[0]?.hidden) {
+            filterKaryawanTrack.value = '';
+        }
+
+        if (typeof filterKaryawanTrack._refreshSearchableSelect === 'function') {
+            filterKaryawanTrack._refreshSearchableSelect();
+        }
+    }
+
+    if (filterDivisiTrack) filterDivisiTrack.addEventListener('change', () => syncKaryawanOptions(true));
+    if (filterStatusTrack) filterStatusTrack.addEventListener('change', () => syncKaryawanOptions(true));
+
+    syncKaryawanOptions(false);
+
+    const formTrack = document.getElementById('formTrackRecordIndividu');
+    if (formTrack) {
+        formTrack.addEventListener('submit', function() {
+            if (typeof filterKaryawanTrack._syncFromInput === 'function') {
+                filterKaryawanTrack._syncFromInput();
+            }
+        });
+    }
+});
+</script>
+@endpush
 
 @if($penilaians->count() > 1)
 <script id="trendDataJson" type="application/json">

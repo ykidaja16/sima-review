@@ -39,27 +39,27 @@
             @endphp
             <div class="form-group">
                 <label class="form-label">Jenis Ketidaksesuaian *</label>
-                <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+                <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px;">
                     @foreach($jenisList as $j)
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    @php
+                        $isNonAudit = str_contains(strtolower($j->nama), 'non audit');
+                    @endphp
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex-wrap:wrap;">
                         <input type="radio" name="jenis_id" value="{{ $j->id }}"
                             data-kategoris="{{ json_encode($j->kategori_temuan_list) }}"
-                            {{ old('jenis_id') == $j->id ? 'checked' : '' }}
+                            {{ (old('jenis_id') == $j->id || (!old('jenis_id') && $loop->first)) ? 'checked' : '' }}
                             id="jenis_{{ $j->id }}"
                             onchange="updateKategoriTemuanOptions()">
                         <span>{{ $j->nama }}</span>
+                        @if($isNonAudit)
+                        <span style="color:var(--text-muted);font-size:0.88rem;">, sebutkan:</span>
+                        <input type="text" name="jenis_lainnya" id="jenis_lainnya_input" class="form-control @error('jenis_lainnya') is-invalid @enderror"
+                            style="width:auto;flex:1;min-width:200px;max-width:360px;padding:6px 12px;font-size:0.88rem;"
+                            value="{{ old('jenis_lainnya') }}" placeholder="Sebutkan..."
+                            onfocus="document.getElementById('jenis_{{ $j->id }}').checked = true; updateKategoriTemuanOptions();">
+                        @endif
                     </label>
                     @endforeach
-                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                        <input type="radio" name="jenis_id" value="" id="jenis_lainnya_radio"
-                            data-kategoris="{{ json_encode($defaultKategoris) }}"
-                            {{ !old('jenis_id') && old('jenis_lainnya') ? 'checked' : '' }}
-                            onchange="updateKategoriTemuanOptions()">
-                        <span>Lain-lain, sebutkan:</span>
-                        <input type="text" name="jenis_lainnya" id="jenis_lainnya_input" class="form-control @error('jenis_lainnya') is-invalid @enderror"
-                            style="width:auto;flex:1;" value="{{ old('jenis_lainnya') }}" placeholder="Sebutkan..."
-                            onfocus="document.getElementById('jenis_lainnya_radio').checked = true; updateKategoriTemuanOptions();">
-                    </label>
                 </div>
                 @error('jenis_id')<div class="invalid-feedback" style="display:block;">{{ $message }}</div>@enderror
                 @error('jenis_lainnya')<div class="invalid-feedback" style="display:block;">{{ $message }}</div>@enderror

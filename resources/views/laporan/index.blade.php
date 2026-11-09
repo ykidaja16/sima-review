@@ -40,7 +40,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Divisi</label>
-                    <select name="divisi_id" class="form-select">
+                    <select name="divisi_id" class="form-select searchable-select" data-placeholder="Cari divisi...">
                         @if($canViewAll)
                         <option value="">Semua Divisi</option>
                         @endif
@@ -51,7 +51,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Kategori Nilai</label>
-                    <select name="kategori_id" class="form-select">
+                    <select name="kategori_id" class="form-select searchable-select" data-placeholder="Cari kategori nilai...">
                         <option value="">Semua Kategori</option>
                         @foreach($kategoris as $k)
                         <option value="{{ $k->id }}" {{ request('kategori_id') == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
@@ -100,10 +100,25 @@
         <h5><i class="bi bi-table" style="color:#059669;margin-right:6px;"></i>Data Penilaian</h5>
         <span class="badge badge-info">{{ $penilaians->count() }} data</span>
     </div>
+    @php
+        $canSeeEvaluator = auth()->user()->isKacab() || auth()->user()->isSuperAdmin();
+    @endphp
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>#</th><th>NIP</th><th>Nama Karyawan</th><th>Jabatan</th><th>Divisi</th><th>Periode</th><th>Evaluator</th><th>Nilai Akhir</th><th>Kategori</th></tr>
+                <tr>
+                    <th>#</th>
+                    <th>NIP</th>
+                    <th>Nama Karyawan</th>
+                    <th>Jabatan</th>
+                    <th>Divisi</th>
+                    <th>Periode</th>
+                    @if($canSeeEvaluator)
+                    <th>Evaluator</th>
+                    @endif
+                    <th>Nilai Akhir</th>
+                    <th>Kategori</th>
+                </tr>
             </thead>
             <tbody>
                 @foreach($penilaians->sortByDesc('nilai_akhir')->values() as $i => $p)
@@ -115,7 +130,9 @@
                     <td style="font-size:0.85rem;">{{ $p->karyawan->jabatan->nama ?? '-' }}</td>
                     <td style="font-size:0.85rem;">{{ $p->karyawan->divisi->nama ?? '-' }}</td>
                     <td style="font-size:0.85rem;">{{ $p->periode->nama ?? '-' }}</td>
+                    @if($canSeeEvaluator)
                     <td style="font-size:0.85rem;">{{ $p->evaluator->name ?? '-' }}</td>
+                    @endif
                     <td>
                         <span class="text-score-{{ $kat?->warna ?? 'secondary' }}" style="font-size:1rem;font-weight:700;">
                             {{ number_format($p->nilai_akhir ?? 0, 2) }}

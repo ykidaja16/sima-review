@@ -64,9 +64,9 @@
             <div class="form-label">Jenis Ketidaksesuaian</div>
             <div>
                 @if($ketidaksesuaian->jenis)
-                    {{ $ketidaksesuaian->jenis->nama }}
+                    {{ $ketidaksesuaian->jenis->nama }}{{ $ketidaksesuaian->jenis_lainnya ? ' (' . $ketidaksesuaian->jenis_lainnya . ')' : '' }}
                 @elseif($ketidaksesuaian->jenis_lainnya)
-                    Lain-lain: {{ $ketidaksesuaian->jenis_lainnya }}
+                    {{ $ketidaksesuaian->jenis_lainnya }}
                 @else
                     -
                 @endif

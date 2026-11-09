@@ -120,12 +120,19 @@ class KetidaksesuaianController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'jenis_id'          => ['nullable', 'exists:jenis_ketidaksesuaians,id'],
-            'jenis_lainnya'     => ['required_without:jenis_id', 'nullable', 'string', 'max:200'],
+            'jenis_id'          => ['required', 'exists:jenis_ketidaksesuaians,id'],
+            'jenis_lainnya'     => ['nullable', 'string', 'max:200'],
             'penjelasan_temuan' => ['required', 'string'],
             'kategori_temuan'   => ['required', 'string', 'max:100'],
             'divisi_tujuan_id'  => ['required', 'exists:divisis,id'],
+        ], [
+            'jenis_id.required' => 'Pilih jenis ketidaksesuaian.',
         ]);
+
+        $jenisTerpilih = JenisKetidaksesuaian::find($validated['jenis_id']);
+        if (!$jenisTerpilih || !str_contains(strtolower($jenisTerpilih->nama), 'non audit')) {
+            $validated['jenis_lainnya'] = null;
+        }
 
         /** @var User $user */
         $user     = Auth::user();

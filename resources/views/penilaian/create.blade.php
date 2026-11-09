@@ -82,7 +82,7 @@
 <div class="card" style="margin-bottom:20px;">
     <div class="card-header"><h5><i class="bi bi-person-badge-fill" style="color:#3b82f6;margin-right:6px;"></i>Data Karyawan & Penilaian</h5></div>
     <div class="card-body">
-        <div class="grid grid-4">
+        <div class="grid grid-3">
             <div class="form-group">
                 <label class="form-label">Filter Divisi</label>
                 <select id="filterDivisiSelect" class="form-select searchable-select" data-placeholder="Cari divisi...">
@@ -114,10 +114,6 @@
                 <input type="date" name="tanggal_penilaian" class="form-control @error('tanggal_penilaian') is-invalid @enderror"
                     value="{{ old('tanggal_penilaian', today()->format('Y-m-d')) }}" required>
                 @error('tanggal_penilaian')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
-            <div class="form-group">
-                <label class="form-label">Catatan Umum</label>
-                <input type="text" name="catatan" class="form-control" value="{{ old('catatan') }}" placeholder="Catatan singkat (opsional)">
             </div>
         </div>
     </div>
@@ -213,6 +209,16 @@
     @endforeach
 </div>
 @endforeach
+
+{{-- Catatan Umum Penilaian (Diisi di akhir sebelum Simpan) --}}
+<div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+        <h5><i class="bi bi-chat-left-text-fill" style="color:#3b82f6;margin-right:6px;"></i>Catatan Umum Penilaian</h5>
+    </div>
+    <div class="card-body">
+        <textarea name="catatan" class="form-control" rows="3" placeholder="Tuliskan catatan umum, evaluasi keseluruhan, atau rekomendasi perbaikan untuk karyawan ini (opsional)...">{{ old('catatan') }}</textarea>
+    </div>
+</div>
 
 {{-- Ringkasan & Submit --}}
 <div class="card" style="margin-bottom:20px;">
