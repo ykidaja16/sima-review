@@ -14,6 +14,24 @@
     </div>
 </div>
 
+{{-- Navigation Tabs --}}
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px;flex-wrap:wrap;">
+    <a href="{{ route('survei-pelanggan.index') }}" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+        <i class="bi bi-card-list"></i> Data Survei
+    </a>
+    @if(auth()->user()->hasRole(['super_admin','kacab','mutu']))
+    <a href="{{ route('survei-pelanggan.analisa') }}" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+        <i class="bi bi-bar-chart-line-fill"></i> Analisa Data
+    </a>
+    <a href="{{ route('survei-pelanggan.grafik') }}" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+        <i class="bi bi-diagram-2-fill"></i> Internal Grafik
+    </a>
+    <a href="{{ route('survei-pelanggan.pendukung') }}" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+        <i class="bi bi-pie-chart-fill"></i> Data Pendukung
+    </a>
+    @endif
+</div>
+
 {{-- Error state --}}
 @if($error)
 <div class="alert alert-danger">
@@ -22,20 +40,33 @@
 </div>
 @endif
 
-{{-- Search bar --}}
+{{-- Search & Export Bar --}}
 <div class="card" style="margin-bottom:16px;">
     <div class="card-body" style="padding:12px 16px;">
-        <form method="GET" action="{{ route('survei-pelanggan.index') }}" style="display:flex;gap:10px;align-items:center;">
-            <div style="flex:1;position:relative;">
-                <i class="bi bi-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;"></i>
-                <input type="text" name="search" value="{{ $search }}" placeholder="Cari di semua kolom..."
-                    class="form-control" style="padding-left:32px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <form method="GET" action="{{ route('survei-pelanggan.index') }}" style="display:flex;gap:10px;align-items:center;flex:1;min-width:280px;">
+                <div style="flex:1;position:relative;">
+                    <i class="bi bi-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;"></i>
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari di semua kolom..."
+                        class="form-control" style="padding-left:32px;">
+                </div>
+                <button type="submit" class="btn btn-primary">Cari</button>
+                @if($search)
+                <a href="{{ route('survei-pelanggan.index') }}" class="btn btn-outline">Reset</a>
+                @endif
+            </form>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="{{ route('survei-pelanggan.export-data-excel', ['search' => $search]) }}"
+                   class="btn btn-success btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-file-earmark-excel"></i> Export Excel
+                </a>
+                <a href="{{ route('survei-pelanggan.export-data-pdf', ['search' => $search]) }}"
+                   class="btn btn-danger btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                </a>
             </div>
-            <button type="submit" class="btn btn-primary">Cari</button>
-            @if($search)
-            <a href="{{ route('survei-pelanggan.index') }}" class="btn btn-outline">Reset</a>
-            @endif
-        </form>
+        </div>
     </div>
 </div>
 

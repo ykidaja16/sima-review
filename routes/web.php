@@ -124,8 +124,24 @@ Route::middleware('auth')->group(function () {
             ->name('destroy');
     });
 
-    // ---- Survei Pelanggan (Semua role yang login) ----
-    Route::get('/survei-pelanggan', [SurveiPelangganController::class, 'index'])->name('survei-pelanggan.index');
+    // ---- Survei Pelanggan (Data Survei: semua role; Analisa data & export analisa: Superadmin, Kacab, Mutu) ----
+    Route::prefix('survei-pelanggan')->name('survei-pelanggan.')->group(function () {
+        Route::get('/', [SurveiPelangganController::class, 'index'])->name('index');
+        Route::get('/export-data-excel', [SurveiPelangganController::class, 'exportDataExcel'])->name('export-data-excel');
+        Route::get('/export-data-pdf', [SurveiPelangganController::class, 'exportDataPdf'])->name('export-data-pdf');
+
+        Route::middleware('role:super_admin,kacab,mutu')->group(function () {
+            Route::get('/analisa', [SurveiPelangganController::class, 'analisa'])->name('analisa');
+            Route::get('/grafik', [SurveiPelangganController::class, 'grafik'])->name('grafik');
+            Route::get('/pendukung', [SurveiPelangganController::class, 'pendukung'])->name('pendukung');
+            Route::get('/export-excel', [SurveiPelangganController::class, 'exportExcel'])->name('export-excel');
+            Route::get('/export-pdf', [SurveiPelangganController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/grafik/export-excel', [SurveiPelangganController::class, 'exportGrafikExcel'])->name('export-grafik-excel');
+            Route::get('/grafik/export-pdf', [SurveiPelangganController::class, 'exportGrafikPdf'])->name('export-grafik-pdf');
+            Route::get('/pendukung/export-excel', [SurveiPelangganController::class, 'exportPendukungExcel'])->name('export-pendukung-excel');
+            Route::get('/pendukung/export-pdf', [SurveiPelangganController::class, 'exportPendukungPdf'])->name('export-pendukung-pdf');
+        });
+    });
 
     // ---- Update Data Diri & Akun (Semua role yang login) ----
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

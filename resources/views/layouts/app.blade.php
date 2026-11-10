@@ -1056,12 +1056,33 @@
             </a>
 
             {{-- Survei Pelanggan: semua role --}}
+            <div class="nav-section-title">Survei Pelanggan</div>
             <a href="{{ route('survei-pelanggan.index') }}"
-               class="nav-item {{ request()->routeIs('survei-pelanggan.*') ? 'active' : '' }}"
-               data-tooltip="Survei">
-                <i class="bi bi-star-half"></i>
-                <span>Survei Pelanggan</span>
+               class="nav-item {{ request()->routeIs('survei-pelanggan.index') ? 'active' : '' }}"
+               data-tooltip="Data Survei">
+                <i class="bi bi-card-list"></i>
+                <span>Data Survei</span>
             </a>
+            @if(auth()->user()->hasRole(['super_admin', 'kacab', 'mutu']))
+            <a href="{{ route('survei-pelanggan.analisa') }}"
+               class="nav-item {{ request()->routeIs('survei-pelanggan.analisa') ? 'active' : '' }}"
+               data-tooltip="Analisa Data">
+                <i class="bi bi-bar-chart-line-fill"></i>
+                <span>Analisa Data</span>
+            </a>
+            <a href="{{ route('survei-pelanggan.grafik') }}"
+               class="nav-item {{ request()->routeIs('survei-pelanggan.grafik') ? 'active' : '' }}"
+               data-tooltip="Internal Grafik">
+                <i class="bi bi-diagram-2-fill"></i>
+                <span>Internal Grafik</span>
+            </a>
+            <a href="{{ route('survei-pelanggan.pendukung') }}"
+               class="nav-item {{ request()->routeIs('survei-pelanggan.pendukung') ? 'active' : '' }}"
+               data-tooltip="Data Pendukung">
+                <i class="bi bi-pie-chart-fill"></i>
+                <span>Data Pendukung</span>
+            </a>
+            @endif
 
             {{-- Master Data --}}
             @if(auth()->user()->isSuperAdmin())
