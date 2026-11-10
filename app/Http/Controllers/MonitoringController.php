@@ -59,11 +59,7 @@ class MonitoringController extends Controller
         if (!$isSaya) {
             $karyawanQuery = Karyawan::active()
                 ->where('is_dinilai', true)
-                ->with(['divisi', 'jabatan', 'penilaians' => function ($q) use ($periodeAktif) {
-                    if ($periodeAktif) {
-                        $q->where('periode_id', $periodeAktif->id);
-                    }
-                }]);
+                ->with(['divisi', 'jabatan']);
 
             if ($user->isSupervisor()) {
                 // Supervisor: memonitor bawahan langsung
@@ -75,10 +71,7 @@ class MonitoringController extends Controller
                 }
             }
 
-            $karyawans = $karyawanQuery->orderBy('nama')->get()->map(function ($k) {
-                $k->sudah_dinilai = $k->penilaians->isNotEmpty();
-                return $k;
-            });
+            $karyawans = $karyawanQuery->orderBy('nama')->get();
 
             $divisis = Divisi::active()
                 ->whereHas('karyawans', fn($q) => $q->active()->where('is_dinilai', true))

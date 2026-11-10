@@ -14,7 +14,7 @@
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body">
         <form method="GET" action="{{ route('monitoring.individu') }}" id="formTrackRecordIndividu" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-            <div style="flex:1;min-width:180px;">
+            <div style="flex:1;min-width:200px;">
                 <label class="form-label">Filter Divisi</label>
                 <select name="divisi_id" id="filterDivisiTrack" class="form-select searchable-select" data-placeholder="Cari divisi...">
                     <option value="">Semua Divisi</option>
@@ -23,22 +23,13 @@
                     @endforeach
                 </select>
             </div>
-            <div style="flex:1;min-width:180px;">
-                <label class="form-label">Status Penilaian</label>
-                <select name="status_penilaian" id="filterStatusTrack" class="form-select searchable-select" data-placeholder="Semua status...">
-                    <option value="">Semua Status</option>
-                    <option value="sudah" {{ request('status_penilaian') === 'sudah' ? 'selected' : '' }}>Sudah Dinilai</option>
-                    <option value="belum" {{ request('status_penilaian') === 'belum' ? 'selected' : '' }}>Belum Dinilai</option>
-                </select>
-            </div>
-            <div style="flex:2;min-width:220px;">
+            <div style="flex:2;min-width:280px;">
                 <label class="form-label">Pilih Karyawan Dinilai</label>
                 <select name="karyawan_id" id="filterKaryawanTrack" class="form-select searchable-select" data-placeholder="Cari nama atau NIP karyawan...">
                     <option value="">-- Pilih Karyawan --</option>
                     @foreach($karyawans as $k)
                     <option value="{{ $k->id }}"
                         data-divisi="{{ $k->divisi_id }}"
-                        data-status="{{ !empty($k->sudah_dinilai) ? 'sudah' : 'belum' }}"
                         {{ request('karyawan_id') == $k->id ? 'selected' : '' }}>
                         {{ $k->nip ? ($k->nip . ' — ') : '' }}{{ $k->nama }} ({{ $k->divisi->nama ?? '-' }})
                     </option>
@@ -174,19 +165,15 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filterDivisiTrack = document.getElementById('filterDivisiTrack');
-    const filterStatusTrack = document.getElementById('filterStatusTrack');
     const filterKaryawanTrack = document.getElementById('filterKaryawanTrack');
 
     function syncKaryawanOptions(isUserAction = false) {
         if (!filterKaryawanTrack) return;
         const divId = filterDivisiTrack ? filterDivisiTrack.value : '';
-        const statusVal = filterStatusTrack ? filterStatusTrack.value : '';
 
         Array.from(filterKaryawanTrack.options).forEach(opt => {
             if (!opt.value) return;
-            const matchDivisi = !divId || opt.dataset.divisi === divId;
-            const matchStatus = !statusVal || opt.dataset.status === statusVal;
-            const match = matchDivisi && matchStatus;
+            const match = !divId || opt.dataset.divisi === divId;
             opt.hidden = !match;
         });
 
@@ -200,7 +187,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (filterDivisiTrack) filterDivisiTrack.addEventListener('change', () => syncKaryawanOptions(true));
-    if (filterStatusTrack) filterStatusTrack.addEventListener('change', () => syncKaryawanOptions(true));
 
     syncKaryawanOptions(false);
 
