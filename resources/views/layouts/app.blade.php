@@ -313,6 +313,168 @@
             letter-spacing: 0.3px;
         }
 
+        /* Notification Dropdown */
+        .notif-dropdown-wrapper {
+            position: relative;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            min-width: 17px;
+            height: 17px;
+            padding: 0 4px;
+            border-radius: 10px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffffff;
+            line-height: 1;
+            pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .notif-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 340px;
+            max-width: 90vw;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            z-index: 1050;
+            overflow: hidden;
+            animation: notifDropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes notifDropdownFade {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notif-dropdown-menu.show {
+            display: block;
+        }
+
+        .notif-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .notif-count-pill {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary-light);
+        }
+
+        .notif-body {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.15s ease;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .notif-icon-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .notif-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notif-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+
+        .notif-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notif-tag {
+            font-size: 0.62rem;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .notif-msg {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.35;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notif-time {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .notif-empty {
+            padding: 32px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* ==================== CONTENT ==================== */
         .content-area {
             flex: 1;
@@ -1219,6 +1381,45 @@
             </div>
 
             <div class="topbar-actions">
+                <!-- Dropdown Notifikasi -->
+                <div class="notif-dropdown-wrapper">
+                    <button type="button" class="topbar-btn" id="notifDropdownBtn" title="Notifikasi" aria-label="Notifikasi">
+                        <i class="bi bi-bell"></i>
+                        @if(!empty($appNotifications) && count($appNotifications) > 0)
+                            <span class="notif-badge">{{ count($appNotifications) > 9 ? '9+' : count($appNotifications) }}</span>
+                        @endif
+                    </button>
+                    <div class="notif-dropdown-menu" id="notifDropdownMenu">
+                        <div class="notif-header">
+                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text);">Notifikasi</div>
+                            <span class="notif-count-pill">{{ count($appNotifications ?? []) }} Baru</span>
+                        </div>
+                        <div class="notif-body">
+                            @forelse($appNotifications ?? [] as $notif)
+                                <a href="{{ $notif['url'] }}" class="notif-item">
+                                    <div class="notif-icon-circle" style="background-color: {{ $notif['color'] }}15; color: {{ $notif['color'] }};">
+                                        <i class="bi {{ $notif['icon'] }}"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <div class="notif-title-row">
+                                            <span class="notif-title">{{ $notif['title'] }}</span>
+                                            <span class="notif-tag" style="background-color: {{ $notif['color'] }}15; color: {{ $notif['color'] }};">{{ $notif['badge_label'] }}</span>
+                                        </div>
+                                        <div class="notif-msg">{{ $notif['message'] }}</div>
+                                        <div class="notif-time">{{ $notif['time_diff'] }}</div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="notif-empty">
+                                    <i class="bi bi-bell-slash" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 8px;"></i>
+                                    <div style="font-weight: 600; font-size: 0.85rem; color: var(--text);">Tidak ada notifikasi</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Semua tugas dan informasi sudah terbarui</div>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
                 <div class="topbar-divider"></div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <a href="{{ route('profile.edit') }}" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit; cursor:pointer;" title="Update Data Diri">
@@ -1626,7 +1827,26 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', initSearchableSelects);
+        document.addEventListener('DOMContentLoaded', () => {
+            initSearchableSelects();
+
+            // Toggle Dropdown Notifikasi
+            const notifBtn = document.getElementById('notifDropdownBtn');
+            const notifMenu = document.getElementById('notifDropdownMenu');
+
+            if (notifBtn && notifMenu) {
+                notifBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    notifMenu.classList.toggle('show');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+                        notifMenu.classList.remove('show');
+                    }
+                });
+            }
+        });
     </script>
 
     @stack('scripts')
