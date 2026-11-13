@@ -60,8 +60,9 @@
 </head>
 <body>
     @php
+        $hasGd = extension_loaded('gd');
         $logoPath = public_path('images/logosima.png');
-        $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
+        $logoBase64 = ($hasGd && file_exists($logoPath)) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
 
         // Jenis ketidaksesuaian logic
         $jenisName = strtolower($ketidaksesuaian->jenis?->nama ?? '');
@@ -92,7 +93,9 @@
                 @if($logoBase64)
                     <img src="{{ $logoBase64 }}" style="max-height: 48px; max-width: 125px; object-fit: contain;">
                 @else
-                    <strong style="font-size: 14pt; color: #0284c7;">SIMA<span style="color: #16a34a;">lab</span></strong>
+                    <div style="font-family: Arial, sans-serif; font-weight: 800; font-size: 17pt; letter-spacing: -0.5px; line-height: 1;">
+                        <span style="color: #1c529e;">SIMA</span><span style="color: #70b030;">lab</span>
+                    </div>
                 @endif
             </td>
             <td style="width: 50%; text-align: center; vertical-align: middle; font-weight: bold; font-size: 10pt; line-height: 1.3; padding: 6px;">

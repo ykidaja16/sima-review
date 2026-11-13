@@ -30,8 +30,8 @@
 <table>
     <!-- HEADER -->
     <tr>
-        <td colspan="2" style="border: 1px solid #000000; font-size: 14pt; font-weight: bold; text-align: center; vertical-align: middle;">
-            SIMAlab
+        <td colspan="2" style="border: 1px solid #000000; text-align: center; vertical-align: middle;">
+            &nbsp;
         </td>
         <td colspan="3" style="border: 1px solid #000000; font-size: 11pt; font-weight: bold; text-align: center; vertical-align: middle;">
             FORMULIR TINDAKAN KOREKTIF DAN PERBAIKAN
