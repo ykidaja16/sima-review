@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm 12mm 10mm 12mm;
+            margin: 16mm 16mm 16mm 16mm;
         }
         * {
             box-sizing: border-box;
@@ -60,9 +60,9 @@
 </head>
 <body>
     @php
-        $hasGd = extension_loaded('gd');
-        $logoPath = public_path('images/logosima.png');
-        $logoBase64 = ($hasGd && file_exists($logoPath)) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
+        $logoJpg = public_path('images/logosima.jpg');
+        $logoPng = public_path('images/logosima.png');
+        $logoSrc = file_exists($logoJpg) ? $logoJpg : (extension_loaded('gd') && file_exists($logoPng) ? $logoPng : '');
 
         // Jenis ketidaksesuaian logic
         $jenisName = strtolower($ketidaksesuaian->jenis?->nama ?? '');
@@ -90,8 +90,8 @@
         <!-- HEADER FORMULIR -->
         <tr>
             <td style="width: 22%; text-align: center; vertical-align: middle; padding: 6px;">
-                @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" style="max-height: 48px; max-width: 125px; object-fit: contain;">
+                @if($logoSrc)
+                    <img src="{{ $logoSrc }}" style="max-height: 48px; max-width: 125px; object-fit: contain;">
                 @else
                     <div style="font-family: Arial, sans-serif; font-weight: 800; font-size: 17pt; letter-spacing: -0.5px; line-height: 1;">
                         <span style="color: #1c529e;">SIMA</span><span style="color: #70b030;">lab</span>
