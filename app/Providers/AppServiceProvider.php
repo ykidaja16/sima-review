@@ -28,7 +28,10 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.app', function ($view) {
             $user = auth()->user();
             $notifications = $user ? NotificationService::getNotificationsForUser($user) : [];
+            $unreadCount = count(array_filter($notifications, fn($n) => empty($n['is_read'])));
+
             $view->with('appNotifications', $notifications);
+            $view->with('unreadNotifCount', $unreadCount);
         });
     }
 }

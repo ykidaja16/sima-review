@@ -14,6 +14,7 @@ use App\Http\Controllers\Master\KaryawanController;
 use App\Http\Controllers\Master\KategoriNilaiController;
 use App\Http\Controllers\Master\ParameterSopController;
 use App\Http\Controllers\MonitoringController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PeriodePenilaianController;
 use App\Http\Controllers\ProfileController;
@@ -153,4 +154,8 @@ Route::middleware('auth')->group(function () {
     // ---- Update Data Diri & Akun (Semua role yang login) ----
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // ---- Notifikasi ----
+    Route::get('/notifications/{key}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
 });

@@ -406,6 +406,49 @@
             background-color: #f8fafc;
         }
 
+        .notif-item.is-read {
+            background-color: #ffffff;
+            opacity: 0.68;
+        }
+
+        .notif-item.is-read:hover {
+            opacity: 1;
+            background-color: #f8fafc;
+        }
+
+        .notif-item.is-unread {
+            background-color: #f8fbff;
+        }
+
+        .notif-item.is-unread .notif-title {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .notif-unread-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .notif-mark-all-btn {
+            background: none;
+            border: none;
+            font-size: 0.7rem;
+            color: var(--primary-light);
+            cursor: pointer;
+            padding: 2px 4px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .notif-mark-all-btn:hover {
+            text-decoration: underline;
+        }
+
         .notif-icon-circle {
             width: 34px;
             height: 34px;
@@ -1385,25 +1428,38 @@
                 <div class="notif-dropdown-wrapper">
                     <button type="button" class="topbar-btn" id="notifDropdownBtn" title="Notifikasi" aria-label="Notifikasi">
                         <i class="bi bi-bell"></i>
-                        @if(!empty($appNotifications) && count($appNotifications) > 0)
-                            <span class="notif-badge">{{ count($appNotifications) > 9 ? '9+' : count($appNotifications) }}</span>
+                        @if(!empty($unreadNotifCount) && $unreadNotifCount > 0)
+                            <span class="notif-badge">{{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}</span>
                         @endif
                     </button>
                     <div class="notif-dropdown-menu" id="notifDropdownMenu">
                         <div class="notif-header">
-                            <div style="font-weight: 700; font-size: 0.85rem; color: var(--text);">Notifikasi</div>
-                            <span class="notif-count-pill">{{ count($appNotifications ?? []) }} Baru</span>
+                            <div>
+                                <span style="font-weight: 700; font-size: 0.85rem; color: var(--text);">Notifikasi</span>
+                                <span class="notif-count-pill" style="margin-left: 6px;">{{ $unreadNotifCount ?? 0 }} Baru</span>
+                            </div>
+                            @if(!empty($unreadNotifCount) && $unreadNotifCount > 0)
+                                <form action="{{ route('notifications.mark-all-read') }}" method="POST" style="margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="notif-mark-all-btn">Tandai Dibaca</button>
+                                </form>
+                            @endif
                         </div>
                         <div class="notif-body">
                             @forelse($appNotifications ?? [] as $notif)
-                                <a href="{{ $notif['url'] }}" class="notif-item">
+                                <a href="{{ $notif['read_url'] }}" class="notif-item {{ $notif['is_read'] ? 'is-read' : 'is-unread' }}">
                                     <div class="notif-icon-circle" style="background-color: {{ $notif['color'] }}15; color: {{ $notif['color'] }};">
                                         <i class="bi {{ $notif['icon'] }}"></i>
                                     </div>
                                     <div class="notif-content">
                                         <div class="notif-title-row">
                                             <span class="notif-title">{{ $notif['title'] }}</span>
-                                            <span class="notif-tag" style="background-color: {{ $notif['color'] }}15; color: {{ $notif['color'] }};">{{ $notif['badge_label'] }}</span>
+                                            <div style="display:flex; align-items:center; gap:5px;">
+                                                <span class="notif-tag" style="background-color: {{ $notif['color'] }}15; color: {{ $notif['color'] }};">{{ $notif['badge_label'] }}</span>
+                                                @if(!$notif['is_read'])
+                                                    <span class="notif-unread-dot" title="Belum dibaca"></span>
+                                                @endif
+                                            </div>
                                         </div>
                                         <div class="notif-msg">{{ $notif['message'] }}</div>
                                         <div class="notif-time">{{ $notif['time_diff'] }}</div>

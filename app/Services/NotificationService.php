@@ -7,6 +7,7 @@ use App\Models\Penilaian;
 use App\Models\PeriodePenilaian;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class NotificationService
 {
@@ -18,12 +19,14 @@ class NotificationService
      *     type: string,
      *     title: string,
      *     message: string,
-     *     time: Carbon|null,
+     *     time: Carbon|string|null,
      *     time_diff: string,
      *     url: string,
+     *     read_url: string,
      *     icon: string,
      *     color: string,
-     *     badge_label: string
+     *     badge_label: string,
+     *     is_read: bool
      * }>
      */
     public static function getNotificationsForUser(?User $user): array
@@ -32,11 +35,19 @@ class NotificationService
             return [];
         }
 
+        // Ambil daftar key notifikasi yang sudah dibaca oleh user ini
+        $readKeys = DB::table('user_notification_reads')
+            ->where('user_id', $user->id)
+            ->pluck('notification_key')
+            ->flip()
+            ->all();
+
         $notifications = [];
         $karyawan = $user->karyawan;
 
         // ---------------------------------------------------------------------
         // 1. Notifikasi FTKP yang masuk ditujukan ke Divisinya yang perlu direspon
+        // (Khusus FTKP: tidak hilang jika hanya diklik, harus sampai direspon/ditindaklanjuti)
         // ---------------------------------------------------------------------
         if ($karyawan && $karyawan->divisi_id) {
             $ftkpList = Ketidaksesuaian::with(['divisiPelapor'])
@@ -48,17 +59,22 @@ class NotificationService
 
             foreach ($ftkpList as $ftkp) {
                 $divisiAsal = $ftkp->divisiPelapor?->nama ?? 'Divisi Terkait';
+                $notifId = 'ftkp_' . $ftkp->id;
+                $targetUrl = route('ketidaksesuaian.show', $ftkp->id);
+
                 $notifications[] = [
-                    'id'          => 'ftkp_' . $ftkp->id,
+                    'id'          => $notifId,
                     'type'        => 'ftkp',
                     'title'       => 'FTKP Baru Perlu Respon',
                     'message'     => "Tiket #{$ftkp->nomor_tiket} dari {$divisiAsal} menunggu respon/tindak lanjut divisi Anda.",
                     'time'        => $ftkp->created_at,
                     'time_diff'   => $ftkp->created_at ? $ftkp->created_at->diffForHumans() : '',
-                    'url'         => route('ketidaksesuaian.show', $ftkp->id),
+                    'url'         => $targetUrl,
+                    'read_url'    => route('notifications.read', ['key' => $notifId, 'redirect' => $targetUrl]),
                     'icon'        => 'bi-exclamation-triangle-fill',
                     'color'       => '#ef4444',
                     'badge_label' => 'FTKP',
+                    'is_read'     => false, // FTKP selalu berstatus unread selama tiket belum direspon
                 ];
             }
         }
@@ -80,18 +96,22 @@ class NotificationService
                 $periodeNama = $penilaian->periode?->nama ?? 'Periode Ini';
                 $evaluatorName = $penilaian->evaluator?->name ?? 'Atasan/Penilai';
                 $tgl = $penilaian->tanggal_penilaian ?? $penilaian->created_at;
+                $notifId = 'penilaian_' . $penilaian->id;
+                $targetUrl = route('penilaian.show', $penilaian->id);
 
                 $notifications[] = [
-                    'id'          => 'penilaian_' . $penilaian->id,
+                    'id'          => $notifId,
                     'type'        => 'penilaian',
                     'title'       => 'Penilaian Kinerja Baru',
                     'message'     => "Penilaian periode {$periodeNama} telah diisi oleh {$evaluatorName} (Nilai: " . number_format($penilaian->nilai_akhir, 2) . ").",
                     'time'        => $tgl,
                     'time_diff'   => $tgl ? Carbon::parse($tgl)->diffForHumans() : '',
-                    'url'         => route('penilaian.show', $penilaian->id),
+                    'url'         => $targetUrl,
+                    'read_url'    => route('notifications.read', ['key' => $notifId, 'redirect' => $targetUrl]),
                     'icon'        => 'bi-clipboard2-check-fill',
                     'color'       => '#3b82f6',
                     'badge_label' => 'Penilaian',
+                    'is_read'     => isset($readKeys[$notifId]),
                 ];
             }
 
@@ -111,18 +131,22 @@ class NotificationService
                     if (!$sudahDinilai) {
                         $sisaText = $diffDays === 0 ? 'hari ini' : "{$diffDays} hari lagi";
                         $hText = $diffDays === 0 ? 'H-0' : "H-{$diffDays}";
+                        $notifId = 'h7_periode_' . $periodeAktif->id;
+                        $targetUrl = route('monitoring.individu', ['saya' => 1]);
 
                         $notifications[] = [
-                            'id'          => 'h7_periode_' . $periodeAktif->id,
+                            'id'          => $notifId,
                             'type'        => 'warning_h7',
                             'title'       => "Peringatan: Belum Dinilai ({$hText})",
                             'message'     => "Periode {$periodeAktif->nama} berakhir {$sisaText} (" . $tglSelesai->format('d M Y') . "). Anda belum dinilai.",
                             'time'        => now(),
                             'time_diff'   => 'Tenggat Waktu',
-                            'url'         => route('monitoring.individu', ['saya' => 1]),
+                            'url'         => $targetUrl,
+                            'read_url'    => route('notifications.read', ['key' => $notifId, 'redirect' => $targetUrl]),
                             'icon'        => 'bi-alarm-fill',
                             'color'       => '#f59e0b',
                             'badge_label' => 'Peringatan H-7',
+                            'is_read'     => isset($readKeys[$notifId]),
                         ];
                     }
                 }
@@ -145,23 +169,30 @@ class NotificationService
             $namaDinilai = $penilaianTanggapan->karyawan?->nama ?? 'Karyawan';
             $periodeNama = $penilaianTanggapan->periode?->nama ?? 'Periode Terkait';
             $tgl = $penilaianTanggapan->tanggal_tanggapan;
+            $notifId = 'tanggapan_' . $penilaianTanggapan->id;
+            $targetUrl = route('penilaian.show', $penilaianTanggapan->id);
 
             $notifications[] = [
-                'id'          => 'tanggapan_' . $penilaianTanggapan->id,
+                'id'          => $notifId,
                 'type'        => 'tanggapan',
                 'title'       => 'Tanggapan Penilaian Diterima',
                 'message'     => "{$namaDinilai} telah memberikan respon tanggapan atas penilaian {$periodeNama}.",
                 'time'        => $tgl,
                 'time_diff'   => $tgl ? Carbon::parse($tgl)->diffForHumans() : '',
-                'url'         => route('penilaian.show', $penilaianTanggapan->id),
+                'url'         => $targetUrl,
+                'read_url'    => route('notifications.read', ['key' => $notifId, 'redirect' => $targetUrl]),
                 'icon'        => 'bi-chat-left-text-fill',
                 'color'       => '#10b981',
                 'badge_label' => 'Respon Balik',
+                'is_read'     => isset($readKeys[$notifId]),
             ];
         }
 
-        // Urutkan berdasarkan waktu paling mutakhir (terbaru di atas)
+        // Urutkan: unread terlebih dahulu, lalu berdasarkan waktu terbaru
         usort($notifications, function ($a, $b) {
+            if ($a['is_read'] !== $b['is_read']) {
+                return $a['is_read'] ? 1 : -1;
+            }
             $tA = $a['time'] ? Carbon::parse($a['time'])->timestamp : 0;
             $tB = $b['time'] ? Carbon::parse($b['time'])->timestamp : 0;
             return $tB <=> $tA;
@@ -169,5 +200,50 @@ class NotificationService
 
         return $notifications;
     }
-}
 
+    /**
+     * Tandai satu notifikasi sebagai sudah dibaca
+     */
+    public static function markAsRead(int $userId, string $key): void
+    {
+        // Khusus FTKP: tidak bisa ditandai terbaca lewat klik (harus sampai direspon/ditindaklanjuti)
+        if (str_starts_with($key, 'ftkp_')) {
+            return;
+        }
+
+        DB::table('user_notification_reads')->updateOrInsert(
+            ['user_id' => $userId, 'notification_key' => $key],
+            ['read_at' => now(), 'updated_at' => now(), 'created_at' => now()]
+        );
+    }
+
+    /**
+     * Tandai kumpulan notifikasi sebagai sudah dibaca (kecuali FTKP)
+     *
+     * @param array<int, string> $keys
+     */
+    public static function markAllAsRead(int $userId, array $keys): void
+    {
+        $now = now();
+        $records = [];
+        foreach ($keys as $key) {
+            if (!str_starts_with($key, 'ftkp_')) {
+                $records[] = [
+                    'user_id'          => $userId,
+                    'notification_key' => $key,
+                    'read_at'          => $now,
+                    'created_at'       => $now,
+                    'updated_at'       => $now,
+                ];
+            }
+        }
+
+        if (!empty($records)) {
+            DB::table('user_notification_reads')->upsert(
+                $records,
+                ['user_id', 'notification_key'],
+                ['read_at', 'updated_at']
+            );
+        }
+    }
+}
