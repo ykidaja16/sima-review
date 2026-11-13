@@ -284,7 +284,7 @@ class KetidaksesuaianController extends Controller
     public function exportPdf(Ketidaksesuaian $ketidaksesuaian)
     {
         $ketidaksesuaian->load([
-            'pelapor.divisi', 'divisiPelapor', 'jenis',
+            'pelapor.divisi', 'pelapor.jabatan', 'divisiPelapor', 'jenis',
             'divisiTujuan', 'tindaklanjut.user',
             'verifikasiManager.verifikator', 'verifikasiKacab.verifikator',
         ]);
@@ -299,7 +299,7 @@ class KetidaksesuaianController extends Controller
     public function exportExcel(Ketidaksesuaian $ketidaksesuaian)
     {
         $ketidaksesuaian->load([
-            'pelapor.divisi', 'divisiPelapor', 'jenis',
+            'pelapor.divisi', 'pelapor.jabatan', 'divisiPelapor', 'jenis',
             'divisiTujuan', 'tindaklanjut.user',
             'verifikasiManager.verifikator', 'verifikasiKacab.verifikator',
         ]);
