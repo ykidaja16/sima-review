@@ -26,6 +26,16 @@ class Role extends Model
         return $this->hasMany(User::class);
     }
 
+    public function menuPermissions(): HasMany
+    {
+        return $this->hasMany(RoleMenuPermission::class);
+    }
+
+    public function hasMenuPermission(string $menuKey): bool
+    {
+        return \App\Services\MenuService::roleHasAccess($this->id, $menuKey);
+    }
+
     // ---- Static helpers ----
 
     public static function getBySlug(string $slug): ?self
@@ -34,8 +44,10 @@ class Role extends Model
     }
 
     public static function superAdmin(): ?self { return static::getBySlug('super_admin'); }
+    public static function direktur(): ?self   { return static::getBySlug('direktur'); }
     public static function kacab(): ?self      { return static::getBySlug('kacab'); }
     public static function manager(): ?self    { return static::getBySlug('manager'); }
     public static function supervisor(): ?self { return static::getBySlug('supervisor'); }
     public static function pelaksana(): ?self  { return static::getBySlug('pelaksana'); }
+    public static function mutu(): ?self       { return static::getBySlug('mutu'); }
 }

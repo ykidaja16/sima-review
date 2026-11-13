@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cabang;
 use App\Models\Divisi;
 use App\Models\KategoriNilai;
 use App\Models\Penilaian;
@@ -27,7 +28,7 @@ class LaporanController extends Controller
             return false;
         }
 
-        return $user->hasRole(['super_admin', 'kacab', 'mutu']) || $user->isMutu();
+        return $user->hasRole(['super_admin', 'direktur', 'kacab', 'mutu']) || $user->isMutu();
     }
 
     private function buildQuery(Request $request)
@@ -36,8 +37,15 @@ class LaporanController extends Controller
         $user = Auth::user();
         $userKaryawan = $user?->karyawan;
 
-        $query = Penilaian::with(['karyawan.divisi', 'karyawan.jabatan', 'evaluator', 'periode'])
+        $query = Penilaian::with(['karyawan.divisi', 'karyawan.jabatan', 'karyawan.cabang', 'evaluator', 'periode'])
             ->orderByDesc('nilai_akhir');
+
+        // Scoping cabang
+        if ($user && $user->isKacab() && $userKaryawan?->cabang_id) {
+            $query->whereHas('karyawan', fn($q) => $q->where('cabang_id', $userKaryawan->cabang_id));
+        } elseif ($user && ($user->isDirektur() || $user->isSuperAdmin()) && $request->filled('cabang_id')) {
+            $query->whereHas('karyawan', fn($q) => $q->where('cabang_id', $request->cabang_id));
+        }
 
         if ($request->filled('periode_id')) {
             $query->where('periode_id', $request->periode_id);
@@ -73,6 +81,7 @@ class LaporanController extends Controller
 
         $periodes   = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
         $kategoris  = KategoriNilai::orderBy('urutan')->get();
+        $cabangs    = Cabang::active()->orderBy('nama')->get();
         $penilaians = $this->buildQuery($request)->get();
 
         if ($canViewAll) {
@@ -83,7 +92,7 @@ class LaporanController extends Controller
                 : collect();
         }
 
-        return view('laporan.index', compact('periodes', 'divisis', 'kategoris', 'penilaians', 'canViewAll'));
+        return view('laporan.index', compact('periodes', 'divisis', 'kategoris', 'cabangs', 'penilaians', 'canViewAll'));
     }
 
     public function exportExcel(Request $request)

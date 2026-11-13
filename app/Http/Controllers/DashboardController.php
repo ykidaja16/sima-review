@@ -20,6 +20,7 @@ class DashboardController extends Controller
 
         return match ($user->role?->slug) {
             'super_admin' => $this->dashboardSuperAdmin(),
+            'direktur'    => $this->dashboardSuperAdmin(),
             'kacab'       => $this->dashboardManager(),
             'manager'     => $this->dashboardManager(),
             'supervisor'  => $this->dashboardSupervisor(),

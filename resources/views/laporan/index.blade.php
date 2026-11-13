@@ -26,7 +26,18 @@
     <div class="card-header"><h5><i class="bi bi-funnel-fill" style="color:#3b82f6;margin-right:6px;"></i>Filter Data Laporan</h5></div>
     <div class="card-body">
         <form method="GET" action="{{ route('laporan.index') }}" id="filterForm">
-            <div class="grid grid-3">
+            <div class="grid {{ (auth()->user()->isDirektur() || auth()->user()->isSuperAdmin()) ? 'grid-4' : 'grid-3' }}">
+                @if(auth()->user()->isDirektur() || auth()->user()->isSuperAdmin())
+                <div class="form-group">
+                    <label class="form-label">Cabang</label>
+                    <select name="cabang_id" class="form-select searchable-select" data-placeholder="Cari cabang...">
+                        <option value="">Semua Cabang</option>
+                        @foreach($cabangs as $c)
+                        <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
                 <div class="form-group">
                     <label class="form-label">Periode (Tanggal)</label>
                     <select name="periode_id" class="form-select searchable-select" data-placeholder="Cari tanggal / nama periode...">

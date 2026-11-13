@@ -14,6 +14,17 @@
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body">
         <form method="GET" action="{{ route('monitoring.individu') }}" id="formTrackRecordIndividu" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            @if(auth()->user()->isDirektur() || auth()->user()->isSuperAdmin())
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Filter Cabang</label>
+                <select name="cabang_id" onchange="this.form.submit()" class="form-select searchable-select" data-placeholder="Cari cabang...">
+                    <option value="">Semua Cabang</option>
+                    @foreach($cabangs as $c)
+                    <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div style="flex:1;min-width:200px;">
                 <label class="form-label">Filter Divisi</label>
                 <select name="divisi_id" id="filterDivisiTrack" class="form-select searchable-select" data-placeholder="Cari divisi...">

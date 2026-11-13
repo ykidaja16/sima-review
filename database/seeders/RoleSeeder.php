@@ -17,6 +17,12 @@ class RoleSeeder extends Seeder
                 'level'     => 5,
             ],
             [
+                'nama'      => 'Direktur',
+                'slug'      => 'direktur',
+                'deskripsi' => 'Direktur: memantau aktivitas seluruh cabang, review dan monitoring level eksekutif',
+                'level'     => 4,
+            ],
+            [
                 'nama'      => 'Kepala Cabang',
                 'slug'      => 'kacab',
                 'deskripsi' => 'Kepala Cabang: memantau seluruh aktivitas cabang, verifikasi akhir ketidaksesuaian, dan mengelola periode penilaian',

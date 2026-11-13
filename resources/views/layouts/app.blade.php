@@ -974,10 +974,10 @@
             </a>
 
             {{-- Penilaian --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor']))
+            @if(auth()->user()->hasRole(['super_admin','direktur','manager','kacab','supervisor']))
             <div class="nav-section-title">Penilaian</div>
 
-            @if(auth()->user()->hasRole(['super_admin','kacab']))
+            @if(auth()->user()->hasRole(['super_admin','kacab']) && auth()->user()->canAccessMenu('periode_kelola'))
             <a href="{{ route('periode.index') }}"
                class="nav-item {{ request()->routeIs('periode.*') ? 'active' : '' }}"
                data-tooltip="Periode">
@@ -986,12 +986,14 @@
             </a>
             @endif
 
+            @if(auth()->user()->canAccessMenu('penilaian_input'))
             <a href="{{ route('penilaian.index') }}"
                class="nav-item {{ request()->routeIs('penilaian.*') ? 'active' : '' }}"
                data-tooltip="Penilaian">
                 <i class="bi bi-clipboard2-check"></i>
                 <span>Input Penilaian</span>
             </a>
+            @endif
             @endif
 
             {{-- Nilai Saya (Pelaksana & Supervisor) --}}
@@ -1005,28 +1007,39 @@
             </a>
             @endif
 
-            {{-- Monitoring --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor','mutu']))
+            {{-- Monitoring: Super Admin tidak memerlukan menu ini sesuai Request #2 --}}
+            @if(!auth()->user()->isSuperAdmin() && auth()->user()->hasRole(['direktur','manager','kacab','supervisor','mutu']))
             <div class="nav-section-title">Monitoring</div>
+
+            @if(auth()->user()->canAccessMenu('monitoring_individu'))
             <a href="{{ route('monitoring.individu') }}"
                class="nav-item {{ (request()->routeIs('monitoring.individu') && !request()->boolean('saya') && !auth()->user()->isPelaksana()) ? 'active' : '' }}"
                data-tooltip="Individu">
                 <i class="bi bi-person-lines-fill"></i>
                 <span>Track Record Individu</span>
             </a>
+            @endif
+
+            @if(auth()->user()->canAccessMenu('monitoring_tim'))
             <a href="{{ route('monitoring.tim') }}"
                class="nav-item {{ request()->routeIs('monitoring.tim') ? 'active' : '' }}"
                data-tooltip="Tim">
                 <i class="bi bi-people-fill"></i>
                 <span>Monitoring Tim</span>
             </a>
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab','mutu']))
+            @endif
+
+            @if(auth()->user()->hasRole(['direktur','manager','kacab','mutu']))
+            @if(auth()->user()->canAccessMenu('monitoring_divisi'))
             <a href="{{ route('monitoring.divisi') }}"
                class="nav-item {{ request()->routeIs('monitoring.divisi') ? 'active' : '' }}"
                data-tooltip="Divisi">
                 <i class="bi bi-bar-chart-fill"></i>
                 <span>Perbandingan Divisi</span>
             </a>
+            @endif
+
+            @if(auth()->user()->canAccessMenu('monitoring_ranking'))
             <a href="{{ route('monitoring.ranking') }}"
                class="nav-item {{ request()->routeIs('monitoring.ranking') ? 'active' : '' }}"
                data-tooltip="Ranking">
@@ -1035,9 +1048,10 @@
             </a>
             @endif
             @endif
+            @endif
 
             {{-- Laporan --}}
-            @if(auth()->user()->hasRole(['super_admin','manager','kacab','supervisor','mutu']))
+            @if(auth()->user()->hasRole(['super_admin','direktur','manager','kacab','supervisor','mutu']) && auth()->user()->canAccessMenu('laporan'))
             <a href="{{ route('laporan.index') }}"
                class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}"
                data-tooltip="Laporan">
@@ -1047,6 +1061,7 @@
             @endif
 
             {{-- Ketidaksesuaian: semua role --}}
+            @if(auth()->user()->canAccessMenu('ketidaksesuaian'))
             <div class="nav-section-title">Review</div>
             <a href="{{ route('ketidaksesuaian.index') }}"
                class="nav-item {{ request()->routeIs('ketidaksesuaian.*') ? 'active' : '' }}"
@@ -1054,34 +1069,45 @@
                 <i class="bi bi-exclamation-triangle-fill"></i>
                 <span>FTKP / Ketidaksesuaian</span>
             </a>
+            @endif
 
-            {{-- Survei Pelanggan: semua role --}}
+            {{-- Survei Pelanggan --}}
+            @if(auth()->user()->canAccessMenu('survei_data') || auth()->user()->canAccessMenu('survei_analisa'))
             <div class="nav-section-title">Survei Pelanggan</div>
+            @if(auth()->user()->canAccessMenu('survei_data'))
             <a href="{{ route('survei-pelanggan.index') }}"
                class="nav-item {{ request()->routeIs('survei-pelanggan.index') ? 'active' : '' }}"
                data-tooltip="Data Survei">
                 <i class="bi bi-card-list"></i>
                 <span>Data Survei</span>
             </a>
-            @if(auth()->user()->hasRole(['super_admin', 'kacab', 'mutu']))
+            @endif
+            @if(auth()->user()->hasRole(['super_admin', 'direktur', 'kacab', 'mutu']))
+            @if(auth()->user()->canAccessMenu('survei_analisa'))
             <a href="{{ route('survei-pelanggan.analisa') }}"
                class="nav-item {{ request()->routeIs('survei-pelanggan.analisa') ? 'active' : '' }}"
                data-tooltip="Analisa Data">
                 <i class="bi bi-bar-chart-line-fill"></i>
                 <span>Analisa Data</span>
             </a>
+            @endif
+            @if(auth()->user()->canAccessMenu('survei_grafik'))
             <a href="{{ route('survei-pelanggan.grafik') }}"
                class="nav-item {{ request()->routeIs('survei-pelanggan.grafik') ? 'active' : '' }}"
                data-tooltip="Internal Grafik">
                 <i class="bi bi-diagram-2-fill"></i>
                 <span>Internal Grafik</span>
             </a>
+            @endif
+            @if(auth()->user()->canAccessMenu('survei_pendukung'))
             <a href="{{ route('survei-pelanggan.pendukung') }}"
                class="nav-item {{ request()->routeIs('survei-pelanggan.pendukung') ? 'active' : '' }}"
                data-tooltip="Data Pendukung">
                 <i class="bi bi-pie-chart-fill"></i>
                 <span>Data Pendukung</span>
             </a>
+            @endif
+            @endif
             @endif
 
             {{-- Master Data --}}
@@ -1136,6 +1162,12 @@
                data-tooltip="User">
                 <i class="bi bi-person-gear"></i>
                 <span>User Management</span>
+            </a>
+            <a href="{{ route('hak-akses.index') }}"
+               class="nav-item {{ request()->routeIs('hak-akses.*') ? 'active' : '' }}"
+               data-tooltip="Hak Akses">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Hak Akses Management</span>
             </a>
             <a href="{{ route('audit-log.index') }}"
                class="nav-item {{ request()->routeIs('audit-log.*') ? 'active' : '' }}"

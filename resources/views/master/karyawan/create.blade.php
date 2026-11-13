@@ -53,7 +53,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Cabang</label>
-                <select name="cabang_id" class="form-select @error('cabang_id') is-invalid @enderror">
+                <select name="cabang_id" id="cabangSelect" class="form-select @error('cabang_id') is-invalid @enderror">
                     <option value="">-- Pilih Cabang --</option>
                     @foreach($cabangs as $c)
                     <option value="{{ $c->id }}" {{ old('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
@@ -63,15 +63,15 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Atasan Langsung</label>
-                <select name="atasan_id" class="form-select">
+                <select name="atasan_id" id="atasanSelect" class="form-select">
                     <option value="">-- Tidak ada --</option>
                     @foreach($atasans as $a)
-                    <option value="{{ $a->id }}" {{ old('atasan_id') == $a->id ? 'selected' : '' }}>
+                    <option value="{{ $a->id }}" data-cabang="{{ $a->cabang_id }}" {{ old('atasan_id') == $a->id ? 'selected' : '' }}>
                         {{ $a->nip ? ($a->nip . ' — ') : '' }}{{ $a->nama }} ({{ $a->jabatan->nama ?? '-' }})
                     </option>
                     @endforeach
                 </select>
-                <small style="color:var(--text-muted);font-size:0.75rem;">Hanya menampilkan karyawan level Supervisor ke atas.</small>
+                <small style="color:var(--text-muted);font-size:0.75rem;">Hanya menampilkan atasan di cabang yang sama (Level Supervisor ke atas).</small>
             </div>
             <div class="form-group" style="display:flex;gap:24px;flex-wrap:wrap;">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
@@ -143,5 +143,49 @@
     buatAkunCheck.addEventListener('change', toggleAkunFields);
     // Inisiasi saat load (jika old value checked)
     toggleAkunFields();
+
+    // Filter Atasan Langsung berdasarkan Cabang terpilih
+    const cabangSelect = document.getElementById('cabangSelect');
+    const atasanSelect = document.getElementById('atasanSelect');
+
+    function filterAtasanByCabang() {
+        if (!cabangSelect || !atasanSelect) return;
+        const selectedCabang = cabangSelect.value;
+        const currentVal = atasanSelect.value;
+        let isCurrentValid = false;
+
+        Array.from(atasanSelect.options).forEach((opt, idx) => {
+            if (idx === 0) return; // Opsi pertama "-- Tidak ada --"
+            const optCabang = opt.getAttribute('data-cabang');
+            if (!selectedCabang) {
+                opt.style.display = 'none';
+                opt.disabled = true;
+            } else if (optCabang === selectedCabang) {
+                opt.style.display = '';
+                opt.disabled = false;
+                if (opt.value === currentVal) {
+                    isCurrentValid = true;
+                }
+            } else {
+                opt.style.display = 'none';
+                opt.disabled = true;
+            }
+        });
+
+        if (currentVal && !isCurrentValid) {
+            atasanSelect.value = '';
+        }
+
+        if (!selectedCabang) {
+            atasanSelect.options[0].text = '-- Pilih Cabang Terlebih Dahulu --';
+        } else {
+            atasanSelect.options[0].text = '-- Tidak ada / Pilih Atasan --';
+        }
+    }
+
+    if (cabangSelect && atasanSelect) {
+        cabangSelect.addEventListener('change', filterAtasanByCabang);
+        filterAtasanByCabang();
+    }
 </script>
 @endsection

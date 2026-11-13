@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->role?->slug === 'super_admin';
     }
 
+    public function isDirektur(): bool
+    {
+        return $this->role?->slug === 'direktur';
+    }
+
     public function isKacab(): bool
     {
         return $this->role?->slug === 'kacab';
@@ -104,6 +109,17 @@ class User extends Authenticatable
             return $slug === $roles;
         }
         return in_array($slug, $roles);
+    }
+
+    /**
+     * Cek apakah user memiliki hak akses ke menu tertentu (berdasarkan konfigurasi Hak Akses Management).
+     */
+    public function canAccessMenu(string $menuKey): bool
+    {
+        if (!$this->role_id) {
+            return false;
+        }
+        return \App\Services\MenuService::roleHasAccess($this->role_id, $menuKey);
     }
 
     public function getRoleLabelAttribute(): string

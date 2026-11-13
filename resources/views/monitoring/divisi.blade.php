@@ -17,7 +17,18 @@
 {{-- Filter Periode --}}
 <div class="card" style="margin-bottom:20px;">
     <div class="card-body">
-        <form method="GET" style="display:flex;gap:12px;align-items:flex-end;">
+        <form method="GET" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+            @if(auth()->user()->isDirektur() || auth()->user()->isSuperAdmin())
+            <div style="flex:1;max-width:300px;">
+                <label class="form-label">Cabang</label>
+                <select name="cabang_id" class="form-select searchable-select" data-placeholder="Cari cabang..." onchange="this.form.submit()">
+                    <option value="">Semua Cabang</option>
+                    @foreach($cabangs as $c)
+                    <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div style="flex:1;max-width:300px;">
                 <label class="form-label">Periode</label>
                 <select name="periode_id" class="form-select searchable-select" data-placeholder="Cari periode..." onchange="this.form.submit()">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cabang;
 use App\Models\Divisi;
 use App\Models\Karyawan;
 use App\Models\ParameterSop;
@@ -38,6 +39,14 @@ class PenilaianController extends Controller
             });
         } elseif ($user->isPelaksana() && $user->karyawan) {
             $query->where('karyawan_id', $user->karyawan->id);
+        } elseif ($user->isKacab() && $user->karyawan?->cabang_id) {
+            // Kacab: hanya melihat penilaian di cabangnya
+            $query->whereHas('karyawan', fn($k) => $k->where('cabang_id', $user->karyawan->cabang_id));
+        }
+
+        // Filter opsional cabang (untuk Direktur dan Super Admin)
+        if (($user->isDirektur() || $user->isSuperAdmin()) && $request->filled('cabang_id')) {
+            $query->whereHas('karyawan', fn($k) => $k->where('cabang_id', $request->cabang_id));
         }
 
         // Filter opsional
@@ -61,8 +70,9 @@ class PenilaianController extends Controller
         $penilaians = $query->paginate(15)->withQueryString();
         $periodes   = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
         $divisis    = Divisi::active()->orderBy('nama')->get();
+        $cabangs    = Cabang::active()->orderBy('nama')->get();
 
-        return view('penilaian.index', compact('penilaians', 'periodes', 'divisis'));
+        return view('penilaian.index', compact('penilaians', 'periodes', 'divisis', 'cabangs'));
     }
 
     public function create(Request $request): View|RedirectResponse
@@ -83,8 +93,8 @@ class PenilaianController extends Controller
             ->with(['divisi', 'jabatan']);
         $userKaryawan = $user->karyawan;
 
-        // Role Kacab tidak perlu dinilai oleh siapapun
-        $karyawansQuery->whereDoesntHave('user.role', fn($q) => $q->where('slug', 'kacab'));
+        // Role Kacab dan Direktur tidak perlu dinilai oleh siapapun
+        $karyawansQuery->whereDoesntHave('user.role', fn($q) => $q->whereIn('slug', ['kacab', 'direktur']));
 
         // 1. Penilai tidak menilai dirinya sendiri
         if ($userKaryawan) {
@@ -99,8 +109,8 @@ class PenilaianController extends Controller
 
             $karyawansQuery->where('divisi_id', '!=', $userKaryawan->divisi_id)
                 ->whereHas('jabatan', fn($q) => $q->where('level', '<', $penilaiLevel));
-        } elseif ($user->isKacab() && $userKaryawan) {
-            // Kepala Cabang: menilai karyawan di bawah level jabatannya
+        } elseif (($user->isKacab() || $user->isDirektur()) && $userKaryawan) {
+            // Kepala Cabang / Direktur: menilai karyawan di bawah level jabatannya
             $penilaiLevel = $userKaryawan->jabatan?->level ?? 0;
             if ($penilaiLevel > 0) {
                 $karyawansQuery->whereHas('jabatan', fn($q) => $q->where('level', '<', $penilaiLevel));

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HakAksesController;
 use App\Http\Controllers\KetidaksesuaianController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\Master\CabangController;
@@ -61,6 +62,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('/', UserController::class)->except(['show'])->parameters(['' => 'user']);
     });
 
+    // ---- Hak Akses Management (Super Admin only) ----
+    Route::middleware('role:super_admin')->prefix('hak-akses')->name('hak-akses.')->group(function () {
+        Route::get('/', [HakAksesController::class, 'index'])->name('index');
+        Route::post('/', [HakAksesController::class, 'update'])->name('update');
+    });
+
     // ---- Audit Log (Super Admin only) ----
     Route::middleware('role:super_admin')
         ->get('/audit-log', [AuditLogController::class, 'index'])
@@ -73,8 +80,8 @@ Route::middleware('auth')->group(function () {
             ->name('periode.update-status');
     });
 
-    // ---- Penilaian CRUD (Super Admin, Manager, Kacab, Supervisor) ----
-    Route::middleware('role:super_admin,manager,kacab,supervisor')->group(function () {
+    // ---- Penilaian CRUD (Super Admin, Direktur, Manager, Kacab, Supervisor) ----
+    Route::middleware('role:super_admin,direktur,manager,kacab,supervisor')->group(function () {
         Route::resource('penilaian', PenilaianController::class)->except(['show']);
     });
 
@@ -93,16 +100,16 @@ Route::middleware('auth')->group(function () {
             ->middleware('pelaksana.access')
             ->name('individu');
 
-        // Tim, Divisi, Ranking: khusus manager ke atas & mutu
-        Route::middleware('role:super_admin,manager,kacab,supervisor,mutu')->group(function () {
+        // Tim, Divisi, Ranking: khusus direktur, manager ke atas & mutu
+        Route::middleware('role:super_admin,direktur,manager,kacab,supervisor,mutu')->group(function () {
             Route::get('/tim', [MonitoringController::class, 'tim'])->name('tim');
             Route::get('/divisi', [MonitoringController::class, 'divisi'])->name('divisi');
             Route::get('/ranking', [MonitoringController::class, 'ranking'])->name('ranking');
         });
     });
 
-    // ---- Laporan (Super Admin, Manager, Kacab, Supervisor, Mutu) ----
-    Route::middleware('role:super_admin,manager,kacab,supervisor,mutu')->prefix('laporan')->name('laporan.')->group(function () {
+    // ---- Laporan (Super Admin, Direktur, Manager, Kacab, Supervisor, Mutu) ----
+    Route::middleware('role:super_admin,direktur,manager,kacab,supervisor,mutu')->prefix('laporan')->name('laporan.')->group(function () {
         Route::get('/', [LaporanController::class, 'index'])->name('index');
         Route::get('/export-excel', [LaporanController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export-pdf', [LaporanController::class, 'exportPdf'])->name('export-pdf');
@@ -124,13 +131,13 @@ Route::middleware('auth')->group(function () {
             ->name('destroy');
     });
 
-    // ---- Survei Pelanggan (Data Survei: semua role; Analisa data & export analisa: Superadmin, Kacab, Mutu) ----
+    // ---- Survei Pelanggan (Data Survei: semua role; Analisa data & export analisa: Superadmin, Direktur, Kacab, Mutu) ----
     Route::prefix('survei-pelanggan')->name('survei-pelanggan.')->group(function () {
         Route::get('/', [SurveiPelangganController::class, 'index'])->name('index');
         Route::get('/export-data-excel', [SurveiPelangganController::class, 'exportDataExcel'])->name('export-data-excel');
         Route::get('/export-data-pdf', [SurveiPelangganController::class, 'exportDataPdf'])->name('export-data-pdf');
 
-        Route::middleware('role:super_admin,kacab,mutu')->group(function () {
+        Route::middleware('role:super_admin,direktur,kacab,mutu')->group(function () {
             Route::get('/analisa', [SurveiPelangganController::class, 'analisa'])->name('analisa');
             Route::get('/grafik', [SurveiPelangganController::class, 'grafik'])->name('grafik');
             Route::get('/pendukung', [SurveiPelangganController::class, 'pendukung'])->name('pendukung');

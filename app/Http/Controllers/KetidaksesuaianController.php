@@ -32,7 +32,7 @@ class KetidaksesuaianController extends Controller
             return false;
         }
 
-        return $user->hasRole(['super_admin', 'kacab', 'mutu']) || $user->isMutu();
+        return $user->hasRole(['super_admin', 'direktur', 'kacab', 'mutu']) || $user->isMutu();
     }
 
     public function index(Request $request): View
@@ -233,10 +233,10 @@ class KetidaksesuaianController extends Controller
 
         if ($ketidaksesuaian->status === 'verifikasi_manager') {
             $isManagerPenggagas = $user->hasRole(['manager']) && $karyawan && $karyawan->divisi_id == $ketidaksesuaian->divisi_pelapor_id;
-            if ($isManagerPenggagas || $user->hasRole(['super_admin', 'kacab'])) {
+            if ($isManagerPenggagas || $user->hasRole(['super_admin', 'direktur', 'kacab'])) {
                 $level = 'manager';
             }
-        } elseif ($ketidaksesuaian->status === 'verifikasi_kacab' && $user->hasRole(['super_admin', 'kacab'])) {
+        } elseif ($ketidaksesuaian->status === 'verifikasi_kacab' && $user->hasRole(['super_admin', 'direktur', 'kacab'])) {
             $level = 'kacab';
         }
 

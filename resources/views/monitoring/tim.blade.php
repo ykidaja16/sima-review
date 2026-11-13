@@ -25,6 +25,17 @@
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama atau NIP...">
                 </div>
             </div>
+            @if(auth()->user()->isDirektur() || auth()->user()->isSuperAdmin())
+            <div style="flex:1;min-width:180px;">
+                <label class="form-label">Filter Cabang</label>
+                <select name="cabang_id" class="form-select searchable-select" data-placeholder="Cari cabang...">
+                    <option value="">Semua Cabang</option>
+                    @foreach($cabangs as $c)
+                    <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama }} ({{ $c->kode }})</option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div style="flex:1;min-width:180px;">
                 <label class="form-label">Filter Divisi</label>
                 <select name="divisi_id" class="form-select searchable-select" data-placeholder="Cari divisi...">
