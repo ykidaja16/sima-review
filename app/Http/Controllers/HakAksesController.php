@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuditLog;
 use App\Models\Role;
 use App\Models\RoleMenuPermission;
+use App\Services\AuditLogService;
 use App\Services\MenuService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -62,13 +62,13 @@ class HakAksesController extends Controller
         });
 
         // Audit log
-        AuditLog::create([
-            'user_id'    => auth()->id(),
-            'action'     => 'UPDATE',
-            'model'      => 'RoleMenuPermission',
-            'model_id'   => null,
-            'keterangan' => 'Mengubah matriks hak akses menu masing-masing role',
-        ]);
+        AuditLogService::log(
+            'UPDATE_ROLE_MENU_PERMISSIONS',
+            'RoleMenuPermission',
+            null,
+            null,
+            ['keterangan' => 'Mengubah matriks hak akses menu masing-masing role']
+        );
 
         return redirect()->route('hak-akses.index')
             ->with('success', 'Hak akses menu berhasil diperbarui.');
