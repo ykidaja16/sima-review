@@ -75,6 +75,12 @@ class Karyawan extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeDinilai($query)
+    {
+        return $query->where('is_dinilai', true)
+            ->whereDoesntHave('user', fn($u) => $u->where('is_dinilai', false));
+    }
+
     public function scopeCalonAtasan($query, ?int $excludeId = null, ?int $includeId = null)
     {
         return $query->where('is_active', true)

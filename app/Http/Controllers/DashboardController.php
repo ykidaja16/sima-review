@@ -77,15 +77,18 @@ class DashboardController extends Controller
 
         $periodeAktif = PeriodePenilaian::aktif()->first();
 
-        // Karyawan divisi selain diri sendiri (karena penilai tidak menilai diri sendiri)
+        // Karyawan divisi selain diri sendiri yang berflag is_dinilai (karena penilai tidak menilai diri sendiri)
         $karyawanDivisiQuery = Karyawan::active()
+            ->dinilai()
             ->where('divisi_id', $divisiId)
             ->when($karyawan, fn($q) => $q->where('id', '!=', $karyawan->id));
 
         $totalKaryawanDivisi = $karyawanDivisiQuery->count();
 
         $sudahDinilai = Penilaian::whereHas('karyawan', function ($q) use ($divisiId, $karyawan) {
-            $q->where('divisi_id', $divisiId);
+            $q->active()
+                ->dinilai()
+                ->where('divisi_id', $divisiId);
             if ($karyawan) {
                 $q->where('id', '!=', $karyawan->id);
             }
@@ -102,6 +105,7 @@ class DashboardController extends Controller
 
         $karyawans = $karyawan
             ? Karyawan::active()
+                ->dinilai()
                 ->where('divisi_id', $divisiId)
                 ->where('id', '!=', $karyawan->id)
                 ->with(['jabatan', 'penilaians' => fn($q) => $q->when($periodeAktif, fn($p) => $p->where('periode_id', $periodeAktif->id))])
@@ -118,9 +122,10 @@ class DashboardController extends Controller
         $karyawan = $user->karyawan;
         $periodeAktif = PeriodePenilaian::aktif()->first();
 
-        // Supervisor memonitor bawahan langsung (tidak termasuk diri sendiri)
+        // Supervisor memonitor bawahan langsung yang berflag is_dinilai (tidak termasuk diri sendiri)
         $bawahans = $karyawan
             ? Karyawan::active()
+                ->dinilai()
                 ->where('atasan_id', $karyawan->id)
                 ->where('id', '!=', $karyawan->id)
                 ->with(['jabatan', 'penilaians' => fn($q) => $q->when($periodeAktif, fn($p) => $p->where('periode_id', $periodeAktif->id))])
