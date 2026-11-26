@@ -50,6 +50,9 @@ class KetidaksesuaianController extends Controller
             $roleSlug   = $user->role?->slug;
 
             $query->where(function ($q) use ($karyawanId, $divisiId, $roleSlug) {
+                // Semua FTKP yang sudah berstatus Selesai (closed) dapat dilihat oleh seluruh user
+                $q->orWhere('status', 'closed');
+
                 // Tiket yang dilaporkan sendiri
                 if ($karyawanId) {
                     $q->orWhere('pelapor_id', $karyawanId);
@@ -289,8 +292,13 @@ class KetidaksesuaianController extends Controller
             'verifikasiManager.verifikator', 'verifikasiKacab.verifikator',
         ]);
 
+        $jenisList = JenisKetidaksesuaian::active()->orderBy('nama')->get();
+        if ($ketidaksesuaian->jenis && !$jenisList->contains('id', $ketidaksesuaian->jenis->id)) {
+            $jenisList->push($ketidaksesuaian->jenis);
+        }
+
         $safeNomor = str_replace(['/', '\\'], '-', $ketidaksesuaian->nomor_ftkp);
-        $pdf = Pdf::loadView('ketidaksesuaian.pdf', compact('ketidaksesuaian'))
+        $pdf = Pdf::loadView('ketidaksesuaian.pdf', compact('ketidaksesuaian', 'jenisList'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download("FTKP-{$safeNomor}.pdf");
@@ -304,10 +312,15 @@ class KetidaksesuaianController extends Controller
             'verifikasiManager.verifikator', 'verifikasiKacab.verifikator',
         ]);
 
+        $jenisList = JenisKetidaksesuaian::active()->orderBy('nama')->get();
+        if ($ketidaksesuaian->jenis && !$jenisList->contains('id', $ketidaksesuaian->jenis->id)) {
+            $jenisList->push($ketidaksesuaian->jenis);
+        }
+
         $safeNomor = str_replace(['/', '\\'], '-', $ketidaksesuaian->nomor_ftkp);
 
         return Excel::download(
-            new \App\Exports\FtkpExport($ketidaksesuaian),
+            new \App\Exports\FtkpExport($ketidaksesuaian, $jenisList),
             "FTKP-{$safeNomor}.xlsx"
         );
     }

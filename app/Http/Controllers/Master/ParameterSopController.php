@@ -8,6 +8,7 @@ use App\Services\AuditLogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ParameterSopController extends Controller
@@ -22,21 +23,26 @@ class ParameterSopController extends Controller
     public function create(): View
     {
         $kategoriList = ParameterSop::select('kategori')->distinct()->orderBy('kategori')->pluck('kategori');
-        return view('master.parameter-sop.create', compact('kategoriList'));
+        $metodeOptions = ParameterSop::METODE_OPTIONS;
+        return view('master.parameter-sop.create', compact('kategoriList', 'metodeOptions'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'kategori'  => ['required', 'string', 'max:100'],
-            'nama'      => ['required', 'string', 'max:200'],
-            'deskripsi' => ['nullable', 'string'],
-            'urutan'    => ['required', 'integer', 'min:0'],
-            'bobot'     => ['required', 'integer', 'min:1'],
-            'is_active' => ['boolean'],
+            'kategori'           => ['required', 'string', 'max:100'],
+            'nama'               => ['required', 'string', 'max:200'],
+            'deskripsi'          => ['nullable', 'string'],
+            'metode_penilaian'   => ['nullable', 'array'],
+            'metode_penilaian.*' => ['string', Rule::in(ParameterSop::METODE_OPTIONS)],
+            'urutan'             => ['required', 'integer', 'min:0'],
+            'bobot'              => ['required', 'integer', 'min:1'],
+            'is_active'          => ['boolean'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['metode_penilaian'] = array_values($request->input('metode_penilaian', []));
+
         $parameter = ParameterSop::create($validated);
         AuditLogService::log('CREATE_PARAMETER_SOP', 'ParameterSop', $parameter->id, null, $parameter->toArray());
 
@@ -47,21 +53,26 @@ class ParameterSopController extends Controller
     public function edit(ParameterSop $parameterSop): View
     {
         $kategoriList = ParameterSop::select('kategori')->distinct()->orderBy('kategori')->pluck('kategori');
-        return view('master.parameter-sop.edit', compact('parameterSop', 'kategoriList'));
+        $metodeOptions = ParameterSop::METODE_OPTIONS;
+        return view('master.parameter-sop.edit', compact('parameterSop', 'kategoriList', 'metodeOptions'));
     }
 
     public function update(Request $request, ParameterSop $parameterSop): RedirectResponse
     {
         $validated = $request->validate([
-            'kategori'  => ['required', 'string', 'max:100'],
-            'nama'      => ['required', 'string', 'max:200'],
-            'deskripsi' => ['nullable', 'string'],
-            'urutan'    => ['required', 'integer', 'min:0'],
-            'bobot'     => ['required', 'integer', 'min:1'],
-            'is_active' => ['boolean'],
+            'kategori'           => ['required', 'string', 'max:100'],
+            'nama'               => ['required', 'string', 'max:200'],
+            'deskripsi'          => ['nullable', 'string'],
+            'metode_penilaian'   => ['nullable', 'array'],
+            'metode_penilaian.*' => ['string', Rule::in(ParameterSop::METODE_OPTIONS)],
+            'urutan'             => ['required', 'integer', 'min:0'],
+            'bobot'              => ['required', 'integer', 'min:1'],
+            'is_active'          => ['boolean'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
+        $validated['metode_penilaian'] = array_values($request->input('metode_penilaian', []));
+
         $dataLama = $parameterSop->toArray();
         $parameterSop->update($validated);
         AuditLogService::log('UPDATE_PARAMETER_SOP', 'ParameterSop', $parameterSop->id, $dataLama, $parameterSop->fresh()->toArray());

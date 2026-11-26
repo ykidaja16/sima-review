@@ -64,18 +64,28 @@
         $logoPng = public_path('images/logosima.png');
         $logoSrc = file_exists($logoJpg) ? $logoJpg : (extension_loaded('gd') && file_exists($logoPng) ? $logoPng : '');
 
-        // Jenis ketidaksesuaian logic
-        $jenisName = strtolower($ketidaksesuaian->jenis?->nama ?? '');
-        $isKeluhan = str_contains($jenisName, 'keluhan') || str_contains($jenisName, 'pelanggan');
-        $isAudit = str_contains($jenisName, 'audit');
-        $isLain = !$isKeluhan && !$isAudit;
-        $namaLain = $ketidaksesuaian->jenis_lainnya ?: ($ketidaksesuaian->jenis?->nama ?: '');
+        // Daftar Jenis Ketidaksesuaian sesuai Master Data aplikasi
+        $allJenis = isset($jenisList) ? collect($jenisList) : collect();
+        if ($allJenis->isEmpty() && $ketidaksesuaian->jenis) {
+            $allJenis->push($ketidaksesuaian->jenis);
+        } elseif ($ketidaksesuaian->jenis && !$allJenis->contains('id', $ketidaksesuaian->jenis->id)) {
+            $allJenis->push($ketidaksesuaian->jenis);
+        }
 
-        // Kategori temuan logic
-        $katLower = strtolower($ketidaksesuaian->kategori_temuan ?? '');
-        $isOk = ($katLower === 'ok');
-        $isObservasi = str_contains($katLower, 'observasi') || str_contains($katLower, 'ofi');
-        $isNc = str_contains($katLower, 'nc') || (!$isOk && !$isObservasi && !empty($katLower));
+        // Daftar Opsi Kategori Temuan sesuai Jenis FTKP yang dipilih
+        $kategoriOptions = $ketidaksesuaian->jenis?->kategori_temuan_list ?? ['Observasi', 'NC Minor', 'NC Mayor', 'OFI'];
+        $currentKategori = trim((string) ($ketidaksesuaian->kategori_temuan ?? ''));
+        $currentKategoriLabel = trim((string) ($ketidaksesuaian->kategori_label ?? $currentKategori));
+
+        if ($currentKategori !== '') {
+            $existsInOptions = collect($kategoriOptions)->contains(function ($opt) use ($currentKategori, $currentKategoriLabel) {
+                $optClean = trim((string) $opt);
+                return strcasecmp($optClean, $currentKategori) === 0 || strcasecmp($optClean, $currentKategoriLabel) === 0;
+            });
+            if (!$existsInOptions) {
+                $kategoriOptions[] = $currentKategoriLabel;
+            }
+        }
 
         // Verifikasi logic
         $verifikasi = $ketidaksesuaian->verifikasiKacab ?? $ketidaksesuaian->verifikasiManager;
@@ -136,13 +146,24 @@
         <tr>
             <td colspan="3" style="padding: 5px 7px;">
                 <div class="text-bold" style="margin-bottom: 3px;">5. JENIS KETIDAKSESUAIAN/POTENSIAL KETIDAKSESUAIAN</div>
-                <div style="margin-left: 10px; line-height: 1.45;">
-                    <div><span class="cb {{ $isKeluhan ? 'cb-checked' : '' }}">{!! $isKeluhan ? '&#10003;' : '&nbsp;' !!}</span> Keluhan Pelanggan</div>
-                    <div><span class="cb {{ $isAudit ? 'cb-checked' : '' }}">{!! $isAudit ? '&#10003;' : '&nbsp;' !!}</span> Laporan Audit</div>
-                    <div>
-                        <span class="cb {{ $isLain ? 'cb-checked' : '' }}">{!! $isLain ? '&#10003;' : '&nbsp;' !!}</span>
-                        Lain-lain, sebutkan: <span class="underline">{{ $isLain ? $namaLain : '' }}</span>
-                    </div>
+                <div style="margin-left: 10px; line-height: 1.5;">
+                    @forelse($allJenis as $j)
+                        @php
+                            $isChecked = ($ketidaksesuaian->jenis_id && $j->id)
+                                ? ((int) $ketidaksesuaian->jenis_id === (int) $j->id)
+                                : ($ketidaksesuaian->jenis === $j);
+                            $isNonAudit = str_contains(strtolower($j->nama ?? ''), 'non audit');
+                        @endphp
+                        <div>
+                            <span class="cb {{ $isChecked ? 'cb-checked' : '' }}">{!! $isChecked ? '&#10003;' : '&nbsp;' !!}</span>
+                            {{ $j->nama }}@if($isNonAudit), sebutkan: <span class="underline">{{ ($isChecked && $ketidaksesuaian->jenis_lainnya) ? $ketidaksesuaian->jenis_lainnya : '' }}</span>@elseif($isChecked && $ketidaksesuaian->jenis_lainnya) (<span class="underline">{{ $ketidaksesuaian->jenis_lainnya }}</span>)@endif
+                        </div>
+                    @empty
+                        <div>
+                            <span class="cb cb-checked">&#10003;</span>
+                            {{ $ketidaksesuaian->jenis?->nama ?? ($ketidaksesuaian->jenis_lainnya ?: '-') }}
+                        </div>
+                    @endforelse
                 </div>
             </td>
         </tr>
@@ -154,10 +175,20 @@
                 </div>
             </td>
             <td style="padding: 5px 7px; vertical-align: middle;">
-                <div style="padding-left: 8px; line-height: 1.8;">
-                    <div><span class="cb {{ $isOk ? 'cb-checked' : '' }}">{!! $isOk ? '&#10003;' : '&nbsp;' !!}</span> OK</div>
-                    <div><span class="cb {{ $isObservasi ? 'cb-checked' : '' }}">{!! $isObservasi ? '&#10003;' : '&nbsp;' !!}</span> OBSERVASI</div>
-                    <div><span class="cb {{ $isNc ? 'cb-checked' : '' }}">{!! $isNc ? '&#10003;' : '&nbsp;' !!}</span> NC</div>
+                <div style="padding-left: 6px; line-height: 1.65;">
+                    @foreach($kategoriOptions as $katOpt)
+                        @php
+                            $optClean = trim((string) $katOpt);
+                            $isKatChecked = $currentKategori !== '' && (
+                                strcasecmp($optClean, $currentKategori) === 0
+                                || strcasecmp($optClean, $currentKategoriLabel) === 0
+                            );
+                        @endphp
+                        <div>
+                            <span class="cb {{ $isKatChecked ? 'cb-checked' : '' }}">{!! $isKatChecked ? '&#10003;' : '&nbsp;' !!}</span>
+                            {{ strtoupper($optClean) }}
+                        </div>
+                    @endforeach
                 </div>
             </td>
         </tr>

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'role_id',
         'is_active',
         'is_dinilai',
+        'sidebar_theme',
     ];
 
     protected $hidden = [

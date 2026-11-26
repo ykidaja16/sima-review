@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\AuditLogService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -97,5 +98,25 @@ class ProfileController extends Controller
             : 'Data diri Anda berhasil diperbarui.';
 
         return redirect()->route('profile.edit')->with('success', $pesan);
+    }
+
+    /**
+     * Simpan preferensi tema warna sidebar ke akun pengguna secara otomatis.
+     */
+    public function updateTheme(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'theme' => ['required', 'string', 'max:50'],
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $user->sidebar_theme = $validated['theme'];
+        $user->save();
+
+        return response()->json([
+            'status' => 'ok',
+            'theme'  => $user->sidebar_theme,
+        ]);
     }
 }

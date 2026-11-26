@@ -14,7 +14,7 @@
     <div class="table-wrapper">
         <table>
             <thead>
-                <tr><th>#</th><th>Nama Parameter</th><th>Kategori</th><th>Bobot</th><th>Deskripsi</th><th>Urutan</th><th>Status</th><th>Aksi</th></tr>
+                <tr><th>#</th><th>Nama Parameter</th><th>Kategori</th><th>Bobot</th><th>Deskripsi &amp; Metode</th><th>Urutan</th><th>Status</th><th>Aksi</th></tr>
             </thead>
             <tbody>
                 @forelse($parameters as $p)
@@ -25,7 +25,14 @@
                     <td>
                         <span class="badge badge-info" style="font-size:0.8rem;font-weight:700;">Bobot {{ $p->bobot }}</span>
                     </td>
-                    <td style="font-size:0.8rem;color:var(--text-muted);">{{ Str::limit($p->deskripsi, 50) ?? '—' }}</td>
+                    <td style="font-size:0.8rem;color:var(--text-muted);">
+                        <div>{{ Str::limit($p->deskripsi, 50) ?? '—' }}</div>
+                        @if($p->metode_penilaian_label)
+                        <div style="font-size:0.73rem;margin-top:3px;color:#475569;">
+                            <i class="bi bi-clipboard2-check"></i> Metode: {{ $p->metode_penilaian_label }}
+                        </div>
+                        @endif
+                    </td>
                     <td>{{ $p->urutan }}</td>
                     <td>
                         @if($p->is_active)

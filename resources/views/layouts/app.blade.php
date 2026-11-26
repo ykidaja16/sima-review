@@ -34,10 +34,12 @@
             --text: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --sidebar-bg: #0f172a;
-            --sidebar-text: rgba(255,255,255,0.75);
-            --sidebar-active: rgba(255,255,255,0.12);
-            --sidebar-hover: rgba(255,255,255,0.07);
+            --sidebar-bg: linear-gradient(165deg, #0b3c5d 0%, #0d5c63 52%, #166d3b 100%);
+            --sidebar-active-bg: rgba(255,255,255,0.20);
+            --sidebar-brand-accent: linear-gradient(135deg, #10b981, #0284c7);
+            --sidebar-text: rgba(255,255,255,0.84);
+            --sidebar-active: rgba(255,255,255,0.18);
+            --sidebar-hover: rgba(255,255,255,0.12);
             --topbar-bg: #ffffff;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
@@ -82,18 +84,18 @@
             gap: 12px;
             padding: 0 18px;
             height: var(--topbar-height);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
             flex-shrink: 0;
             text-decoration: none;
         }
 
         .brand-logo {
             width: 36px; height: 36px;
-            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            background: var(--sidebar-brand-accent);
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(59,130,246,0.35);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.22);
         }
 
         .brand-logo i { color: white; font-size: 17px; }
@@ -113,7 +115,7 @@
 
         .brand-text span {
             font-size: 0.68rem;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.68);
             white-space: nowrap;
         }
 
@@ -122,7 +124,7 @@
         /* Sidebar nav */
         .sidebar-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 0; }
         .sidebar-nav::-webkit-scrollbar { width: 4px; }
-        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 2px; }
 
         .nav-section-title {
             padding: 8px 20px 4px;
@@ -130,7 +132,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            color: rgba(255,255,255,0.25);
+            color: rgba(255,255,255,0.52);
             white-space: nowrap;
             overflow: hidden;
             transition: var(--transition);
@@ -145,7 +147,7 @@
             padding: 9px 16px;
             margin: 2px 10px;
             border-radius: var(--radius-sm);
-            color: rgba(255,255,255,0.65);
+            color: rgba(255,255,255,0.82);
             text-decoration: none;
             font-size: 0.85rem;
             font-weight: 500;
@@ -155,14 +157,16 @@
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.07);
-            color: white;
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
         }
 
         .nav-item.active {
-            background: linear-gradient(135deg, rgba(59,130,246,0.9), rgba(37,99,235,0.9));
-            color: white;
-            box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+            background: var(--sidebar-active-bg);
+            color: #ffffff;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.20);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
         }
 
         .nav-item i {
@@ -202,7 +206,7 @@
 
         /* Sidebar user bottom */
         .sidebar-user {
-            border-top: 1px solid rgba(255,255,255,0.07);
+            border-top: 1px solid rgba(255,255,255,0.12);
             padding: 12px;
             display: flex;
             align-items: center;
@@ -213,7 +217,7 @@
         .user-avatar {
             width: 36px; height: 36px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background: var(--sidebar-brand-accent);
             display: flex; align-items: center; justify-content: center;
             font-size: 14px;
             font-weight: 700;
@@ -223,8 +227,126 @@
 
         .user-info { overflow: hidden; transition: var(--transition); }
         .user-info .name { font-size: 0.82rem; font-weight: 600; color: white; white-space: nowrap; }
-        .user-info .role { font-size: 0.7rem; color: rgba(255,255,255,0.4); white-space: nowrap; }
+        .user-info .role { font-size: 0.7rem; color: rgba(255,255,255,0.68); white-space: nowrap; }
         .sidebar.collapsed .user-info { width: 0; opacity: 0; }
+
+        /* ==================== THEME PICKER WIDGET ==================== */
+        .theme-picker-floating {
+            position: fixed;
+            bottom: 22px;
+            right: 24px;
+            z-index: 1080;
+        }
+
+        .theme-picker-fab {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            background: var(--sidebar-brand-accent);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .theme-picker-fab:hover {
+            transform: scale(1.07);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.32);
+        }
+
+        .theme-picker-popover {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 12px);
+            right: 0;
+            width: 282px;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 23, 42, 0.06);
+            animation: notifDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .theme-picker-popover.show {
+            display: block;
+        }
+
+        .theme-picker-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.25;
+        }
+
+        .theme-picker-subtitle {
+            font-size: 0.73rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .theme-swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        .theme-swatch-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 11px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1rem;
+            position: relative;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+        }
+
+        .theme-swatch-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-swatch-btn.active {
+            box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #1e293b;
+        }
+
+        .theme-picker-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 4px;
+            font-size: 0.75rem;
+        }
+
+        .theme-active-name {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .theme-esc-hint {
+            color: #94a3b8;
+            background: none;
+            border: none;
+            font-size: 0.73rem;
+            cursor: pointer;
+            padding: 0;
+            font-family: inherit;
+        }
+
+        .theme-esc-hint:hover {
+            color: #475569;
+        }
 
         /* ==================== MAIN ==================== */
         .main-wrapper {
@@ -1154,13 +1276,46 @@
         html.sidebar-init-collapsed .sidebar { width: var(--sidebar-collapsed-width); }
         html.sidebar-init-collapsed .main-wrapper { margin-left: var(--sidebar-collapsed-width); }
     </style>
+
+    @php
+        $sidebarThemes = [
+            'sima_emerald'   => ['name' => 'SIMA Signature',  'bg' => 'linear-gradient(165deg, #0b3c5d 0%, #0d5c63 52%, #166d3b 100%)', 'swatch' => 'linear-gradient(135deg, #0284c7, #16a34a)', 'accent' => 'linear-gradient(135deg, #10b981, #0284c7)'],
+            'royal_indigo'   => ['name' => 'Royal Indigo',    'bg' => 'linear-gradient(165deg, #1e3a8a 0%, #312e81 55%, #4338ca 100%)', 'swatch' => 'linear-gradient(135deg, #2563eb, #6366f1)', 'accent' => 'linear-gradient(135deg, #3b82f6, #6366f1)'],
+            'ocean_breeze'   => ['name' => 'Ocean Breeze',    'bg' => 'linear-gradient(165deg, #0c4a6e 0%, #0369a1 52%, #0891b2 100%)', 'swatch' => 'linear-gradient(135deg, #0284c7, #06b6d4)', 'accent' => 'linear-gradient(135deg, #0ea5e9, #06b6d4)'],
+            'aurora_violet'  => ['name' => 'Aurora Violet',   'bg' => 'linear-gradient(165deg, #4c1d95 0%, #6d28d9 52%, #be185d 100%)', 'swatch' => 'linear-gradient(135deg, #6366f1, #ec4899)', 'accent' => 'linear-gradient(135deg, #8b5cf6, #ec4899)'],
+            'emerald_mint'   => ['name' => 'Emerald Mint',    'bg' => 'linear-gradient(165deg, #064e3b 0%, #047857 52%, #0d9488 100%)', 'swatch' => 'linear-gradient(135deg, #059669, #14b8a6)', 'accent' => 'linear-gradient(135deg, #10b981, #14b8a6)'],
+            'coral_rose'     => ['name' => 'Coral Rose',      'bg' => 'linear-gradient(165deg, #881337 0%, #be123c 52%, #e11d48 100%)', 'swatch' => 'linear-gradient(135deg, #f43f5e, #fb7185)', 'accent' => 'linear-gradient(135deg, #e11d48, #f43f5e)'],
+            'amber_sunset'   => ['name' => 'Amber Sunset',    'bg' => 'linear-gradient(165deg, #7c2d12 0%, #b45309 52%, #c2410c 100%)', 'swatch' => 'linear-gradient(135deg, #f97316, #ef4444)', 'accent' => 'linear-gradient(135deg, #f59e0b, #ea580c)'],
+            'berry_night'    => ['name' => 'Berry Night',     'bg' => 'linear-gradient(165deg, #3b0764 0%, #701a75 52%, #9d174d 100%)', 'swatch' => 'linear-gradient(135deg, #581c87, #be185d)', 'accent' => 'linear-gradient(135deg, #9333ea, #db2777)'],
+            'deep_navy'      => ['name' => 'Deep Navy',       'bg' => 'linear-gradient(165deg, #0a192f 0%, #172554 55%, #1e40af 100%)', 'swatch' => 'linear-gradient(135deg, #1e3a8a, #1d4ed8)', 'accent' => 'linear-gradient(135deg, #2563eb, #3b82f6)'],
+            'periwinkle_sky' => ['name' => 'Periwinkle Sky',  'bg' => 'linear-gradient(165deg, #1e3a8a 0%, #2563eb 52%, #4f46e5 100%)', 'swatch' => 'linear-gradient(135deg, #60a5fa, #818cf8)', 'accent' => 'linear-gradient(135deg, #3b82f6, #818cf8)'],
+            'teal_forest'    => ['name' => 'Teal Forest',     'bg' => 'linear-gradient(165deg, #134e4a 0%, #115e59 52%, #0f766e 100%)', 'swatch' => 'linear-gradient(135deg, #0f766e, #10b981)', 'accent' => 'linear-gradient(135deg, #14b8a6, #10b981)'],
+            'sage_pine'      => ['name' => 'Sage Pine',       'bg' => 'linear-gradient(165deg, #1e352f 0%, #2d4f44 55%, #3d6b58 100%)', 'swatch' => 'linear-gradient(135deg, #3f6255, #6b9080)', 'accent' => 'linear-gradient(135deg, #52796f, #84a98c)'],
+            'olive_moss'     => ['name' => 'Olive Moss',      'bg' => 'linear-gradient(165deg, #283618 0%, #3a5a40 55%, #4f6f52 100%)', 'swatch' => 'linear-gradient(135deg, #588157, #a3b18a)', 'accent' => 'linear-gradient(135deg, #3a5a40, #588157)'],
+            'crimson_noir'   => ['name' => 'Crimson Noir',    'bg' => 'linear-gradient(165deg, #1c0d14 0%, #31101d 55%, #4a1525 100%)', 'swatch' => 'linear-gradient(135deg, #1f1218, #581c2c)', 'accent' => 'linear-gradient(135deg, #9f1239, #e11d48)'],
+            'slate_midnight' => ['name' => 'Slate Midnight',  'bg' => 'linear-gradient(165deg, #0f172a 0%, #1e1b4b 55%, #1e293b 100%)', 'swatch' => 'linear-gradient(135deg, #0f172a, #312e81)', 'accent' => 'linear-gradient(135deg, #3b82f6, #6366f1)'],
+        ];
+        $currentThemeKey = auth()->user()?->sidebar_theme ?? 'sima_emerald';
+        if (!isset($sidebarThemes[$currentThemeKey])) {
+            $currentThemeKey = 'sima_emerald';
+        }
+        $activeThemeObj = $sidebarThemes[$currentThemeKey];
+    @endphp
+    <style id="userSidebarThemeStyle">
+        :root {
+            --sidebar-bg: {!! $activeThemeObj['bg'] !!};
+            --sidebar-brand-accent: {!! $activeThemeObj['accent'] !!};
+        }
+    </style>
 </head>
 <body>
 
     <!-- ==================== SIDEBAR ==================== -->
     <aside class="sidebar" id="sidebar">
         <a href="{{ route('dashboard') }}" class="sidebar-brand">
-            <img src="{{ asset('images/logosima.png') }}" alt="SIMA" style="height:34px;flex-shrink:0;">
+            <div style="background:rgba(255,255,255,0.95);padding:4px 7px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                <img src="{{ asset('images/logosima.png') }}" alt="SIMA" style="height:26px;flex-shrink:0;">
+            </div>
             <div class="brand-text">
                 <h2>SIMA-MONEV</h2>
                 <span>Service Excellence</span>
@@ -1902,8 +2057,119 @@
                     }
                 });
             }
+
+            // Pemilih Tema Warna Sidebar (Tersimpan otomatis per akun user)
+            const themeFab = document.getElementById('themePickerFab');
+            const themePopover = document.getElementById('themePickerPopover');
+            const themeCloseHint = document.getElementById('themeEscHint');
+            const themeNameLabel = document.getElementById('themeActiveName');
+            const themeStyleEl = document.getElementById('userSidebarThemeStyle');
+            const swatchBtns = document.querySelectorAll('.theme-swatch-btn');
+
+            if (themeFab && themePopover) {
+                let currentActiveName = themeNameLabel ? themeNameLabel.dataset.activeName : '';
+
+                themeFab.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    themePopover.classList.toggle('show');
+                });
+
+                if (themeCloseHint) {
+                    themeCloseHint.addEventListener('click', () => {
+                        themePopover.classList.remove('show');
+                    });
+                }
+
+                document.addEventListener('click', (e) => {
+                    if (!themePopover.contains(e.target) && !themeFab.contains(e.target)) {
+                        themePopover.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && themePopover.classList.contains('show')) {
+                        themePopover.classList.remove('show');
+                    }
+                });
+
+                swatchBtns.forEach(btn => {
+                    btn.addEventListener('mouseenter', () => {
+                        if (themeNameLabel) themeNameLabel.textContent = btn.dataset.name;
+                    });
+                    btn.addEventListener('mouseleave', () => {
+                        if (themeNameLabel) themeNameLabel.textContent = currentActiveName;
+                    });
+                    btn.addEventListener('click', () => {
+                        const key = btn.dataset.key;
+                        const name = btn.dataset.name;
+                        const bg = btn.dataset.bg;
+                        const accent = btn.dataset.accent;
+                        const swatch = btn.dataset.swatch;
+
+                        if (themeStyleEl) {
+                            themeStyleEl.textContent = `:root { --sidebar-bg: ${bg}; --sidebar-brand-accent: ${accent}; }`;
+                        }
+                        themeFab.style.background = swatch;
+
+                        swatchBtns.forEach(b => {
+                            b.classList.remove('active');
+                            b.innerHTML = '';
+                        });
+                        btn.classList.add('active');
+                        btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+
+                        currentActiveName = name;
+                        if (themeNameLabel) {
+                            themeNameLabel.textContent = name;
+                            themeNameLabel.dataset.activeName = name;
+                        }
+
+                        fetch("{{ route('profile.theme') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({ theme: key })
+                        }).catch(() => {});
+                    });
+                });
+            }
         });
     </script>
+
+    <!-- Floating Pemilih Tema Warna per User -->
+    <div class="theme-picker-floating">
+        <div class="theme-picker-popover" id="themePickerPopover" role="dialog" aria-label="Pilih Tema Warna">
+            <div class="theme-picker-title">Tema warna</div>
+            <div class="theme-picker-subtitle">Tersimpan otomatis ke akun Anda</div>
+            <div class="theme-swatch-grid">
+                @foreach($sidebarThemes as $tKey => $tItem)
+                <button type="button"
+                    class="theme-swatch-btn {{ $currentThemeKey === $tKey ? 'active' : '' }}"
+                    style="background: {{ $tItem['swatch'] }};"
+                    data-key="{{ $tKey }}"
+                    data-name="{{ $tItem['name'] }}"
+                    data-bg="{{ $tItem['bg'] }}"
+                    data-accent="{{ $tItem['accent'] }}"
+                    data-swatch="{{ $tItem['swatch'] }}"
+                    title="{{ $tItem['name'] }}">
+                    @if($currentThemeKey === $tKey)
+                        <i class="bi bi-check-lg"></i>
+                    @endif
+                </button>
+                @endforeach
+            </div>
+            <div class="theme-picker-footer">
+                <span class="theme-active-name" id="themeActiveName" data-active-name="{{ $activeThemeObj['name'] }}">{{ $activeThemeObj['name'] }}</span>
+                <button type="button" class="theme-esc-hint" id="themeEscHint">Esc untuk tutup</button>
+            </div>
+        </div>
+        <button type="button" class="theme-picker-fab" id="themePickerFab" style="background: {{ $activeThemeObj['swatch'] }};" title="Ubah Tema Warna Menu">
+            <i class="bi bi-droplet"></i>
+        </button>
+    </div>
 
     @stack('scripts')
 </body>

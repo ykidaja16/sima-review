@@ -170,6 +170,11 @@
             @if($param->deskripsi)
             <div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px;">{{ $param->deskripsi }}</div>
             @endif
+            @if($param->metode_penilaian_label)
+            <div style="font-size:0.74rem;color:var(--text-muted);margin-top:2px;opacity:0.85;">
+                Metode Penilaian: {{ $param->metode_penilaian_label }}
+            </div>
+            @endif
         </div>
         <div class="skor-grid">
             @foreach([4,3,2,1] as $skor)

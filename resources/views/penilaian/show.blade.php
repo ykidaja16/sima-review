@@ -120,6 +120,11 @@
                 @if($detail->parameter?->deskripsi)
                 <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">{{ $detail->parameter->deskripsi }}</div>
                 @endif
+                @if($detail->parameter?->metode_penilaian_label)
+                <div style="font-size:0.74rem;color:var(--text-muted);margin-top:2px;opacity:0.85;">
+                    Metode Penilaian: {{ $detail->parameter->metode_penilaian_label }}
+                </div>
+                @endif
             </div>
             <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;">
                 <span class="badge badge-{{ $badgeColor }}" style="padding:4px 12px;border-radius:12px;font-size:0.82rem;font-weight:700;">

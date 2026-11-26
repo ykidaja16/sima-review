@@ -154,6 +154,7 @@ Route::middleware('auth')->group(function () {
     // ---- Update Data Diri & Akun (Semua role yang login) ----
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/theme', [ProfileController::class, 'updateTheme'])->name('profile.theme');
 
     // ---- Notifikasi ----
     Route::get('/notifications/{key}/read', [NotificationController::class, 'read'])->name('notifications.read');

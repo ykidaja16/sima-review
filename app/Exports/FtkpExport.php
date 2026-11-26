@@ -2,8 +2,10 @@
 
 namespace App\Exports;
 
+use App\Models\JenisKetidaksesuaian;
 use App\Models\Ketidaksesuaian;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithDrawings;
@@ -15,12 +17,28 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class FtkpExport implements FromView, WithColumnWidths, WithDrawings, WithStyles
 {
-    public function __construct(protected Ketidaksesuaian $ketidaksesuaian) {}
+    protected Collection $jenisList;
+
+    public function __construct(
+        protected Ketidaksesuaian $ketidaksesuaian,
+        ?Collection $jenisList = null
+    ) {
+        if ($jenisList) {
+            $this->jenisList = $jenisList;
+        } else {
+            $list = JenisKetidaksesuaian::active()->orderBy('nama')->get();
+            if ($ketidaksesuaian->jenis && !$list->contains('id', $ketidaksesuaian->jenis->id)) {
+                $list->push($ketidaksesuaian->jenis);
+            }
+            $this->jenisList = $list;
+        }
+    }
 
     public function view(): View
     {
         return view('ketidaksesuaian.excel', [
             'ketidaksesuaian' => $this->ketidaksesuaian,
+            'jenisList'       => $this->jenisList,
         ]);
     }
 
@@ -77,14 +95,17 @@ class FtkpExport implements FromView, WithColumnWidths, WithDrawings, WithStyles
         $sheet->getPageSetup()->setFitToHeight(0);
         $sheet->getPageSetup()->setHorizontalCentered(true);
 
+        $jenisCount = max(3, $this->jenisList->count());
+        $jenisRowHeight = max(65, 22 + ($jenisCount * 16));
+
         // Pengaturan tinggi baris agar isi lapang & proporsional
         $rowHeights = [
             1  => 14, // Spacer atas
             2  => 52, // Header Formulir
             3  => 22, // BAGIAN 1 - PENGGAGAS
             4  => 40, // 3. Penggagas & 4. Departemen
-            5  => 65, // 5. Jenis Ketidaksesuaian
-            6  => 85, // 6. Penjelasan Temuan & Checklist
+            5  => $jenisRowHeight, // 5. Jenis Ketidaksesuaian
+            6  => 90, // 6. Penjelasan Temuan & Checklist Kategori
             7  => 45, // 7. Penggagas & Manajer Bagian
             8  => 22, // BAGIAN 2 - TINDAKAN
             9  => 45, // 8A/8B & 9. Perkiraan Tgl

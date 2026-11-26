@@ -38,8 +38,26 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Deskripsi</label>
+                <label class="form-label">Deskripsi / Aspek Penilaian</label>
                 <textarea name="deskripsi" class="form-control" rows="2" placeholder="Penjelasan singkat parameter ini">{{ old('deskripsi') }}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Metode Penilaian <span style="font-weight:400;color:var(--text-muted);">(Bisa pilih lebih dari 1)</span></label>
+                @php
+                    $oldMetode = (array) old('metode_penilaian', []);
+                    $opsiMetode = $metodeOptions ?? \App\Models\ParameterSop::METODE_OPTIONS;
+                @endphp
+                <div style="display:flex;gap:18px;flex-wrap:wrap;padding:10px 14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:var(--radius-sm);">
+                    @foreach($opsiMetode as $metode)
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.88rem;color:var(--text);">
+                        <input type="checkbox" name="metode_penilaian[]" value="{{ $metode }}"
+                            {{ in_array($metode, $oldMetode, true) ? 'checked' : '' }}
+                            style="width:16px;height:16px;cursor:pointer;">
+                        <span>{{ $metode }}</span>
+                    </label>
+                    @endforeach
+                </div>
+                @error('metode_penilaian')<div class="invalid-feedback" style="display:block;">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">

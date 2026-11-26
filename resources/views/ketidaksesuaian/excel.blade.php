@@ -5,18 +5,28 @@
 </head>
 <body>
 @php
-    // Jenis ketidaksesuaian logic
-    $jenisName = strtolower($ketidaksesuaian->jenis?->nama ?? '');
-    $isKeluhan = str_contains($jenisName, 'keluhan') || str_contains($jenisName, 'pelanggan');
-    $isAudit = str_contains($jenisName, 'audit');
-    $isLain = !$isKeluhan && !$isAudit;
-    $namaLain = $ketidaksesuaian->jenis_lainnya ?: ($ketidaksesuaian->jenis?->nama ?: '');
+    // Daftar Jenis Ketidaksesuaian sesuai Master Data aplikasi
+    $allJenis = isset($jenisList) ? collect($jenisList) : collect();
+    if ($allJenis->isEmpty() && $ketidaksesuaian->jenis) {
+        $allJenis->push($ketidaksesuaian->jenis);
+    } elseif ($ketidaksesuaian->jenis && !$allJenis->contains('id', $ketidaksesuaian->jenis->id)) {
+        $allJenis->push($ketidaksesuaian->jenis);
+    }
 
-    // Kategori temuan logic
-    $katLower = strtolower($ketidaksesuaian->kategori_temuan ?? '');
-    $isOk = ($katLower === 'ok');
-    $isObservasi = str_contains($katLower, 'observasi') || str_contains($katLower, 'ofi');
-    $isNc = str_contains($katLower, 'nc') || (!$isOk && !$isObservasi && !empty($katLower));
+    // Daftar Opsi Kategori Temuan sesuai Jenis FTKP yang dipilih
+    $kategoriOptions = $ketidaksesuaian->jenis?->kategori_temuan_list ?? ['Observasi', 'NC Minor', 'NC Mayor', 'OFI'];
+    $currentKategori = trim((string) ($ketidaksesuaian->kategori_temuan ?? ''));
+    $currentKategoriLabel = trim((string) ($ketidaksesuaian->kategori_label ?? $currentKategori));
+
+    if ($currentKategori !== '') {
+        $existsInOptions = collect($kategoriOptions)->contains(function ($opt) use ($currentKategori, $currentKategoriLabel) {
+            $optClean = trim((string) $opt);
+            return strcasecmp($optClean, $currentKategori) === 0 || strcasecmp($optClean, $currentKategoriLabel) === 0;
+        });
+        if (!$existsInOptions) {
+            $kategoriOptions[] = $currentKategoriLabel;
+        }
+    }
 
     // Verifikasi logic
     $verifikasi = $ketidaksesuaian->verifikasiKacab ?? $ketidaksesuaian->verifikasiManager;
@@ -75,9 +85,23 @@
         <td></td>
         <td colspan="8" style="border: 1px solid #000000; vertical-align: top;">
             <b>5. JENIS KETIDAKSESUAIAN/POTENSIAL KETIDAKSESUAIAN</b><br />
-            {{ $isKeluhan ? '[X]' : '[  ]' }} Keluhan Pelanggan<br />
-            {{ $isAudit ? '[X]' : '[  ]' }} Laporan Audit<br />
-            {{ $isLain ? '[X]' : '[  ]' }} Lain-lain, sebutkan: {{ $isLain ? $namaLain : '' }}
+            @forelse($allJenis as $j)
+                @php
+                    $isChecked = ($ketidaksesuaian->jenis_id && $j->id)
+                        ? ((int) $ketidaksesuaian->jenis_id === (int) $j->id)
+                        : ($ketidaksesuaian->jenis === $j);
+                    $isNonAudit = str_contains(strtolower($j->nama ?? ''), 'non audit');
+                    $suffix = '';
+                    if ($isNonAudit) {
+                        $suffix = ', sebutkan: ' . (($isChecked && $ketidaksesuaian->jenis_lainnya) ? $ketidaksesuaian->jenis_lainnya : '');
+                    } elseif ($isChecked && $ketidaksesuaian->jenis_lainnya) {
+                        $suffix = ' (' . $ketidaksesuaian->jenis_lainnya . ')';
+                    }
+                @endphp
+                {{ $isChecked ? '[X]' : '[  ]' }} {{ $j->nama }}{{ $suffix }}@if(!$loop->last)<br />@endif
+            @empty
+                [X] {{ $ketidaksesuaian->jenis?->nama ?? ($ketidaksesuaian->jenis_lainnya ?: '-') }}
+            @endforelse
         </td>
         <td></td>
     </tr>
@@ -88,9 +112,16 @@
             {{ $ketidaksesuaian->penjelasan_temuan }}
         </td>
         <td colspan="2" style="border: 1px solid #000000; vertical-align: middle;">
-            {{ $isOk ? '[X]' : '[  ]' }} OK<br />
-            {{ $isObservasi ? '[X]' : '[  ]' }} OBSERVASI<br />
-            {{ $isNc ? '[X]' : '[  ]' }} NC
+            @foreach($kategoriOptions as $katOpt)
+                @php
+                    $optClean = trim((string) $katOpt);
+                    $isKatChecked = $currentKategori !== '' && (
+                        strcasecmp($optClean, $currentKategori) === 0
+                        || strcasecmp($optClean, $currentKategoriLabel) === 0
+                    );
+                @endphp
+                {{ $isKatChecked ? '[X]' : '[  ]' }} {{ strtoupper($optClean) }}@if(!$loop->last)<br />@endif
+            @endforeach
         </td>
         <td></td>
     </tr>
