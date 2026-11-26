@@ -36,6 +36,7 @@ class AuthController extends Controller
         ];
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             if (!$user->is_active) {
@@ -46,6 +47,12 @@ class AuthController extends Controller
             }
 
             $request->session()->regenerate();
+
+            // Jika user memilih tema warna baru saat berada di halaman login, terapkan ke akunnya
+            if ($request->filled('selected_login_theme')) {
+                $user->sidebar_theme = substr((string) $request->input('selected_login_theme'), 0, 50);
+                $user->save();
+            }
 
             // Catat audit log login
             AuditLog::create([

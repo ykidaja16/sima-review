@@ -2067,6 +2067,11 @@
             const swatchBtns = document.querySelectorAll('.theme-swatch-btn');
 
             if (themeFab && themePopover) {
+                try {
+                    if (themeFab.dataset.currentKey) {
+                        localStorage.setItem('sima_theme_pref', themeFab.dataset.currentKey);
+                    }
+                } catch (e) {}
                 let currentActiveName = themeNameLabel ? themeNameLabel.dataset.activeName : '';
 
                 themeFab.addEventListener('click', (e) => {
@@ -2124,6 +2129,10 @@
                             themeNameLabel.dataset.activeName = name;
                         }
 
+                        try {
+                            localStorage.setItem('sima_theme_pref', key);
+                        } catch (e) {}
+
                         fetch("{{ route('profile.theme') }}", {
                             method: 'POST',
                             headers: {
@@ -2166,7 +2175,7 @@
                 <button type="button" class="theme-esc-hint" id="themeEscHint">Esc untuk tutup</button>
             </div>
         </div>
-        <button type="button" class="theme-picker-fab" id="themePickerFab" style="background: {{ $activeThemeObj['swatch'] }};" title="Ubah Tema Warna Menu">
+        <button type="button" class="theme-picker-fab" id="themePickerFab" data-current-key="{{ $currentThemeKey }}" style="background: {{ $activeThemeObj['swatch'] }};" title="Ubah Tema Warna Menu">
             <i class="bi bi-droplet"></i>
         </button>
     </div>
