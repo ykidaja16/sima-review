@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Cabang;
 use App\Models\Divisi;
 use App\Models\Karyawan;
+use App\Models\ParameterSop;
 use App\Models\Penilaian;
+use App\Models\PenilaianDetail;
 use App\Models\PeriodePenilaian;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MonitoringController extends Controller
 {
@@ -165,50 +169,147 @@ class MonitoringController extends Controller
     }
 
     /**
-     * Perbandingan antar divisi
+     * Siapkan data Monitoring Indikator & Tren Penilaian per Periode
      */
-    public function divisi(Request $request): View
+    private function buildIndikatorData(Request $request): array
     {
         /** @var User $user */
-        $user      = Auth::user();
-        $periodeId = $request->periode_id;
-        $periodes  = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
-        $periodeAktif = $periodeId ? PeriodePenilaian::find($periodeId) : PeriodePenilaian::aktif()->first();
-        $cabangs   = Cabang::active()->orderBy('nama')->get();
+        $user         = Auth::user();
+        $periodeId    = $request->periode_id;
+        $divisiId     = $request->divisi_id;
+        $periodes     = PeriodePenilaian::orderByDesc('tanggal_mulai')->get();
+        $periodeAktif = $periodeId ? PeriodePenilaian::find($periodeId) : null;
+        $cabangs      = Cabang::active()->orderBy('nama')->get();
 
+        // Scope cabang & divisi berdasarkan role
         $cabangFilter = null;
+        $divisiFilter = $divisiId ? (int) $divisiId : null;
+
         if ($user->isKacab() && $user->karyawan?->cabang_id) {
             $cabangFilter = $user->karyawan->cabang_id;
         } elseif (($user->isDirektur() || $user->isSuperAdmin()) && $request->filled('cabang_id')) {
-            $cabangFilter = $request->cabang_id;
+            $cabangFilter = (int) $request->cabang_id;
         }
 
-        $divisiStats = Divisi::active()
+        if ($user->isManager() && $user->karyawan?->divisi_id) {
+            $divisiFilter = $user->karyawan->divisi_id;
+        }
+
+        $divisis = Divisi::active()
             ->whereHas('karyawans', fn($q) => $q->active()->where('is_dinilai', true)->when($cabangFilter, fn($c) => $c->where('cabang_id', $cabangFilter)))
-            ->with(['karyawans' => function ($q) use ($periodeAktif, $cabangFilter) {
-                $q->active()
-                  ->where('is_dinilai', true)
-                  ->when($cabangFilter, fn($c) => $c->where('cabang_id', $cabangFilter))
-                  ->with(['penilaians' => fn($p) => $p->when($periodeAktif, fn($p2) => $p2->where('periode_id', $periodeAktif?->id))]);
-            }])
-            ->get()
-            ->map(function ($d) {
-                $karyawans = $d->karyawans;
-                $d->total_karyawan = $karyawans->count();
-                $penilaians = $karyawans->flatMap(fn($k) => $k->penilaians);
-                $d->sudah_dinilai  = $penilaians->count();
-                $d->avg_nilai      = $penilaians->isNotEmpty() ? $penilaians->avg('nilai_akhir') : 0;
-                $d->max_nilai      = $penilaians->isNotEmpty() ? $penilaians->max('nilai_akhir') : null;
-                $d->min_nilai      = $penilaians->isNotEmpty() ? $penilaians->min('nilai_akhir') : null;
-                return $d;
+            ->orderBy('nama')
+            ->get();
+
+        // 1. Analisis Indikator (urut rata-rata terendah ke tertinggi)
+        $parameters = ParameterSop::active()->orderBy('urutan')->get();
+
+        $detailsQuery = PenilaianDetail::with(['penilaian.karyawan'])
+            ->whereHas('penilaian', function ($q) use ($periodeAktif, $cabangFilter, $divisiFilter) {
+                if ($periodeAktif) {
+                    $q->where('periode_id', $periodeAktif->id);
+                }
+                $q->whereHas('karyawan', function ($k) use ($cabangFilter, $divisiFilter) {
+                    $k->where('is_dinilai', true)
+                      ->when($cabangFilter, fn($c) => $c->where('cabang_id', $cabangFilter))
+                      ->when($divisiFilter, fn($d) => $d->where('divisi_id', $divisiFilter));
+                });
             })
-            ->sortByDesc('avg_nilai')
+            ->get()
+            ->groupBy('parameter_id');
+
+        $indikators = $parameters->map(function ($param) use ($detailsQuery) {
+            $items = $detailsQuery->get($param->id, collect());
+            $count = $items->count();
+            $avg   = $count > 0 ? round((float) $items->avg('nilai'), 2) : null;
+            $pct   = $avg !== null ? round(($avg / 4) * 100, 1) : null;
+
+            $catatanList = $items
+                ->filter(fn($d) => trim((string) $d->catatan) !== '')
+                ->map(fn($d) => [
+                    'catatan'  => trim((string) $d->catatan),
+                    'karyawan' => $d->penilaian?->karyawan?->nama ?? '-',
+                    'nilai'    => (int) $d->nilai,
+                ])
+                ->unique('catatan')
+                ->take(5)
+                ->values();
+
+            $param->total_evaluasi = $count;
+            $param->avg_nilai      = $avg;
+            $param->persentase     = $pct;
+            $param->min_nilai      = $count > 0 ? (int) $items->min('nilai') : null;
+            $param->max_nilai      = $count > 0 ? (int) $items->max('nilai') : null;
+            $param->catatan_list   = $catatanList;
+
+            return $param;
+        })
+        ->sortBy(function ($item) {
+            // Indikator yang sudah dievaluasi dengan nilai paling rendah tampil paling atas
+            return $item->avg_nilai === null ? 999 : $item->avg_nilai;
+        })
+        ->values();
+
+        // 2. Grafik Penilaian Per Periode (kronologis)
+        $trendPeriodes = PeriodePenilaian::orderBy('tanggal_mulai')
+            ->get()
+            ->map(function ($periode) use ($cabangFilter, $divisiFilter) {
+                $penilaians = Penilaian::where('periode_id', $periode->id)
+                    ->whereHas('karyawan', function ($k) use ($cabangFilter, $divisiFilter) {
+                        $k->where('is_dinilai', true)
+                          ->when($cabangFilter, fn($c) => $c->where('cabang_id', $cabangFilter))
+                          ->when($divisiFilter, fn($d) => $d->where('divisi_id', $divisiFilter));
+                    })
+                    ->get();
+
+                $periode->total_penilaian = $penilaians->count();
+                $periode->avg_nilai       = $penilaians->isNotEmpty() ? round((float) $penilaians->avg('nilai_akhir'), 2) : null;
+                return $periode;
+            })
+            ->filter(fn($p) => $p->total_penilaian > 0)
             ->values();
 
-        $chartLabels = $divisiStats->pluck('nama');
-        $chartData   = $divisiStats->pluck('avg_nilai')->map(fn($v) => round($v, 2));
+        $chartLabels = $trendPeriodes->pluck('nama');
+        $chartData   = $trendPeriodes->pluck('avg_nilai');
 
-        return view('monitoring.divisi', compact('divisiStats', 'periodes', 'periodeAktif', 'chartLabels', 'chartData', 'cabangs'));
+        $cabangObj = $cabangFilter ? Cabang::find($cabangFilter) : null;
+        $divisiObj = $divisiFilter ? Divisi::find($divisiFilter) : null;
+
+        return compact(
+            'indikators', 'trendPeriodes', 'chartLabels', 'chartData',
+            'periodes', 'periodeAktif', 'divisis', 'cabangs', 'cabangObj', 'divisiObj'
+        );
+    }
+
+    /**
+     * Menu Monitoring Indikator (Kepala Cabang, Manager, Direktur, Super Admin)
+     */
+    public function indikator(Request $request): View
+    {
+        return view('monitoring.indikator', $this->buildIndikatorData($request));
+    }
+
+    /**
+     * Export PDF Monitoring Indikator
+     */
+    public function exportIndikatorPdf(Request $request)
+    {
+        $data = $this->buildIndikatorData($request);
+        $pdf = Pdf::loadView('monitoring.indikator-pdf', $data)
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('monitoring-indikator-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Export Excel Monitoring Indikator
+     */
+    public function exportIndikatorExcel(Request $request)
+    {
+        $data = $this->buildIndikatorData($request);
+        return Excel::download(
+            new \App\Exports\MonitoringIndikatorExport($data),
+            'monitoring-indikator-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     /**

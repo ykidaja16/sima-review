@@ -31,10 +31,10 @@ class MenuService
             [
                 'group' => 'Monitoring',
                 'menus' => [
-                    ['key' => 'monitoring_individu', 'title' => 'Track Record Individu', 'desc' => 'Grafik & tren nilai individu karyawan'],
-                    ['key' => 'monitoring_tim',      'title' => 'Monitoring Tim',        'desc' => 'Status penilaian bawahan / tim'],
-                    ['key' => 'monitoring_divisi',   'title' => 'Perbandingan Divisi',   'desc' => 'Statistik & perbandingan antar divisi'],
-                    ['key' => 'monitoring_ranking',  'title' => 'Ranking Karyawan',      'desc' => 'Peringkat nilai karyawan tertinggi'],
+                    ['key' => 'monitoring_individu',  'title' => 'Track Record Individu', 'desc' => 'Grafik & tren nilai individu karyawan'],
+                    ['key' => 'monitoring_tim',       'title' => 'Monitoring Tim',        'desc' => 'Status penilaian bawahan / tim'],
+                    ['key' => 'monitoring_indikator', 'title' => 'Monitoring Indikator',  'desc' => 'Analisis indikator terendah, kendala & grafik tren penilaian'],
+                    ['key' => 'monitoring_ranking',   'title' => 'Ranking Karyawan',      'desc' => 'Peringkat nilai karyawan tertinggi'],
                 ],
             ],
             [
@@ -100,7 +100,8 @@ class MenuService
         return match ($roleSlug) {
             'super_admin' => [
                 'dashboard', 'penilaian_input', 'penilaian_data', 'periode_kelola',
-                // Sesuai Request #2: superadmin TIDAK perlu monitoring_individu, monitoring_tim, monitoring_divisi, monitoring_ranking
+                // Super Admin tidak perlu monitoring_individu, monitoring_tim, monitoring_ranking; namun memiliki akses monitoring_indikator
+                'monitoring_indikator',
                 'laporan', 'ketidaksesuaian',
                 'survei_data', 'survei_analisa', 'survei_grafik', 'survei_pendukung',
                 'master_cabang', 'master_divisi', 'master_jabatan', 'master_karyawan', 'master_parameter',
@@ -109,19 +110,19 @@ class MenuService
             'direktur' => [
                 // Sesuai Request #3: mirip kacab tapi TANPA periode_kelola, dan bisa akses semua cabang
                 'dashboard', 'penilaian_input', 'penilaian_data',
-                'monitoring_individu', 'monitoring_tim', 'monitoring_divisi', 'monitoring_ranking',
+                'monitoring_individu', 'monitoring_tim', 'monitoring_indikator', 'monitoring_ranking',
                 'laporan', 'ketidaksesuaian',
                 'survei_data', 'survei_analisa', 'survei_grafik', 'survei_pendukung',
             ],
             'kacab' => [
                 'dashboard', 'penilaian_input', 'penilaian_data', 'periode_kelola',
-                'monitoring_individu', 'monitoring_tim', 'monitoring_divisi', 'monitoring_ranking',
+                'monitoring_individu', 'monitoring_tim', 'monitoring_indikator', 'monitoring_ranking',
                 'laporan', 'ketidaksesuaian',
                 'survei_data', 'survei_analisa', 'survei_grafik', 'survei_pendukung',
             ],
             'manager' => [
                 'dashboard', 'penilaian_input', 'penilaian_data',
-                'monitoring_individu', 'monitoring_tim', 'monitoring_divisi',
+                'monitoring_individu', 'monitoring_tim', 'monitoring_indikator',
                 'laporan', 'ketidaksesuaian', 'survei_data',
             ],
             'supervisor' => [
@@ -136,7 +137,7 @@ class MenuService
             ],
             'mutu' => [
                 'dashboard',
-                'monitoring_divisi', 'monitoring_ranking',
+                'monitoring_ranking',
                 'laporan', 'ketidaksesuaian',
                 'survei_data', 'survei_analisa', 'survei_grafik', 'survei_pendukung',
             ],

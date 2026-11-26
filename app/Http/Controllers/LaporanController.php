@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cabang;
 use App\Models\Divisi;
 use App\Models\KategoriNilai;
+use App\Models\ParameterSop;
 use App\Models\Penilaian;
 use App\Models\PeriodePenilaian;
 use App\Models\User;
@@ -37,7 +38,7 @@ class LaporanController extends Controller
         $user = Auth::user();
         $userKaryawan = $user?->karyawan;
 
-        $query = Penilaian::with(['karyawan.divisi', 'karyawan.jabatan', 'karyawan.cabang', 'evaluator', 'periode'])
+        $query = Penilaian::with(['karyawan.divisi', 'karyawan.jabatan', 'karyawan.cabang', 'evaluator', 'periode', 'details'])
             ->orderByDesc('nilai_akhir');
 
         // Scoping cabang
@@ -98,8 +99,10 @@ class LaporanController extends Controller
     public function exportExcel(Request $request)
     {
         $penilaians = $this->buildQuery($request)->get();
+        $parameters = ParameterSop::active()->orderBy('urutan')->get();
+
         return Excel::download(
-            new \App\Exports\PenilaianExport($penilaians),
+            new \App\Exports\PenilaianExport($penilaians, $parameters),
             'laporan-penilaian-' . now()->format('Y-m-d') . '.xlsx'
         );
     }
@@ -107,6 +110,7 @@ class LaporanController extends Controller
     public function exportPdf(Request $request)
     {
         $penilaians = $this->buildQuery($request)->get();
+        $parameters = ParameterSop::active()->orderBy('urutan')->get();
         $periode    = $request->periode_id ? PeriodePenilaian::find($request->periode_id) : null;
 
         if ($this->canViewAllDivisi()) {
@@ -117,8 +121,8 @@ class LaporanController extends Controller
             $divisi = $user?->karyawan?->divisi;
         }
 
-        $pdf = Pdf::loadView('laporan.print', compact('penilaians', 'periode', 'divisi'))
-            ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('laporan.pdf', compact('penilaians', 'parameters', 'periode', 'divisi'))
+            ->setPaper('a3', 'landscape');
 
         return $pdf->download('laporan-penilaian-' . now()->format('Y-m-d') . '.pdf');
     }

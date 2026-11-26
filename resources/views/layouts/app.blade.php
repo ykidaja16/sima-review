@@ -1367,11 +1367,11 @@
             </a>
             @endif
 
-            {{-- Monitoring: Super Admin tidak memerlukan menu ini sesuai Request #2 --}}
-            @if(!auth()->user()->isSuperAdmin() && auth()->user()->hasRole(['direktur','manager','kacab','supervisor','mutu']))
+            {{-- Monitoring: Super Admin hanya melihat Monitoring Indikator --}}
+            @if(auth()->user()->hasRole(['super_admin','direktur','manager','kacab','supervisor','mutu']))
             <div class="nav-section-title">Monitoring</div>
 
-            @if(auth()->user()->canAccessMenu('monitoring_individu'))
+            @if(!auth()->user()->isSuperAdmin() && auth()->user()->canAccessMenu('monitoring_individu'))
             <a href="{{ route('monitoring.individu') }}"
                class="nav-item {{ (request()->routeIs('monitoring.individu') && !request()->boolean('saya') && !auth()->user()->isPelaksana()) ? 'active' : '' }}"
                data-tooltip="Individu">
@@ -1380,7 +1380,7 @@
             </a>
             @endif
 
-            @if(auth()->user()->canAccessMenu('monitoring_tim'))
+            @if(!auth()->user()->isSuperAdmin() && auth()->user()->canAccessMenu('monitoring_tim'))
             <a href="{{ route('monitoring.tim') }}"
                class="nav-item {{ request()->routeIs('monitoring.tim') ? 'active' : '' }}"
                data-tooltip="Tim">
@@ -1389,24 +1389,22 @@
             </a>
             @endif
 
-            @if(auth()->user()->hasRole(['direktur','manager','kacab','mutu']))
-            @if(auth()->user()->canAccessMenu('monitoring_divisi'))
-            <a href="{{ route('monitoring.divisi') }}"
-               class="nav-item {{ request()->routeIs('monitoring.divisi') ? 'active' : '' }}"
-               data-tooltip="Divisi">
-                <i class="bi bi-bar-chart-fill"></i>
-                <span>Perbandingan Divisi</span>
+            @if(auth()->user()->hasRole(['super_admin','direktur','manager','kacab']) && auth()->user()->canAccessMenu('monitoring_indikator'))
+            <a href="{{ route('monitoring.indikator') }}"
+               class="nav-item {{ request()->routeIs('monitoring.indikator*') ? 'active' : '' }}"
+               data-tooltip="Indikator">
+                <i class="bi bi-graph-down-arrow"></i>
+                <span>Monitoring Indikator</span>
             </a>
             @endif
 
-            @if(auth()->user()->canAccessMenu('monitoring_ranking'))
+            @if(!auth()->user()->isSuperAdmin() && auth()->user()->hasRole(['direktur','manager','kacab','mutu']) && auth()->user()->canAccessMenu('monitoring_ranking'))
             <a href="{{ route('monitoring.ranking') }}"
                class="nav-item {{ request()->routeIs('monitoring.ranking') ? 'active' : '' }}"
                data-tooltip="Ranking">
                 <i class="bi bi-trophy-fill"></i>
                 <span>Ranking Karyawan</span>
             </a>
-            @endif
             @endif
             @endif
 

@@ -101,11 +101,17 @@ Route::middleware('auth')->group(function () {
             ->middleware('pelaksana.access')
             ->name('individu');
 
-        // Tim, Divisi, Ranking: khusus direktur, manager ke atas & mutu
+        // Tim & Ranking: khusus direktur, manager ke atas & mutu
         Route::middleware('role:super_admin,direktur,manager,kacab,supervisor,mutu')->group(function () {
             Route::get('/tim', [MonitoringController::class, 'tim'])->name('tim');
-            Route::get('/divisi', [MonitoringController::class, 'divisi'])->name('divisi');
             Route::get('/ranking', [MonitoringController::class, 'ranking'])->name('ranking');
+        });
+
+        // Monitoring Indikator: khusus Kepala Cabang, Manager, Direktur, dan Super Admin
+        Route::middleware('role:super_admin,direktur,manager,kacab')->group(function () {
+            Route::get('/indikator', [MonitoringController::class, 'indikator'])->name('indikator');
+            Route::get('/indikator/export-pdf', [MonitoringController::class, 'exportIndikatorPdf'])->name('indikator.export-pdf');
+            Route::get('/indikator/export-excel', [MonitoringController::class, 'exportIndikatorExcel'])->name('indikator.export-excel');
         });
     });
 
