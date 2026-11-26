@@ -30,14 +30,17 @@ class ParameterSopController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'kategori'           => ['required', 'string', 'max:100'],
-            'nama'               => ['required', 'string', 'max:200'],
+            'kategori'           => ['required', 'string', 'max:255'],
+            'nama'               => ['required', 'string', 'max:255'],
             'deskripsi'          => ['nullable', 'string'],
             'metode_penilaian'   => ['nullable', 'array'],
             'metode_penilaian.*' => ['string', Rule::in(ParameterSop::METODE_OPTIONS)],
             'urutan'             => ['required', 'integer', 'min:0'],
             'bobot'              => ['required', 'integer', 'min:1'],
             'is_active'          => ['boolean'],
+        ], [
+            'kategori.max' => 'Kategori maksimal 255 karakter.',
+            'nama.max'     => 'Nama parameter maksimal 255 karakter.',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
@@ -60,14 +63,17 @@ class ParameterSopController extends Controller
     public function update(Request $request, ParameterSop $parameterSop): RedirectResponse
     {
         $validated = $request->validate([
-            'kategori'           => ['required', 'string', 'max:100'],
-            'nama'               => ['required', 'string', 'max:200'],
+            'kategori'           => ['required', 'string', 'max:255'],
+            'nama'               => ['required', 'string', 'max:255'],
             'deskripsi'          => ['nullable', 'string'],
             'metode_penilaian'   => ['nullable', 'array'],
             'metode_penilaian.*' => ['string', Rule::in(ParameterSop::METODE_OPTIONS)],
             'urutan'             => ['required', 'integer', 'min:0'],
             'bobot'              => ['required', 'integer', 'min:1'],
             'is_active'          => ['boolean'],
+        ], [
+            'kategori.max' => 'Kategori maksimal 255 karakter.',
+            'nama.max'     => 'Nama parameter maksimal 255 karakter.',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');
